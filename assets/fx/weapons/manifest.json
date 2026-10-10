@@ -1,0 +1,263 @@
+{
+  "packet_bolt": {
+    "file": "packet_bolt.png",
+    "type": "loop",
+    "frame_w": 64,
+    "frame_h": 24,
+    "frames": 4,
+    "fps": 12,
+    "loop": true,
+    "notes": "PACKET GUN bolt: a data packet (header bar, flipping bits) with an arrow head and a shrinking pixel trail. Points right; rotate to the travel direction. Anchor = the packet centre (44,12). Loop frames 0-3."
+  },
+  "packet_hit": {
+    "file": "packet_hit.png",
+    "type": "one_shot",
+    "frame_w": 48,
+    "frame_h": 48,
+    "frames": 5,
+    "fps": 12,
+    "loop": false,
+    "notes": "PACKET GUN impact: square shock frame + flying bits. Centre (24,24). Frames 0-4, once."
+  },
+  "firewall_brick": {
+    "file": "firewall_brick.png",
+    "type": "loop",
+    "frame_w": 56,
+    "frame_h": 72,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "FIREWALL wall segment: three courses of glowing red brick topped with flames. Upright; base centre (28,68). Stand them along the ring every ~34 px. Loop frames 0-7.",
+    "base_x": 28,
+    "base_y": 68
+  },
+  "key_head": {
+    "file": "key_head.png",
+    "type": "loop",
+    "frame_w": 48,
+    "frame_h": 48,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "ENCRYPTION KEYS: a glowing key (ring bow left, toothed shaft right). Points right; rotate to the orbit tangent. Anchor = middle of the shaft (24,24). Loop frames 0-7."
+  },
+  "quarantine_emblem": {
+    "file": "quarantine_emblem.png",
+    "type": "loop",
+    "frame_w": 80,
+    "frame_h": 80,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "QUARANTINE zone centre emblem: a turning trefoil in a tick ring (3-fold symmetric, seamless). 80x80, centre (40,40). Draw at 1x or 2x, ~80% alpha. Loop frames 0-7."
+  },
+  "quarantine_pylon": {
+    "file": "quarantine_pylon.png",
+    "type": "loop",
+    "frame_w": 28,
+    "frame_h": 56,
+    "frames": 6,
+    "fps": 12,
+    "loop": true,
+    "notes": "QUARANTINE containment pylon, stood on each of the 8 corners of the zone. Base centre (14,52). Loop frames 0-5.",
+    "base_x": 14,
+    "base_y": 52
+  },
+  "quarantine_drop": {
+    "file": "quarantine_drop.png",
+    "type": "one_shot",
+    "frame_w": 160,
+    "frame_h": 160,
+    "frames": 8,
+    "fps": 12,
+    "loop": false,
+    "notes": "QUARANTINE drop-in: a square cage slams down over the target spot with a flash and shock ring. 160x160, centre (80,80). Play once when a zone is placed. Frames 0-7."
+  },
+  "mine_idle": {
+    "file": "mine_idle.png",
+    "type": "loop",
+    "frame_w": 40,
+    "frame_h": 40,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "LOGIC MINE. Frames 0-3 = arming (slow dim light), frames 4-7 = armed (fast red blink, lit prongs). Centre (20,22). Loop the half that matches the mine's state."
+  },
+  "mine_blast": {
+    "file": "mine_blast.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 10,
+    "fps": 12,
+    "loop": false,
+    "notes": "LOGIC MINE explosion: white flash, layered fireball, ring, debris and late smoke. 192x192, centre (96,96), fireball radius ~76 at full size. Play once; scale 1x or 2x to the blast radius. Frames 0-9."
+  },
+  "scanner_hub": {
+    "file": "scanner_hub.png",
+    "type": "loop",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "SCANNER base: radar plate with an antenna arm pointing right (+x). Rotate to the sweep angle. Centre (32,32), blinking LED. Loop frames 0-7."
+  },
+  "scanner_blip": {
+    "file": "scanner_blip.png",
+    "type": "one_shot",
+    "frame_w": 48,
+    "frame_h": 48,
+    "frames": 6,
+    "fps": 12,
+    "loop": false,
+    "notes": "SCANNER hit: a radar blip - expanding green ring + X lock. Centre (24,24). Frames 0-5, once."
+  },
+  "backdoor_door": {
+    "file": "backdoor_door.png",
+    "type": "loop",
+    "frame_w": 56,
+    "frame_h": 80,
+    "frames": 8,
+    "fps": 12,
+    "loop": false,
+    "notes": "BACKDOOR: a glitching purple door. Frames 0-3 open (play once during the 0.25 s opening), 4-7 idle glitch loop. Base centre (28,76).",
+    "base_x": 28,
+    "base_y": 76
+  },
+  "backdoor_boomerang": {
+    "file": "backdoor_boomerang.png",
+    "type": "loop",
+    "frame_w": 48,
+    "frame_h": 48,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "BACKDOOR boomerang: two curved purple blades with gold tips, spinning (2-fold symmetric, seamless). Centre (24,24). Loop frames 0-7 (play ~2 loops per 0.67 s for the fast spin)."
+  },
+  "backdoor_slash": {
+    "file": "backdoor_slash.png",
+    "type": "one_shot",
+    "frame_w": 56,
+    "frame_h": 56,
+    "frames": 5,
+    "fps": 12,
+    "loop": false,
+    "notes": "BACKDOOR hit: a glitching X-slash with offset slice bars. Centre (28,28). Frames 0-4, once."
+  },
+  "ping_hit": {
+    "file": "ping_hit.png",
+    "type": "one_shot",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 6,
+    "fps": 12,
+    "loop": false,
+    "notes": "PING.EXE hit: nested square echo rings with a '!' flash. Centre (32,32). Frames 0-5, once."
+  },
+  "evo_railgun_beam": {
+    "file": "evo_railgun_beam.png",
+    "type": "one_shot",
+    "frame_w": 384,
+    "frame_h": 96,
+    "frames": 8,
+    "fps": 12,
+    "loop": false,
+    "notes": "RAILGUN beam, rotate to aim. 3 parts: left cap x0-96 (muzzle at x=48,y=48), body tile x96-288 (tile it, seamless), right cap x288-384 (impact point at x=336). Frames 0-7, play once over ~0.6 s; thins out from frame 3.",
+    "cap_l": 96,
+    "tile_x": 96,
+    "tile_w": 192,
+    "cap_r": 288,
+    "origin_x": 48,
+    "end_x": 336,
+    "origin_y": 48
+  },
+  "evo_railgun_hit": {
+    "file": "evo_railgun_hit.png",
+    "type": "one_shot",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 6,
+    "fps": 12,
+    "loop": false,
+    "notes": "Spark burst on every enemy the beam pierces. Centre = (32,32). Frames 0-5, play once."
+  },
+  "evo_inferno_flame": {
+    "file": "evo_inferno_flame.png",
+    "type": "loop",
+    "frame_w": 48,
+    "frame_h": 80,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "One flame cluster for the SCORCHED EARTH ring. Upright (fire rises, never rotate). Base centre = (24,76). Stand them along the ring every ~26 px, each with its own frame offset and an optional horizontal flip. Loop frames 0-7.",
+    "base_x": 24,
+    "base_y": 76
+  },
+  "evo_inferno_pillar": {
+    "file": "evo_inferno_pillar.png",
+    "type": "one_shot",
+    "frame_w": 64,
+    "frame_h": 144,
+    "frames": 10,
+    "fps": 12,
+    "loop": false,
+    "notes": "Fire geyser for the SCORCHED EARTH eruption. Base centre = (32,138). Spawn them in an expanding wave (delay by distance from the player). Frames 0-9, play once.",
+    "base_x": 32,
+    "base_y": 138
+  },
+  "evo_tesla_strike": {
+    "file": "evo_tesla_strike.png",
+    "type": "one_shot",
+    "frame_w": 112,
+    "frame_h": 208,
+    "frames": 10,
+    "fps": 12,
+    "loop": false,
+    "notes": "TESLA GRID hit: forked bolt falls from the top (0-5), a glowing 5x5 node lattice flashes on the ground, double shock ring + sparks. Origin = point of impact (56,160). Play once on every target the grid strikes. Frames 0-9.",
+    "base_x": 56,
+    "base_y": 160
+  },
+  "evo_tesla_coil": {
+    "file": "evo_tesla_coil.png",
+    "type": "loop",
+    "frame_w": 96,
+    "frame_h": 96,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "Emitter glyph under the player while TESLA GRID is equipped: four pylons arcing round a pulsing core. Centre = (48,48); draw it a few px below the player's feet. Loop frames 0-7."
+  },
+  "evo_blizzard_flake": {
+    "file": "evo_blizzard_flake.png",
+    "type": "loop",
+    "frame_w": 24,
+    "frame_h": 24,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "A drifting snowflake, 24x24, centre (12,12). Scatter many inside the ABSOLUTE ZERO area, fall + sway them in code, each with its own frame offset; draw at 1x or 2x. Loop frames 0-7."
+  },
+  "evo_blizzard_crystal": {
+    "file": "evo_blizzard_crystal.png",
+    "type": "loop",
+    "frame_w": 64,
+    "frame_h": 88,
+    "frames": 6,
+    "fps": 12,
+    "loop": true,
+    "notes": "Ice crystal cluster standing on the rim of the ABSOLUTE ZERO area. Upright (never rotate). Base centre = (32,84). Loop frames 0-5 (a sparkle climbs the tallest spike).",
+    "base_x": 32,
+    "base_y": 84
+  },
+  "evo_blizzard_glyph": {
+    "file": "evo_blizzard_glyph.png",
+    "type": "loop",
+    "frame_w": 224,
+    "frame_h": 224,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "notes": "Frost rune under the player (hexagram + snowflake + tick ring), 224x224, centre (112,112). Draw at ~50% alpha at 1x, below the player. Loop frames 0-7 (6-fold symmetric, seamless)."
+  }
+}

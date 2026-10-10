@@ -1,0 +1,178 @@
+{
+  "phase_impact": {
+    "file": "phase_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 64,
+    "frames": 10,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 0,
+    "notes": "Dash trail, left=start -> right=landing. Stretch/rotate the strip so x=22 is the origin and x=170 the destination (scale X by distance/148). Frames 0-9, play once."
+  },
+  "purge_impact": {
+    "file": "purge_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 12,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Gold dithered flood + white rim + 8 rays + sparks. Frames 0-2 are the white core flash. Scale by game radius / 88."
+  },
+  "lockdown_impact": {
+    "file": "lockdown_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 12,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Blue cage frame closes in (frames 0-4) while grille bars slam across, then a big padlock drops in the middle and clamps with a white shock ring (5-8), fading out (9-11). Scale by game radius / 88."
+  },
+  "deepscan_impact": {
+    "file": "deepscan_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 12,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Scan line sweeps top->bottom (frames 0-10) leaving scanlines + grid; target reticles lock on behind it. Scale by game radius / 88."
+  },
+  "restore_impact": {
+    "file": "restore_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 12,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Pixel plus-signs drift up with a soft green ring + dithered wash. Frames 0-11, play once."
+  },
+  "overclock_impact": {
+    "file": "overclock_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 10,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Spinning gear-tooth ring with radial speed dashes; frames 0-1 core flash. Scale by game radius / 88."
+  },
+  "railstrike_impact": {
+    "file": "railstrike_impact.png",
+    "type": "one_shot",
+    "frame_w": 640,
+    "frame_h": 160,
+    "frames": 20,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 0,
+    "notes": "FLAGSHIP. 640x160, 20 frames. Charge-up: three counter-rotating ring segments converge on the muzzle while a hairline beam draws in (0-4). Fire (5-19): white-core beam with gold sheath, double helix, edge arcing, grid ticks, sonic chevrons racing down the beam, muzzle starburst and a crater + bloom + starburst + debris at the far end. For other beam lengths 3-slice: keep x<110 and x>530 fixed, stretch the middle. Rotate to aim; origin = muzzle (64,80)."
+  },
+  "pause_impact": {
+    "file": "pause_impact.png",
+    "type": "one_shot",
+    "frame_w": 192,
+    "frame_h": 192,
+    "frames": 12,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 88,
+    "notes": "Giant bronze/gold clockwork face: rim, 60 ticks, three meshing gears, hands that spin then lock at 12. Frames 0-11, play once (fades from frame 8). Scale by game radius / 88."
+  },
+  "wildfire_impact": {
+    "file": "wildfire_impact.png",
+    "type": "one_shot",
+    "frame_w": 384,
+    "frame_h": 384,
+    "frames": 24,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 170,
+    "notes": "FLAGSHIP. 384x384, 24 frames. White-hot ignition flash (0-3), shockwave + haze rings, glowing lava cracks, 3 spiral flame arms, 3 nested rings of tongues, a central fire pillar (frames 2-14), 90 embers; fades from frame 17. Scale by game radius / 170."
+  },
+  "deepfreeze_impact": {
+    "file": "deepfreeze_impact.png",
+    "type": "one_shot",
+    "frame_w": 384,
+    "frame_h": 384,
+    "frames": 24,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 170,
+    "notes": "FLAGSHIP. 384x384, 24 frames. Ignition flash (0-3), frost floods out over a hex-ice floor with turning light rays, glacier crystal clusters, triple snowflake core and falling snow (4-13), then SHATTERS from frame 14 (shards of 3 sizes + frost mist). Sync the bonus-damage pop to frame 14. Scale by game radius / 170."
+  },
+  "thunderstorm_impact": {
+    "file": "thunderstorm_impact.png",
+    "type": "one_shot",
+    "frame_w": 384,
+    "frame_h": 384,
+    "frames": 24,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 170,
+    "notes": "FLAGSHIP. 384x384, 24 frames. Ignition flash (0-3), rain-lashed charged ground zone with crawling rim arcs and strobe flashes every 6 frames, towering storm cloud overhead (centre y=58, above the caster) throwing branching bolt trees onto the zone, 8 bolts radiating from the caster. Scale by game radius / 170."
+  },
+  "thunderstorm_strike": {
+    "file": "thunderstorm_strike.png",
+    "type": "one_shot",
+    "frame_w": 160,
+    "frame_h": 288,
+    "frames": 14,
+    "fps": 12,
+    "loop": false,
+    "reference_radius_px": 0,
+    "notes": "FLAGSHIP. 160x288, 14 frames. Per-strike hit: a thick bolt tree with 3 levels of branches crashes down (0-8) with a column flash, scorch cracks, double shock ring and sparks (3-13). Origin = (80, 250), the point of impact. Play once."
+  },
+  "overclock_aura": {
+    "file": "overclock_aura.png",
+    "type": "aura_loop",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "reference_radius_px": 22,
+    "notes": "Orbiting amber sparks with trails + flickering ring, around the player. Loop frames 0-7 while OVERCLOCK is active (6 s). Centre = (32,32)."
+  },
+  "deepscan_aura": {
+    "file": "deepscan_aura.png",
+    "type": "aura_loop",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "reference_radius_px": 26,
+    "notes": "Four bracket corners + a scan line bobbing top/bottom around the player. Loop frames 0-7 while DEEP SCAN is active (8 s). Centre = (32,32)."
+  },
+  "thunderstorm_aura": {
+    "file": "thunderstorm_aura.png",
+    "type": "aura_loop",
+    "frame_w": 96,
+    "frame_h": 96,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "reference_radius_px": 38,
+    "notes": "FLAGSHIP. 96x96, 8-frame loop. A turning storm cloud floats over the player (cloud centre y=14) dropping bolts, with arcs crackling round the body. Loop frames 0-7 while THUNDERSTORM is active (6 s). Player centre = (48,56)."
+  },
+  "pause_aura": {
+    "file": "pause_aura.png",
+    "type": "aura_loop",
+    "frame_w": 64,
+    "frame_h": 64,
+    "frames": 8,
+    "fps": 12,
+    "loop": true,
+    "reference_radius_px": 29,
+    "notes": "Small bronze clock with a turning gear and a second hand + pause glyph overhead. Loop frames 0-7 while PAUSE is active (4 s). Centre = (32,32)."
+  }
+}

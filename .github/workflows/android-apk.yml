@@ -1,0 +1,99 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to publish the release
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.5-stable"
+  GODOT_TEMPLATE_DIR: "4.5.stable"
+  GODOT_BUILD_TYPE: debug   # "debug" signs with an auto-generated debug key; see README note for release signing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 platforms;android-36 build-tools;35.0.0 build-tools;36.0.0 ndk;28.1.13356709 cmdline-tools;12.0"
+
+      - name: Install Godot and export templates
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}"
+          unzip -q templates.tpz -d tpl
+          mv tpl/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/"
+
+      - name: Install Android build template
+        run: |
+          # Gradle build is enabled in export_presets.cfg; recreate android/build from the templates
+          rm -rf android/build
+          mkdir -p android/build
+          unzip -q "$HOME/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}/android_source.zip" -d android/build
+          echo "${GODOT_TEMPLATE_DIR}" > android/.build_version
+          touch android/build/.gdignore
+
+      - name: Configure Godot editor for Android
+        run: |
+          keytool -genkeypair -v -keystore "$HOME/debug.keystore" -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<SETTINGS
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$HOME/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          SETTINGS
+          sed -i 's/^ *//' "$HOME/.config/godot/editor_settings-4.5.tres"
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Export APK
+        run: |
+          mkdir -p build
+          sed -i "s|^version/code=.*|version/code=${GITHUB_RUN_NUMBER}|" export_presets.cfg
+          godot --headless --path . --export-${GODOT_BUILD_TYPE} "Android" "$PWD/build/KernelPanic.apk"
+          ls -lh build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KernelPanic-apk
+          path: build/KernelPanic.apk
+          retention-days: 30
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="build-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" build/KernelPanic.apk \
+            --title "Kernel Panic build ${GITHUB_RUN_NUMBER}" \
+            --notes "Automatic Android APK build of ${GITHUB_SHA::7}." \
+            --target "$GITHUB_SHA" --latest
