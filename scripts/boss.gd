@@ -233,7 +233,7 @@ func _draw() -> void:
 		face_left = player.global_position.x < global_position.x
 	var bspr: Texture2D = PixelArt.boss_tex(boss_id, enraged, t)   # the pixel sprite (glow baked in); null falls back to the vector drawing
 	if bspr == null:
-		draw_circle(Vector2.ZERO, r * 3.2, Color(color, 0.05 + 0.04 * pulse))
+		FD.circle(self, Vector2.ZERO, r * 3.2, Color(color, 0.05 + 0.04 * pulse))
 		Global.glow_circle(self, Vector2.ZERO, r, color, 2.5)
 	if dash_windup > 0.0 and player:
 		var d: Vector2 = (player.global_position - global_position).normalized()
@@ -242,7 +242,7 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, r + 20.0 + pulse * 6.0, 0.0, TAU, 48, Color(1, 0.2, 0.2, 0.6), 4.0)
 	if shield_time > 0.0:   # invulnerable: a bright cyan shell that flickers out in the last half second
 		var sa := 0.9 if shield_time > 0.5 else 0.9 * (0.5 + 0.5 * sin(t * 40.0))
-		draw_circle(Vector2.ZERO, r + 12.0, Color(Global.C_CYAN, 0.12 * sa))
+		FD.circle(self, Vector2.ZERO, r + 12.0, Color(Global.C_CYAN, 0.12 * sa))
 		draw_arc(Vector2.ZERO, r + 12.0, 0.0, TAU, 48, Color(Global.C_CYAN, sa), 5.0)
 	_draw_status()
 
@@ -268,8 +268,8 @@ func _draw() -> void:
 					band = color.lightened(0.15)   # the pale band of an earthworm
 				if flash > 0.0:
 					band = Color(1.6, 1.6, 1.6)
-				draw_circle(p, sr, band)
-				draw_circle(p - seg_dir.orthogonal() * sr * 0.3, sr * 0.55, Color(band.lightened(0.25), 0.55))   # the lit top of the ring
+				FD.circle(self, p, sr, band)
+				FD.circle(self, p - seg_dir.orthogonal() * sr * 0.3, sr * 0.55, Color(band.lightened(0.25), 0.55))   # the lit top of the ring
 				draw_arc(p, sr, seg_dir.angle() + PI * 0.5, seg_dir.angle() + PI * 1.5, 14, band.darkened(0.45), 3.0)   # the groove at the front edge
 			var head := PackedVector2Array()
 			for k in 20:
@@ -279,14 +279,14 @@ func _draw() -> void:
 			head.append(head[0])
 			draw_polyline(head, color.darkened(0.5), 3.0)
 			var mouth := face * r * 0.8
-			draw_circle(mouth, r * 0.3, Color(0.25, 0.02, 0.05))
+			FD.circle(self, mouth, r * 0.3, Color(0.25, 0.02, 0.05))
 			for k in 5:   # teeth ringing the mouth
 				var ta := TAU * k / 5.0 + t * 1.5
-				draw_circle(mouth + Vector2.from_angle(ta) * r * 0.3, r * 0.06, Color(0.95, 0.95, 0.85))
+				FD.circle(self, mouth + Vector2.from_angle(ta) * r * 0.3, r * 0.06, Color(0.95, 0.95, 0.85))
 			for s in [-1.0, 1.0]:
 				var ep: Vector2 = face * r * 0.35 + side * s * r * 0.5
-				draw_circle(ep, r * 0.14, Color(0.05, 0.05, 0.05))
-				draw_circle(ep + face * r * 0.04, r * 0.06, Color(1.0, 0.3, 0.3))
+				FD.circle(self, ep, r * 0.14, Color(0.05, 0.05, 0.05))
+				FD.circle(self, ep + face * r * 0.04, r * 0.06, Color(1.0, 0.3, 0.3))
 		"locker":
 			for i in 12:
 				var a := t * 0.8 + TAU * i / 12.0
@@ -297,7 +297,7 @@ func _draw() -> void:
 			draw_line(Vector2(r * 0.55, -r * 0.35), Vector2(r * 0.55, 0), col, 9.0)
 			draw_rect(Rect2(-r * 0.85, -r * 0.1, r * 1.7, r * 1.1), col)
 			draw_rect(Rect2(-r * 0.85, -r * 0.1, r * 1.7, r * 1.1), Global.C_GOLD, false, 3.0)
-			draw_circle(Vector2(0, r * 0.3), r * 0.17, Color(1, 0.85, 0.3, 0.5 + 0.5 * pulse))
+			FD.circle(self, Vector2(0, r * 0.3), r * 0.17, Color(1, 0.85, 0.3, 0.5 + 0.5 * pulse))
 			draw_rect(Rect2(-4, r * 0.3, 8, r * 0.38), Color(1, 0.85, 0.3, 0.5 + 0.5 * pulse))
 		"hive":
 			var nodes := []
@@ -306,16 +306,16 @@ func _draw() -> void:
 			for i in 6:
 				draw_line(Vector2.ZERO, nodes[i], Color(col, 0.5), 2.0)
 				draw_line(nodes[i], nodes[(i + 1) % 6], Color(col, 0.35), 2.0)
-				draw_circle(nodes[i], 8.0, col)
-				draw_circle(nodes[i], 3.0, Color.WHITE)
+				FD.circle(self, nodes[i], 8.0, col)
+				FD.circle(self, nodes[i], 3.0, Color.WHITE)
 			var hex := PackedVector2Array()
 			for i in 6:
 				hex.append(Vector2.from_angle(TAU * i / 6.0 + t * 0.3) * r)
 			draw_colored_polygon(hex, Color(0.05, 0.1, 0.3))
 			hex.append(hex[0])
 			draw_polyline(hex, col, 4.0)
-			draw_circle(Vector2.ZERO, r * 0.35 * (0.9 + 0.2 * pulse), col)
-			draw_circle(Vector2.ZERO, r * 0.15, Color.WHITE)
+			FD.circle(self, Vector2.ZERO, r * 0.35 * (0.9 + 0.2 * pulse), col)
+			FD.circle(self, Vector2.ZERO, r * 0.15, Color.WHITE)
 		"kernel":
 			var g := Vector2(randf_range(-4, 4), 0) if randf() < 0.2 else Vector2.ZERO
 			for k in 3:
@@ -331,9 +331,9 @@ func _draw() -> void:
 					draw_line(Vector2(o, s * r * 0.75), Vector2(o, s * r * 1.0), col, 4.0)
 					draw_line(Vector2(s * r * 0.75, o), Vector2(s * r * 1.0, o), col, 4.0)
 			var look: Vector2 = (player.global_position - global_position).normalized() * r * 0.15 if player else Vector2.ZERO
-			draw_circle(Vector2.ZERO, r * 0.38, Color(1, 1, 1, 0.9))
-			draw_circle(look, r * 0.22, col)
-			draw_circle(look, r * 0.1, Color.BLACK)
+			FD.circle(self, Vector2.ZERO, r * 0.38, Color(1, 1, 1, 0.9))
+			FD.circle(self, look, r * 0.22, col)
+			FD.circle(self, look, r * 0.1, Color.BLACK)
 		"popupking":
 			for k in 3:
 				var o := Vector2(-0.5 + k * 0.5, -0.4 + k * 0.4) * r * 0.7
@@ -359,9 +359,9 @@ func _draw() -> void:
 				for kx in 7:
 					draw_rect(Rect2(deck.position + Vector2(r * 0.15 + kx * r * 0.32, r * 0.12 + row * r * 0.3), Vector2(r * 0.24, r * 0.2)), Color(col, 0.55))
 			var eye_look: Vector2 = (player.global_position - global_position).normalized() * r * 0.15 if player else Vector2.ZERO
-			draw_circle(Vector2(0, -r * 0.65), r * 0.5, Color.WHITE)
-			draw_circle(Vector2(0, -r * 0.65) + eye_look, r * 0.26, Color(1.0, 0.2, 0.3))
-			draw_circle(Vector2(0, -r * 0.65) + eye_look, r * 0.11, Color.BLACK)
+			FD.circle(self, Vector2(0, -r * 0.65), r * 0.5, Color.WHITE)
+			FD.circle(self, Vector2(0, -r * 0.65) + eye_look, r * 0.26, Color(1.0, 0.2, 0.3))
+			FD.circle(self, Vector2(0, -r * 0.65) + eye_look, r * 0.11, Color.BLACK)
 		"phisher":
 			var env := Rect2(-r * 0.95, -r * 0.7, r * 1.9, r * 1.3)
 			draw_rect(env, Color(0.04, 0.15, 0.14))
@@ -379,7 +379,7 @@ func _draw() -> void:
 			draw_polyline(mast, col, 4.0)
 			draw_line(Vector2(-r * 0.3, r * 0.1), Vector2(r * 0.3, r * 0.1), col, 3.0)
 			draw_line(Vector2(-r * 0.45, r * 0.5), Vector2(r * 0.45, r * 0.5), col, 3.0)
-			draw_circle(Vector2(0, -r), r * 0.2 * (0.9 + 0.2 * pulse), Color.WHITE)
+			FD.circle(self, Vector2(0, -r), r * 0.2 * (0.9 + 0.2 * pulse), Color.WHITE)
 		"bluescreen":
 			var scr := Rect2(-r * 1.2, -r * 0.85, r * 2.4, r * 1.7)
 			var jit := Vector2(randf_range(-3, 3), 0) if randf() < 0.1 else Vector2.ZERO

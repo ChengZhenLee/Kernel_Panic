@@ -25,7 +25,7 @@ func get_radius() -> float:
 	return (95.0 + level * 14.0) * player.area()
 
 
-## Fire geysers on three rings out to the eruption radius, each delayed by its distance so the blast sweeps outward (fewer in low-fx).
+## Fire geysers on three rings out to the eruption radius, each delayed by its distance so the blast sweeps outward.
 func _spawn_pillars() -> void:
 	if not WFx.has("evo_inferno_pillar"):
 		return
@@ -33,8 +33,6 @@ func _spawn_pillars() -> void:
 	for ring_k in [0.35, 0.7, 1.0]:
 		var rr: float = big * ring_k
 		var n := clampi(int(TAU * rr / 90.0), 4, 20)
-		if Global.low_fx:
-			n = maxi(4, n / 2)
 		var off := randf() * TAU
 		for i in n:
 			var a := off + TAU * i / n + randf_range(-0.08, 0.08)
@@ -92,7 +90,7 @@ func _draw() -> void:
 	Pix.dither_disc(self, Vector2.ZERO, r, Color(1.0, 0.29, 0.07, 0.12 + 0.08 * pulse))
 	Pix.ring_auto(self, Vector2.ZERO, r, Color(0.35, 0.05, 0.02, 0.55), 3.0)   # scorched ground line under the flames
 	var n := clampi(int(TAU * minf(r, 300.0) / 30.0), 14, 48)   # a big ring gets sparser flames, not more of them
-	var step := 2 if Global.low_fx else 1
+	var step := 1
 	var order := []
 	for i in range(0, n, step):
 		var a := TAU * i / n + spin * 0.15

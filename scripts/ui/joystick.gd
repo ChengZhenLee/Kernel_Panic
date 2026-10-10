@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## Floating virtual joystick: touch anywhere (outside buttons) to place it, drag to move.
 ## On desktop it also works with a mouse drag, so you can try the mobile controls on PC.
 
@@ -85,11 +86,11 @@ func _draw() -> void:
 			var p := Vector2(size.x - 150 if Global.swap_controls else 150, size.y - 150)
 			var a := 0.18 + 0.08 * sin(t * 2.0)
 			draw_arc(p, RADIUS, 0.0, TAU, 48, Color(Global.C_CYAN, a), 3.0)
-			draw_circle(p, 34.0, Color(Global.C_CYAN, a * 0.6))
+			FD.circle(self, p, 34.0, Color(Global.C_CYAN, a * 0.6))
 		return
 	var col := Global.C_CYAN
-	draw_circle(base, RADIUS, Color(col, 0.08))
+	FD.circle(self, base, RADIUS, Color(col, 0.08))
 	draw_arc(base, RADIUS, 0.0, TAU, 48, Color(col, 0.55), 3.0)
 	draw_line(base, knob, Color(col, 0.35), 6.0)
-	draw_circle(knob, 38.0, Color(col, 0.3))
+	FD.circle(self, knob, 38.0, Color(col, 0.3))
 	draw_arc(knob, 38.0, 0.0, TAU, 32, Color(0.85, 1.0, 1.0, 0.9), 3.0)

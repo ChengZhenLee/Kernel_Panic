@@ -30,7 +30,7 @@ static func zone(ci: Node2D, c: Vector2, r: float, col: Color, fade: float, t: f
 	var rr := r * (0.97 + 0.03 * sin(t * 5.0))
 	Pix.ring_auto(ci, c, rr, Color(col, 0.75 * fade), 2.0)
 	Pix.ring_auto(ci, c, maxf(1.0, rr - 6.0), Color(col, 0.25 * fade), 2.0)
-	var n := maxi(3, ticks / 2) if Global.low_fx else ticks
+	var n := ticks
 	for i in n:
 		var ang := TAU * i / n + t * 0.4
 		Pix.line(ci, c + Vector2.from_angle(ang) * (rr - 6.0), c + Vector2.from_angle(ang) * (rr + 4.0), Color(Color.WHITE, 0.7 * fade), 2.0)
@@ -38,7 +38,7 @@ static func zone(ci: Node2D, c: Vector2, r: float, col: Color, fade: float, t: f
 
 ## Square motes rising off a point, looping; `seed` makes each prop's motes different.
 static func motes(ci: Node2D, c: Vector2, col: Color, fade: float, t: float, seed: float, count := 6, spread := 14.0, rise := 36.0) -> void:
-	var n := maxi(2, count / 2) if Global.low_fx else count
+	var n := count
 	for i in n:
 		var ph := fposmod(t * 0.9 + Pix.rnd(i * 7.1 + seed), 1.0)
 		var p := c + Vector2((Pix.rnd(i * 3.3 + seed) - 0.5) * spread * 2.0 + sin(t * 4.0 + i) * 2.0, -ph * rise)

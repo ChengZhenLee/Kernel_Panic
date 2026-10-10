@@ -13,8 +13,44 @@ const WALL_SCALE := 2.5    # wall thickness and pillar/block size grow by this f
 const MAP_SCALE := 3.4     # arenas are spread out by this factor (4x the area of the old 1.7 scale at 2x per side) so they feel open like Vampire Survivors (walls keep their thickness)
 
 
+const TILE := 128.0   # wall art tiles are 128 px; every wall edge sits on this grid so tiles never cut off or overlap
+
+
 static func layout(tier: int) -> Dictionary:
-	return _spread(_layout(tier))
+	return _snap(_spread(_layout(tier)))
+
+
+## Moves every wall edge onto the TILE grid (minimum one tile thick) so the wall art fits exactly. The layouts above stay in free units;
+## the art grid applies only here, so layouts can change later and the art stays valid.
+static func _snap(d: Dictionary) -> Dictionary:
+	var out := d.duplicate()
+	for key in ["walls", "phase_a", "phase_b"]:
+		if not d.has(key):
+			continue
+		var list := []
+		for r in d[key]:
+			list.append(snap_rect(r))
+		out[key] = list
+	return out
+
+
+## One wall moved onto the TILE grid: a thin wall (under 1.5 tiles) is exactly one tile thick, centred where it was; a thick block snaps both edges.
+static func snap_rect(rect: Rect2) -> Rect2:
+	var x0 := roundf(rect.position.x / TILE) * TILE
+	var x1 := roundf(rect.end.x / TILE) * TILE
+	if rect.size.x < TILE * 1.5:
+		x0 = roundf((rect.get_center().x - TILE / 2.0) / TILE) * TILE
+		x1 = x0 + TILE
+	var y0 := roundf(rect.position.y / TILE) * TILE
+	var y1 := roundf(rect.end.y / TILE) * TILE
+	if rect.size.y < TILE * 1.5:
+		y0 = roundf((rect.get_center().y - TILE / 2.0) / TILE) * TILE
+		y1 = y0 + TILE
+	if x1 - x0 < TILE:
+		x1 = x0 + TILE
+	if y1 - y0 < TILE:
+		y1 = y0 + TILE
+	return Rect2(x0, y0, x1 - x0, y1 - y0)
 
 
 ## Scales an arena up: positions and long wall dimensions grow, wall thickness and pillars by WALL_SCALE.
@@ -64,6 +100,10 @@ static func _layout(tier: int) -> Dictionary:
 
 ## Boss rooms: a sealed side arena (about 1900 x 1300) with a little cover, one per device. The player enters on the left.
 static func room(tier: int) -> Dictionary:
+	return _snap(_boss_room(tier))
+
+
+static func _boss_room(tier: int) -> Dictionary:
 	var size := Vector2(1900, 1300)
 	var start := Vector2(-600, 0)
 	match tier % 8:

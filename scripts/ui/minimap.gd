@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## Radar: a window around the player showing nearby walls, plus arrows at the edge pointing to points of interest
 ## (the boss, caches, elites). Everything fades in as it comes into range. Works on the open Internet too.
 
@@ -26,7 +27,7 @@ func _draw() -> void:
 	var k := half / RANGE
 	var ppos: Vector2 = player.global_position
 	var col := Global.C_CYAN
-	draw_circle(c, half, Color(0.02, 0.04, 0.08, 0.6))
+	FD.circle(self, c, half, Color(0.02, 0.04, 0.08, 0.6))
 	if arena != null and is_instance_valid(arena):
 		var wcol: Color = arena.color
 		for w in arena.active_walls():
@@ -40,14 +41,14 @@ func _draw() -> void:
 			var rb := Vector2(clampf(b.x, -half * 0.8, half * 0.8), clampf(b.y, -half * 0.8, half * 0.8))
 			draw_rect(Rect2(c + ra, rb - ra), Color(wcol, 0.85))
 	draw_arc(c, half, 0.0, TAU, 48, Color(col, 0.55), 2.0)
-	draw_circle(c, 4.0, col)
+	FD.circle(self, c, 4.0, col)
 	var pois := _points()
 	for p in pois:
 		var off: Vector2 = (p[0] - ppos)
 		var colr: Color = p[1]
 		var d := off.length()
 		if d < RANGE * 0.93:
-			draw_circle(c + off * k, 3.5, colr)
+			FD.circle(self, c + off * k, 3.5, colr)
 		else:
 			var dir := off / maxf(d, 1.0)
 			var tip := c + dir * (half - 2.0)

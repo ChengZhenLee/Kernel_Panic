@@ -3,7 +3,7 @@ extends Node2D
 ## hard-edged rings, no antialiasing and no soft glow). One short-lived node per effect; Game.ifx() spawns them.
 ## kind: "shock" (BACKFIRE) | "nova" (KILLSTREAK, PURGE pickup) | "blast" (FLASHPOINT) | "shatter" (COLD SNAP) | "spore" (PLAGUE VECTOR)
 ## | "rage" | "boom" (DECOY) | "drop" (TOTEM / BEACON landing) | "pulse" (TOTEM tick) | "block" (GUARDIAN) | "heal" | "suck" (DEFRAG)
-## | "cache" (CACHE decrypted) | "levelup" (upgrade offer opens) | "tier" (combo tier reached) | "rarity" (upgrade picked; `size` = rarity 1 rare / 2 epic / 3 legendary). `radius` is the reach, `life` the playback time, `color` the theme. Mark counts are capped; Global.low_fx trims them.
+## | "cache" (CACHE decrypted) | "levelup" (upgrade offer opens) | "tier" (combo tier reached) | "rarity" (upgrade picked; `size` = rarity 1 rare / 2 epic / 3 legendary). `radius` is the reach, `life` the playback time, `color` the theme. Mark counts are capped.
 
 const Pix = preload("res://scripts/fx/pix.gd")
 
@@ -30,7 +30,7 @@ func _process(delta: float) -> void:
 
 
 func _cap(n: int) -> int:
-	return maxi(3, n / 2) if Global.low_fx else n
+	return n
 
 
 func _v(ang: float, r: float) -> Vector2:

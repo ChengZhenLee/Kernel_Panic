@@ -1,6 +1,6 @@
 extends Control
 ## Jackpot backdrop for a LEGENDARY upgrade offer (a full-screen layer behind the cards): columns of golden pixel code (3x5 glyphs, 2 px cells) falling behind the card text, with
-## a bright head on every column and a slow diagonal shimmer sweeping across. Whole-pixel rects only; Global.low_fx trims the columns.
+## a bright head on every column and a slow diagonal shimmer sweeping across. Whole-pixel rects only.
 
 const GLYPHS := [   # 3x5 bitmasks, rows top to bottom (bit 2 = left)
 	[7, 5, 5, 5, 7], [2, 6, 2, 2, 7], [7, 1, 7, 4, 7], [7, 1, 7, 1, 7], [5, 5, 7, 1, 1], [7, 4, 7, 1, 7], [7, 4, 7, 5, 7], [7, 1, 2, 2, 2],
@@ -16,7 +16,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	cols = 8 if Global.low_fx else maxi(11, int(size.x / (cell * 14.0)))
+	cols = maxi(11, int(size.x / (cell * 14.0)))
 
 
 func _process(delta: float) -> void:

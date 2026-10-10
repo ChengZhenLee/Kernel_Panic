@@ -38,6 +38,9 @@ const ITEM_ART := {"drone": "drone", "totem": "totem", "backfire": "backfire", "
 	"flashpoint": "flashpoint", "plague": "plague", "shatter": "shatter", "overvolt": "overvolt", "reroll": "seedhack",
 	"ban": "blocklist", "cherrypick": "cherrypick"}
 
+## icon ids with their own 16x16 sprite in art/ui (device icons "dev_*" live in art/devices); drawn by tools/gen_icons.py
+const UI_ICONS := ["bomb", "thorns", "data", "slot", "choice", "boss", "elite", "start", "iframe", "key", "infinity", "core", "internet"]
+
 ## pickup kind (pickup.gd) -> file in art/items
 const PICKUP_ART := {"xp": "xp", "heal": "patch", "magnet": "magnet", "purge": "purge", "cache": "cache"}
 
@@ -73,6 +76,10 @@ static func icon_tex(id: String) -> Texture2D:
 		return load_tex("cards/%s.png" % CARD_ART[id])
 	if ITEM_ART.has(id):
 		return load_tex("items/%s.png" % ITEM_ART[id])
+	if id.begins_with("dev_"):
+		return load_tex("devices/%s.png" % id.substr(4))
+	if UI_ICONS.has(id):
+		return load_tex("ui/%s.png" % id)
 	return null
 
 

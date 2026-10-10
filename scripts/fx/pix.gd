@@ -24,15 +24,21 @@ static func rect(ci: Node2D, p: Vector2, size: Vector2, col: Color) -> void:
 ## A line of s px squares from a to b.
 static func line(ci: Node2D, a: Vector2, b: Vector2, col: Color, s := 1.0) -> void:
 	var n := maxi(1, ceili(a.distance_to(b) / maxf(1.0, s)))
+	var o := ci.global_position   # read once: the per-dot dot() -> snap() calls were most of the cost of a line
+	var h := Vector2(s, s) * 0.5
+	var sz := Vector2(s, s)
 	for i in n + 1:
-		dot(ci, a.lerp(b, float(i) / n), col, s)
+		ci.draw_rect(Rect2((o + (a.lerp(b, float(i) / n) - h)).round() - o, sz), col)
 
 
 ## An arc of s px squares (angles in radians).
 static func arc(ci: Node2D, c: Vector2, r: float, a0: float, a1: float, col: Color, s := 1.0, max_dots := 400) -> void:
 	var n := clampi(ceili(r * absf(a1 - a0) / maxf(1.0, s)), 3, max_dots)
+	var o := ci.global_position
+	var h := Vector2(s, s) * 0.5
+	var sz := Vector2(s, s)
 	for i in n + 1:
-		dot(ci, c + Vector2.from_angle(lerpf(a0, a1, float(i) / n)) * r, col, s)
+		ci.draw_rect(Rect2((o + (c + Vector2.from_angle(lerpf(a0, a1, float(i) / n)) * r - h)).round() - o, sz), col)
 
 
 static func ring(ci: Node2D, c: Vector2, r: float, col: Color, s := 1.0, max_dots := 400) -> void:
@@ -99,9 +105,10 @@ static func ring_auto(ci: Node2D, c: Vector2, r: float, col: Color, s := 2.0) ->
 		return
 	var n := clampi(ceili(r / 3.0), 48, 220)
 	var pts := PackedVector2Array()   # separate segments (no joins): a wide closed polyline can spike into a solid square at small radii
-	var prev := snap(ci, c + Vector2(r, 0.0))
+	var o := ci.global_position   # read once instead of once per vertex
+	var prev := (o + (c + Vector2(r, 0.0))).round() - o
 	for i in range(1, n + 1):
-		var cur := snap(ci, c + Vector2.from_angle(TAU * float(i % n) / n) * r)
+		var cur := (o + (c + Vector2.from_angle(TAU * float(i % n) / n) * r)).round() - o
 		pts.append(prev)
 		pts.append(cur)
 		prev = cur

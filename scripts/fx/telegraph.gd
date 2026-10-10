@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## Telegraphed ground slam: a red circle fills up, then damages the player if still inside.
 
 var radius := 100.0
@@ -27,6 +28,6 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var k := clampf(t / delay, 0.0, 1.0)
-	draw_circle(Vector2.ZERO, radius, Color(color, 0.08 + 0.12 * k))
+	FD.circle(self, Vector2.ZERO, radius, Color(color, 0.08 + 0.12 * k))
 	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 40, Color(color, 0.8), 3.0)
-	draw_circle(Vector2.ZERO, radius * k, Color(color, 0.25))
+	FD.circle(self, Vector2.ZERO, radius * k, Color(color, 0.25))

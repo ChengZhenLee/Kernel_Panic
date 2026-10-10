@@ -1,4 +1,5 @@
 ﻿extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## Charge-up shown before a class ability fires: a ring that collapses onto the player plus a style per ability
 ## (rail = vertical neon lines and an aim line, fire = flame spikes, storm = crackling arcs, ice = shards).
 ## Follows `target` while it charges, then frees itself.
@@ -32,7 +33,7 @@ func _draw() -> void:
 	var w := 3.0 + 4.0 * k
 	draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(color, a * 0.25), w * 3.0)
 	draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(color, a), w)
-	draw_circle(Vector2.ZERO, 10.0 + 22.0 * e, Color(color, 0.25 + 0.35 * e))
+	FD.circle(self, Vector2.ZERO, 10.0 + 22.0 * e, Color(color, 0.25 + 0.35 * e))
 	if super_cast:
 		draw_arc(Vector2.ZERO, r * 1.45, 0.0, TAU, 48, Color(Color.WHITE, a * 0.7), w * 0.6)
 	match style:
@@ -62,7 +63,7 @@ func _draw() -> void:
 				var c := Vector2.RIGHT.rotated(ang2) * r * 0.9 + Vector2(0, -40.0 * k)
 				draw_line(c - Vector2(7, 0), c + Vector2(7, 0), Color(color, a), 3.0)
 				draw_line(c - Vector2(0, 7), c + Vector2(0, 7), Color(color, a), 3.0)
-			draw_circle(Vector2.ZERO, 18.0 + 8.0 * sin(seed_t * 18.0), Color(color, 0.3))
+			FD.circle(self, Vector2.ZERO, 18.0 + 8.0 * sin(seed_t * 18.0), Color(color, 0.3))
 		"clock":
 			# a dial whose hand spins faster and faster, with tick marks
 			var spin := pow(k, 2.0) * 14.0 * TAU

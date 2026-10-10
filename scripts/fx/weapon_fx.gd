@@ -32,9 +32,19 @@ static func has(sheet: String) -> bool:
 	return tex(sheet) != null
 
 
+static var _frame_size := {}   # sheet -> frame size (the textures never change, and draw() asks for this per mark)
+
+
 static func frame_size(sheet: String) -> Vector2:
+	var hit = _frame_size.get(sheet)
+	if hit != null:
+		return hit
 	var t := tex(sheet)
-	return Vector2(t.get_width() / FRAMES[sheet], t.get_height()) if t != null else Vector2.ZERO
+	if t == null:
+		return Vector2.ZERO   # not cached: the sheet may be imported later
+	var fs := Vector2(t.get_width() / FRAMES[sheet], t.get_height())
+	_frame_size[sheet] = fs
+	return fs
 
 
 ## Frame number at time t (seconds) for a loop that runs at fps (default 12), shifted by offset frames.

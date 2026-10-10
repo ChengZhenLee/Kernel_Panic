@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## The class ability button (bottom right): the ability's icon, the cooldown as its outer ring, and its name below the ring.
 ## Mouse click, touch (emulated as mouse) and the Space / Q keys all use it.
 
@@ -45,7 +46,7 @@ func _draw() -> void:
 	var r := minf(size.x, size.y) / 2.0 - 2.0
 	var ready := frac <= 0.0
 	var col := Global.C_GOLD if active else (color if ready else Color(0.6, 0.65, 0.72))
-	draw_circle(c, r, Color(0.02, 0.04, 0.08, 0.88))
+	FD.circle(self, c, r, Color(0.02, 0.04, 0.08, 0.88))
 	IconArt.draw_icon(self, icon_id, c, r * 0.5, col, t, false)
 	# the bounding circle is the cooldown: a dim track that fills clockwise with the recharge, fully lit when ready
 	if ready or active:
@@ -60,7 +61,7 @@ func _draw() -> void:
 		draw_arc(c, rr, 0.0, TAU, 40, Global.C_GOLD if sweet_hot else Color(1, 1, 1, 0.85), 4.0 if sweet_hot else 2.0)
 	var font: Font = Global.FONT_TITLE
 	if charges > 0:
-		draw_circle(c + Vector2(r * 0.72, -r * 0.72), 15.0, Color(0.02, 0.04, 0.08, 0.95))
+		FD.circle(self, c + Vector2(r * 0.72, -r * 0.72), 15.0, Color(0.02, 0.04, 0.08, 0.95))
 		draw_arc(c + Vector2(r * 0.72, -r * 0.72), 15.0, 0.0, TAU, 20, Global.C_GOLD, 2.0)
 		var cw := 30.0
 		draw_string(font, c + Vector2(r * 0.72 - cw / 2.0, -r * 0.72 + 6.0), str(charges), HORIZONTAL_ALIGNMENT_CENTER, cw, 16, Global.C_GOLD)

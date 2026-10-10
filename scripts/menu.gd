@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## Main menu: glitchy title, binary rain, options panel.
 const ScrollFix = preload("res://scripts/ui/scroll_fix.gd")
 
@@ -267,15 +268,6 @@ func _build_options() -> void:
 	shake.button_pressed = Global.screen_shake
 	shake.toggled.connect(func(on): Global.screen_shake = on)
 	box.add_child(shake)
-
-	var perf := CheckButton.new()
-	perf.text = "PERFORMANCE MODE"
-	perf.button_pressed = Global.low_fx
-	perf.toggled.connect(func(on):
-		Global.low_fx = on
-		Global.save())
-	box.add_child(perf)
-
 
 	for o in [["MINIMAP", "minimap_on"], ["DAMAGE NUMBERS", "damage_numbers"], ["STATUS WORDS", "status_words"], ["SWAP ABILITY BUTTON / JOYSTICK SIDES", "swap_controls"]]:
 		var tg := CheckButton.new()
@@ -558,7 +550,7 @@ func _draw() -> void:
 		var p: Vector2 = d[0]
 		var c: Color = d[2]
 		var r: float = d[3]
-		draw_circle(p, r * 2.2, Color(c, 0.05))
+		FD.circle(self, p, r * 2.2, Color(c, 0.05))
 		draw_rect(Rect2(p - Vector2(r, r) * 0.7, Vector2(r, r) * 1.4), Color(c, 0.35))
 
 	if (options_panel and options_panel.visible) or (howto_panel and howto_panel.visible):
@@ -613,4 +605,4 @@ func _draw_avatar() -> void:
 	else:
 		IconArt.draw_icon(self, cl["icon"], c, r * 0.55, col, t)
 	if avatar0 == null:
-		draw_circle(c + Vector2.from_angle(-spin * 2.2) * r * 1.35, 5.0, col)
+		FD.circle(self, c + Vector2.from_angle(-spin * 2.2) * r * 1.35, 5.0, col)

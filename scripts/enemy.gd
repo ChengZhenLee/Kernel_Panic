@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## Malware. Kinds:
 ##  bug (fast zig-zag), worm (segmented), adware (splits into popups), popup,
 ##  trojan (tanky), spyware (keeps distance, shoots), botnet (telegraphed dash),
@@ -616,8 +617,8 @@ static func draw_laser_beam(c: CanvasItem, a: Vector2, b: Vector2, k: float, tim
 	c.draw_line(a, b, Color(1.0, 0.1, 0.12, 0.25 * k), w * 3.2)
 	c.draw_line(a, b, Color(1.0, 0.18, 0.2, 0.85 * k), w * 1.6)
 	c.draw_line(a, b, Color(1.0, 0.75, 0.75, k), w * 0.5)
-	c.draw_circle(a, w * 1.4, Color(1.0, 0.3, 0.3, 0.8 * k))
-	c.draw_circle(b, w * 1.8, Color(1.0, 0.2, 0.2, 0.5 * k))
+	FD.circle(c, a, w * 1.4, Color(1.0, 0.3, 0.3, 0.8 * k))
+	FD.circle(c, b, w * 1.8, Color(1.0, 0.2, 0.2, 0.5 * k))
 
 
 ## Ram: chases; in range it rears back (drifting slowly away, lane locked), then charges straight along the lane.
@@ -849,17 +850,17 @@ func _draw_status() -> void:
 		for i in 3:
 			var a := t * 5.0 + i * 2.1
 			var f := Vector2(sin(a) * r * 0.6, -r - 4.0 - fmod(t * 14.0 + i * 5.0, 12.0))
-			draw_circle(f, 3.5, Color(STATUS_COLOR["burn"], 0.85))
+			FD.circle(self, f, 3.5, Color(STATUS_COLOR["burn"], 0.85))
 	if status.has("poison"):
 		# a small, faint fog clinging to the threat (stacks only thicken it slightly)
 		var fog_a := 0.07 + 0.015 * poison_stacks
 		for i in 3:
 			var a := t * 0.8 + i * 2.1
-			draw_circle(Vector2.from_angle(a) * r * 0.45, r * 0.55, Color(STATUS_COLOR["poison"], fog_a))
+			FD.circle(self, Vector2.from_angle(a) * r * 0.45, r * 0.55, Color(STATUS_COLOR["poison"], fog_a))
 	if status.has("freeze"):
-		draw_arc(Vector2.ZERO, r + 6.0, 0.0, TAU, 24, Color(STATUS_COLOR["freeze"], 0.9), 3.0)
+		FD.ring(self, Vector2.ZERO, r + 6.0, 24, Color(STATUS_COLOR["freeze"], 0.9), 3.0)
 	if stun_timer > 0.0:
-		draw_arc(Vector2.ZERO, r + 8.0, 0.0, TAU, 20, Color(STATUS_COLOR["shock"], 0.9), 3.0)
+		FD.ring(self, Vector2.ZERO, r + 8.0, 20, Color(STATUS_COLOR["shock"], 0.9), 3.0)
 	if status.has("shock"):
 		_draw_shock_bolts(r)
 
@@ -872,25 +873,55 @@ func _draw_shock_bolts(r: float) -> void:
 	var fade := 1.0 - fmod(t * 10.0, 1.0) * 0.5
 	for b in 2:
 		var seed_v := float(slot * 2 + b) * 12.9898 + float(get_instance_id() % 997)
-		var sx := fmod(absf(sin(seed_v) * 43758.5453), 1.0)
-		var ground := Vector2.from_angle(sx * TAU) * r * 0.55
-		var top := ground + Vector2(sx * 40.0 - 20.0, -r - 52.0)
-		var pts := PackedVector2Array([top])
-		for k in range(1, 6):
-			var jx := (fmod(absf(sin(seed_v + k * 7.7) * 9301.7), 1.0) - 0.5) * 26.0
-			pts.append(top.lerp(ground, k / 6.0) + Vector2(jx, 0.0))
-		pts.append(ground)
-		draw_polyline(pts, Color(col, 0.5 * fade), 8.0)
-		draw_polyline(pts, Color(1.0, 1.0, 0.75, fade), 3.0)
-		draw_circle(ground, (r * 0.4 + 5.0) * fade, Color(1.0, 1.0, 0.6, 0.6 * fade))
+		var bolt: Array = _bolt(r, int(seed_v) & 255)
+		draw_mesh(bolt[0], null, Transform2D.IDENTITY, Color(col, 0.5 * fade))
+		draw_mesh(bolt[1], null, Transform2D.IDENTITY, Color(1.0, 1.0, 0.75, fade))
+		FD.circle(self, bolt[2], (r * 0.4 + 5.0) * fade, Color(1.0, 1.0, 0.6, 0.6 * fade))
 	# a spark arc crackling across the body
 	var s0 := float(slot) * 3.17 + float(get_instance_id() % 991)
+	draw_mesh(_spark(r, int(s0) & 255), null, Transform2D.IDENTITY, Color(col, 0.95 * fade))
+
+
+## One lightning strike, built once per (radius, variant) and reused: [wide glow mesh, white core mesh, landing point].
+## The strikes are random flicker, so 256 variants per radius look like a fresh random bolt every 0.1s but cost almost nothing to draw
+## (building and triangulating a polyline per bolt per frame was the single most expensive thing a shocked threat did).
+static var _bolt_cache := {}
+static var _spark_cache := {}
+
+
+static func _bolt(r: float, q: int) -> Array:
+	var key := Vector2(r, q)
+	var hit = _bolt_cache.get(key)
+	if hit != null:
+		return hit
+	var seed_v := float(q) * 12.9898
+	var sx := fmod(absf(sin(seed_v) * 43758.5453), 1.0)
+	var ground := Vector2.from_angle(sx * TAU) * r * 0.55
+	var top := ground + Vector2(sx * 40.0 - 20.0, -r - 52.0)
+	var pts := PackedVector2Array([top])
+	for k in range(1, 6):
+		var jx := (fmod(absf(sin(seed_v + k * 7.7) * 9301.7), 1.0) - 0.5) * 26.0
+		pts.append(top.lerp(ground, k / 6.0) + Vector2(jx, 0.0))
+	pts.append(ground)
+	hit = [FD.polyline_mesh(pts, 8.0), FD.polyline_mesh(pts, 3.0), ground]
+	_bolt_cache[key] = hit
+	return hit
+
+
+static func _spark(r: float, q: int) -> ArrayMesh:
+	var key := Vector2(r, q)
+	var m: ArrayMesh = _spark_cache.get(key)
+	if m != null:
+		return m
+	var s0 := float(q) * 3.17
 	var a0 := fmod(absf(sin(s0) * 2834.1), 1.0) * TAU
 	var arc := PackedVector2Array()
 	for k in 5:
 		var jr := r + 3.0 + (fmod(absf(sin(s0 + k * 5.1) * 7213.3), 1.0) - 0.5) * 8.0
 		arc.append(Vector2.from_angle(a0 + k * 0.4) * jr)
-	draw_polyline(arc, Color(col, 0.95 * fade), 2.0)
+	m = FD.polyline_mesh(arc, 2.0)
+	_spark_cache[key] = m
+	return m
 
 
 func slow(seconds: float) -> void:
@@ -912,11 +943,11 @@ func _draw() -> void:
 		_draw_elite_aura()
 	elif affix != "":   # a modified regular enemy: a ring and four studs in the modifier's colour
 		var ac := affix_color()
-		draw_arc(Vector2.ZERO, radius + 5.0, 0.0, TAU, 24, Color(ac, 0.85), 2.5)
+		FD.ring(self, Vector2.ZERO, radius + 5.0, 24, Color(ac, 0.85), 2.5)
 		for i in 4:
-			draw_circle(Vector2.from_angle(t * 2.0 + TAU * i / 4.0) * (radius + 5.0), 2.5, ac)
+			FD.circle(self, Vector2.from_angle(t * 2.0 + TAU * i / 4.0) * (radius + 5.0), 2.5, ac)
 	if slow_timer > 0.0:
-		draw_arc(Vector2.ZERO, radius + 4.0, 0.0, TAU, 20, Color(0.5, 0.9, 1.0, 0.7), 2.0)
+		FD.ring(self, Vector2.ZERO, radius + 4.0, 20, Color(0.5, 0.9, 1.0, 0.7), 2.0)
 	_draw_status()
 	if kind == "sentry" and sentry_phase == "warp":   # crosshair closing in on the landing spot, and a flicker where it stands
 		var k := clampf(1.0 - warp_t / SENTRY_WARP, 0.0, 1.0)
@@ -927,7 +958,7 @@ func _draw() -> void:
 		for i in 4:
 			var d := Vector2.from_angle(TAU * i / 4.0 + k * 1.5)
 			draw_line(lp + d * (lr + 4.0), lp + d * (lr - 8.0), lc, 2.5)
-		draw_circle(lp, radius * 0.5 * k, Color(color, 0.35))
+		FD.circle(self, lp, radius * 0.5 * k, Color(color, 0.35))
 		col.a = 0.35 + 0.65 * absf(sin(t * 25.0)) * (1.0 - k)
 	if kind == "nanobot" and atk_phase == "aim":   # sight line: thin and flickering while tracking, solid once locked
 		var locked := atk_t <= NANO_LOCK
@@ -947,9 +978,9 @@ func _draw() -> void:
 	if kind == "zipbomb" and atk_phase == "armed":   # blast radius filling up as the fuse burns
 		var k := clampf(1.0 - atk_t / ZIP_FUSE, 0.0, 1.0)
 		var zr := zip_radius()
-		draw_circle(Vector2.ZERO, zr, Color(1.0, 0.2, 0.1, 0.06 + 0.1 * k))
+		FD.circle(self, Vector2.ZERO, zr, Color(1.0, 0.2, 0.1, 0.06 + 0.1 * k))
 		draw_arc(Vector2.ZERO, zr, 0.0, TAU, 40, Color(1.0, 0.3, 0.15, 0.6 + 0.4 * absf(sin(t * (10.0 + 30.0 * k)))), 2.5)
-		draw_circle(Vector2.ZERO, zr * k, Color(1.0, 0.45, 0.1, 0.18))
+		FD.circle(self, Vector2.ZERO, zr * k, Color(1.0, 0.45, 0.1, 0.18))
 	if kind == "botnet" and state == "windup":
 		draw_line(Vector2.ZERO, dash_dir * 240.0, Color(1, 0.3, 0.3, 0.5 + 0.5 * sin(t * 40.0)), 3.0)
 	if kind == "worm" and spr == null:
@@ -958,8 +989,8 @@ func _draw() -> void:
 				continue
 			var p: Vector2 = history[i] - position
 			var r := radius * (1.0 - i / 16.0)
-			draw_circle(p, r, Color(color.darkened(0.3), 0.9))
-			draw_arc(p, r, 0.0, TAU, 16, col, 2.0)
+			FD.circle(self, p, r, Color(color.darkened(0.3), 0.9))
+			FD.ring(self, p, r, 16, col, 2.0)
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(sq, 2.0 - sq))
 	if (kind == "mite" or kind == "leech") and mite_phase != "":
@@ -969,7 +1000,7 @@ func _draw() -> void:
 			draw_set_transform(Vector2.from_angle(t * 90.0) * 1.5, ma, Vector2(0.75, 1.25))
 		else:   # stretched along the lunge with a fading streak behind
 			for k in range(1, 4):
-				draw_circle(-mite_dir * k * 7.0, radius * (1.0 - k * 0.2), Color(color, 0.45 - k * 0.12))
+				FD.circle(self, -mite_dir * k * 7.0, radius * (1.0 - k * 0.2), Color(color, 0.45 - k * 0.12))
 			draw_set_transform(Vector2.ZERO, ma, Vector2(1.5, 0.7))
 	var r := radius
 	if spr != null:
@@ -994,9 +1025,9 @@ func _draw() -> void:
 			draw_rect(Rect2(-r * 0.5, -r * 0.4, 4, 4), Color.BLACK)
 			draw_rect(Rect2(r * 0.15, -r * 0.4, 4, 4), Color.BLACK)
 		"worm":
-			draw_circle(Vector2.ZERO, r, col)
-			draw_circle(Vector2(-r * 0.35, -r * 0.25), r * 0.22, Color.BLACK)
-			draw_circle(Vector2(r * 0.35, -r * 0.25), r * 0.22, Color.BLACK)
+			FD.circle(self, Vector2.ZERO, r, col)
+			FD.circle(self, Vector2(-r * 0.35, -r * 0.25), r * 0.22, Color.BLACK)
+			FD.circle(self, Vector2(r * 0.35, -r * 0.25), r * 0.22, Color.BLACK)
 		"adware", "popup":
 			var win := Rect2(-r * 1.1, -r * 0.85, r * 2.2, r * 1.7)
 			draw_rect(win, Color(0.12, 0.1, 0.02))
@@ -1020,46 +1051,46 @@ func _draw() -> void:
 			for i in 4:
 				outer.append(Vector2.from_angle(rot + TAU * i / 4.0) * r * 1.2)
 				inner.append(Vector2.from_angle(rot + TAU * i / 4.0) * r * 0.6)
-			draw_colored_polygon(outer, col)
-			draw_colored_polygon(inner, Color(0.1, 0.03, 0.0))
+			FD.poly(self, outer, col)
+			FD.poly(self, inner, Color(0.1, 0.03, 0.0))
 			draw_rect(Rect2(-1.5, -6, 3, 7), col)
 			draw_rect(Rect2(-1.5, 3, 3, 3), col)
 		"spyware":
 			var look: Vector2 = Vector2.ZERO
 			if player:
 				look = (player.global_position - global_position).normalized() * r * 0.35
-			draw_colored_polygon(PackedVector2Array([Vector2(-r * 1.2, 0), Vector2(0, -r * 0.75), Vector2(r * 1.2, 0), Vector2(0, r * 0.75)]), col)
-			draw_circle(look, r * 0.45, Color(1.0, 0.2, 0.3))
-			draw_circle(look, r * 0.2, Color.BLACK)
+			FD.poly(self, PackedVector2Array([Vector2(-r * 1.2, 0), Vector2(0, -r * 0.75), Vector2(r * 1.2, 0), Vector2(0, r * 0.75)]), col)
+			FD.circle(self, look, r * 0.45, Color(1.0, 0.2, 0.3))
+			FD.circle(self, look, r * 0.2, Color.BLACK)
 		"botnet":
 			var a: float = dash_dir.angle() if state != "chase" else (player.global_position - global_position).angle() if player else 0.0
 			var tri := PackedVector2Array([Vector2.from_angle(a) * r * 1.3, Vector2.from_angle(a + 2.4) * r, Vector2.from_angle(a - 2.4) * r])
-			draw_colored_polygon(tri, col)
-			draw_circle(Vector2.ZERO, r * 0.3, Color.WHITE if state == "windup" else Color(0.05, 0.08, 0.2))
+			FD.poly(self, tri, col)
+			FD.circle(self, Vector2.ZERO, r * 0.3, Color.WHITE if state == "windup" else Color(0.05, 0.08, 0.2))
 			for i in 3:
-				draw_circle(Vector2.from_angle(t * 4.0 + TAU * i / 3.0) * r * 1.5, 2.0, Color(col, 0.8))
+				FD.circle(self, Vector2.from_angle(t * 4.0 + TAU * i / 3.0) * r * 1.5, 2.0, Color(col, 0.8))
 		"ransom":
-			draw_arc(Vector2(0, -r * 0.35), r * 0.55, PI, TAU, 16, col, 5.0)
+			FD.arc(self, Vector2(0, -r * 0.35), r * 0.55, PI, TAU, 16, col, 5.0)
 			draw_line(Vector2(-r * 0.55, -r * 0.35), Vector2(-r * 0.55, 0), col, 5.0)
 			draw_line(Vector2(r * 0.55, -r * 0.35), Vector2(r * 0.55, 0), col, 5.0)
 			draw_rect(Rect2(-r * 0.85, -r * 0.1, r * 1.7, r * 1.1), col)
-			draw_circle(Vector2(0, r * 0.3), r * 0.15, Color(0.15, 0, 0))
+			FD.circle(self, Vector2(0, r * 0.3), r * 0.15, Color(0.15, 0, 0))
 			draw_rect(Rect2(-2, r * 0.3, 4, r * 0.35), Color(0.15, 0, 0))
 		"mite":
-			draw_circle(Vector2.ZERO, r, col)
+			FD.circle(self, Vector2.ZERO, r, col)
 			for i in 3:
 				var a := TAU * i / 3.0 + t * 12.0
 				draw_line(Vector2.from_angle(a) * r, Vector2.from_angle(a) * (r + 4.0), col, 1.5)
-			draw_circle(Vector2(0, -r * 0.2), r * 0.3, Color.BLACK)
+			FD.circle(self, Vector2(0, -r * 0.2), r * 0.3, Color.BLACK)
 		"miner":
 			var dia := PackedVector2Array([Vector2(0, -r * 1.15), Vector2(r * 1.0, 0), Vector2(0, r * 1.15), Vector2(-r * 1.0, 0)])
-			draw_colored_polygon(dia, col)
+			FD.poly(self, dia, col)
 			draw_polyline(PackedVector2Array([dia[0], dia[1], dia[2], dia[3], dia[0]]), Color(1, 1, 0.8), 2.0)
 			draw_line(Vector2(-r * 0.5, 0), Vector2(r * 0.5, 0), Color(0.2, 0.12, 0.0), 3.0)
 			draw_line(Vector2(0, -r * 0.5), Vector2(0, r * 0.5), Color(0.2, 0.12, 0.0), 3.0)
 		"leech":
-			draw_circle(Vector2.ZERO, r, col)
-			draw_circle(Vector2.ZERO, r * 0.55, Color(0.25, 0.0, 0.08))
+			FD.circle(self, Vector2.ZERO, r, col)
+			FD.circle(self, Vector2.ZERO, r * 0.55, Color(0.25, 0.0, 0.08))
 			var pulse := 0.5 + 0.5 * sin(t * 5.0)
 			draw_arc(Vector2.ZERO, r * (0.8 + 0.3 * pulse), 0.0, TAU, 16, Color(col, 0.6), 2.0)
 		"sentry":
@@ -1068,7 +1099,7 @@ func _draw() -> void:
 				look2 = (player.global_position - global_position).normalized() * r * 0.35
 			draw_rect(Rect2(-r, -r * 0.8, r * 2.0, r * 1.6), col)
 			draw_rect(Rect2(-r * 0.75, -r * 0.55, r * 1.5, r * 1.1), Color(0.02, 0.1, 0.1))
-			draw_circle(look2, r * 0.3, col)
+			FD.circle(self, look2, r * 0.3, col)
 			draw_line(Vector2.ZERO, look2.normalized() * r * 1.5, col, 3.0)
 		"nanobot":   # a tiny chip with a lens, spinning legs
 			var aim: Vector2 = atk_dir if atk_phase in ["aim", "beam"] else ((player.global_position - global_position).normalized() if player else Vector2.RIGHT)
@@ -1077,7 +1108,7 @@ func _draw() -> void:
 				draw_line(Vector2.from_angle(a) * r * 0.7, Vector2.from_angle(a) * (r + 5.0), col, 1.5)
 			draw_rect(Rect2(-r * 0.75, -r * 0.75, r * 1.5, r * 1.5), col)
 			draw_rect(Rect2(-r * 0.5, -r * 0.5, r, r), Color(0.03, 0.06, 0.12))
-			draw_circle(aim * r * 0.2, r * 0.3, Color(1.0, 0.25, 0.3) if atk_phase in ["aim", "beam"] else col)
+			FD.circle(self, aim * r * 0.2, r * 0.3, Color(1.0, 0.25, 0.3) if atk_phase in ["aim", "beam"] else col)
 		"ram":   # a blocky head with two curled horns
 			var fa: float = (atk_dir if atk_phase != "" else ((player.global_position - global_position).normalized() if player else Vector2.RIGHT)).angle()
 			if state == "windup" or state == "dash":
@@ -1085,29 +1116,29 @@ func _draw() -> void:
 			var f := Vector2.from_angle(fa)
 			var sd := f.orthogonal()
 			var body := PackedVector2Array([f * r * 1.15 + sd * r * 0.55, f * r * 1.15 - sd * r * 0.55, -f * r * 0.9 - sd * r * 0.85, -f * r * 0.9 + sd * r * 0.85])
-			draw_colored_polygon(body, col)
+			FD.poly(self, body, col)
 			for side in [-1.0, 1.0]:
 				var hb: Vector2 = f * r * 0.35 + sd * side * r * 0.75
-				draw_arc(hb, r * 0.45, fa + side * 0.6, fa + side * 3.6, 10, col.lightened(0.35), 4.0)
-			draw_circle(f * r * 0.5 + sd * r * 0.25, 2.5, Color.BLACK)
-			draw_circle(f * r * 0.5 - sd * r * 0.25, 2.5, Color.BLACK)
+				FD.arc(self, hb, r * 0.45, fa + side * 0.6, fa + side * 3.6, 10, col.lightened(0.35), 4.0)
+			FD.circle(self, f * r * 0.5 + sd * r * 0.25, 2.5, Color.BLACK)
+			FD.circle(self, f * r * 0.5 - sd * r * 0.25, 2.5, Color.BLACK)
 		"zipbomb":   # a round bomb with a zipper stripe and a burning fuse
 			var hot := atk_phase == "armed" and fmod(t * 12.0, 1.0) < 0.5
-			draw_circle(Vector2.ZERO, r, Color(1.0, 0.35, 0.2) if hot else col)
+			FD.circle(self, Vector2.ZERO, r, Color(1.0, 0.35, 0.2) if hot else col)
 			draw_line(Vector2(0, -r), Vector2(0, r), Color(0.15, 0.1, 0.0), 2.0)
 			for i in 5:
 				var y := -r * 0.7 + i * r * 0.35
 				draw_line(Vector2(-3, y), Vector2(3, y), Color(0.15, 0.1, 0.0), 2.0)
 			draw_line(Vector2(r * 0.5, -r * 0.85), Vector2(r * 0.85, -r * 1.35), Color(0.6, 0.6, 0.6), 2.0)
-			draw_circle(Vector2(r * 0.85, -r * 1.35), 3.0 + 1.5 * absf(sin(t * 20.0)), Color(1.0, 0.85, 0.3))
+			FD.circle(self, Vector2(r * 0.85, -r * 1.35), 3.0 + 1.5 * absf(sin(t * 20.0)), Color(1.0, 0.85, 0.3))
 		"rootkit":
 			var hex := PackedVector2Array()
 			for i in 6:
 				hex.append(Vector2.from_angle(TAU * i / 6.0 - t) * r)
-			draw_colored_polygon(hex, Color(0.05, 0.0, 0.1, alpha))
+			FD.poly(self, hex, Color(0.05, 0.0, 0.1, alpha))
 			hex.append(hex[0])
 			draw_polyline(hex, col, 2.5)
-			draw_circle(Vector2.ZERO, r * 0.3, Color(col, alpha))
+			FD.circle(self, Vector2.ZERO, r * 0.3, Color(col, alpha))
 	draw_set_transform(Vector2.ZERO)
 
 	if elite or kind == "ransom":
@@ -1128,7 +1159,7 @@ func _draw_elite_aura() -> void:
 	var pulse := 0.5 + 0.5 * sin(t * 6.0)
 	var gold := Global.C_GOLD
 	var aff_col := affix_color()
-	draw_circle(Vector2.ZERO, radius + 26.0, Color(aff_col, 0.05 + 0.05 * pulse))
+	FD.circle(self, Vector2.ZERO, radius + 26.0, Color(aff_col, 0.05 + 0.05 * pulse))
 	draw_arc(Vector2.ZERO, radius + 8.0 + pulse * 3.0, 0.0, TAU, 40, Color(gold, 0.6 + 0.4 * pulse), 3.0)
 	# rotating spikes
 	for i in 10:
@@ -1139,4 +1170,4 @@ func _draw_elite_aura() -> void:
 	if affix == "ARMORED":
 		for i in 6:
 			var a := -t + TAU * i / 6.0
-			draw_arc(Vector2.ZERO, radius + 18.0, a, a + 0.6, 6, Color(aff_col, 0.8), 4.0)
+			FD.arc(self, Vector2.ZERO, radius + 18.0, a, a + 0.6, 6, Color(aff_col, 0.8), 4.0)

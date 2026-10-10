@@ -2,7 +2,7 @@
 
 The project is already set up for mobile: landscape orientation, touch controls
 (floating joystick, tap cards, pinch-zoom research tree), notch-safe UI,
-Android back button support, and an automatic Performance Mode on phones.
+and Android back button support.
 Export presets for Android and iOS are included in `export_presets.cfg`.
 
 ## Try the touch controls on PC first
@@ -24,6 +24,5 @@ Requires a Mac with Xcode and an Apple developer account.
 Fill in your Team ID in the "iOS" preset, export, then build/run the generated Xcode project.
 
 ## Notes
-- Options > Performance Mode reduces glows, particles and the enemy cap.
-  It's on by default on phones; turn it off on a strong device.
+- There is a single graphics setting (full quality, 150-enemy cap) on every device.
 - The CRT filter is off by default on phones (it costs a full-screen pass).

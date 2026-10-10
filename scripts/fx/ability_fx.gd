@@ -4,7 +4,7 @@ extends Node2D
 ## | "storm" | "strike" (one-shots) and "aura_overclock" | "aura_scan" | "aura_storm" | "aura_pause" (follow `target` until `life` runs out or stop() is called).
 ## Every kind except "ring" and "burst" plays a pixel-art sprite sheet from res://assets/fx/abilities (see README.md there); the code-drawn
 ## versions below are only a fallback when a sheet is missing. `radius` sets the sprite scale (radius / ref radius, in half steps); `life` is the playback time.
-## Every mark count is capped, and Global.low_fx trims them further.
+## Every mark count is capped.
 
 const Pix = preload("res://scripts/fx/pix.gd")
 
@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 
 
 func _cap(n: int) -> int:
-	return maxi(3, n / 2) if Global.low_fx else n
+	return n
 
 
 ## The sheet texture for this kind, or null when it is not imported yet (the code-drawn fallback is used then).
@@ -198,7 +198,7 @@ func _draw_disc(k: float, out: float) -> void:
 	Pix.dither_disc_tiled(self, Vector2.ZERO, r, Color(color, 0.14 * (1.0 - k)))
 	Pix.dither_disc_tiled(self, Vector2.ZERO, r * 0.6, Color(Color.WHITE, 0.12 * (1.0 - k)))
 	Pix.ring_auto(self, Vector2.ZERO, r, Color(Color.WHITE, 1.0 - k), size)
-	var rays := 4 if Global.low_fx else 8
+	var rays := 8
 	for i in rays:
 		var ang := TAU * i / rays + k * 0.8
 		Pix.line(self, Vector2.from_angle(ang) * r * 0.55, Vector2.from_angle(ang) * r, Color(color, 1.0 - k), 3.0)
@@ -207,7 +207,7 @@ func _draw_disc(k: float, out: float) -> void:
 ## PHASE: a trail of hollow ghost squares along the dash that fade out from the start, plus a speed-line streak.
 func _draw_phase(k: float) -> void:
 	var a := 1.0 - k
-	var n := 6 if Global.low_fx else 10
+	var n := 10
 	var span := to - from
 	var dir := span.normalized() if span.length() > 1.0 else Vector2.RIGHT
 	for i in n:
@@ -250,7 +250,7 @@ func _draw_lock(k: float) -> void:
 			Pix.rect(self, c + Vector2(-bl if sx > 0 else 0.0, -w * 0.5 - 1.0 if sy > 0 else -w * 0.5), Vector2(bl, w + 2.0), Color(Color.WHITE, a))
 			Pix.rect(self, c + Vector2(0.0 if sx < 0.0 else -bl, -1.0), Vector2(bl, w + 2.0), Color(Color.WHITE, a))
 			Pix.rect(self, c + Vector2(-1.0, 0.0 if sy < 0.0 else -bl), Vector2(w + 2.0, bl), Color(Color.WHITE, a))
-	var ticks := 4 if Global.low_fx else 8
+	var ticks := 8
 	for i in ticks:   # ticks creeping along each edge toward the middle
 		var f := (float(i) + 0.5) / ticks * 2.0 - 1.0
 		var tk := h * f
@@ -267,14 +267,14 @@ func _draw_scan(k: float) -> void:
 	var half := radius
 	Pix.rect(self, Vector2(-half, y - 2.0), Vector2(half * 2.0, 4.0), Color(Color.WHITE, a))
 	Pix.rect(self, Vector2(-half, y - 6.0), Vector2(half * 2.0, 4.0), Color(color, a * 0.7))
-	var rows := 10 if Global.low_fx else 22
+	var rows := 22
 	for i in rows:   # scanlines left in the wake
 		var ry := y - 8.0 - i * 6.0
 		if ry < -radius:
 			break
 		var fade := 1.0 - float(i) / rows
 		Pix.rect(self, Vector2(-half, ry), Vector2(half * 2.0, 2.0), Color(color, a * 0.35 * fade))
-	var cols := 6 if Global.low_fx else 12   # grid ticks on the lines already scanned
+	var cols := 12   # grid ticks on the lines already scanned
 	for i in cols + 1:
 		var gx := lerpf(-half, half, float(i) / cols)
 		Pix.rect(self, Vector2(gx - 1.0, -radius), Vector2(2.0, maxf(0.0, y + radius)), Color(color, 0.12 * a))
@@ -303,14 +303,14 @@ func _draw_heal(k: float) -> void:
 func _draw_clock(k: float, out: float) -> void:
 	var a := 1.0 - k
 	var r := radius * out
-	var teeth := 12 if Global.low_fx else 20
+	var teeth := 20
 	for i in teeth:
 		var ang := TAU * i / teeth + k * 2.5
 		var d := Vector2.from_angle(ang)
 		var in_r := maxf(0.0, r - (14.0 if i % 2 == 0 else 6.0))
 		Pix.line(self, d * in_r, d * r, Color(color, a), 3.0)
 	Pix.ring(self, Vector2.ZERO, r, Color(Color.WHITE, a * 0.7), 2.0, 160)
-	for i in (4 if Global.low_fx else 8):   # dashes streaking outward
+	for i in (8):   # dashes streaking outward
 		var ang2 := TAU * i / 8.0 - k * 4.0
 		var d2 := Vector2.from_angle(ang2)
 		Pix.line(self, d2 * (r * 0.3), d2 * (r * 0.3 + 30.0 * a), Color(Color.WHITE, a), 2.0)
@@ -323,12 +323,12 @@ func _draw_rail(k: float, out: float) -> void:
 	var e := to_local(to)
 	var dir := (e - o).normalized()
 	var perp := dir.orthogonal()
-	var step := 6.0 if Global.low_fx else 4.0
+	var step := 4.0
 	var sheath := (14.0 if sup else 10.0) * (1.0 - k * 0.8)
-	Pix.line(self, o, e, Color(color, 0.35 * a), 10.0 if Global.low_fx else maxf(2.0, sheath * 1.6 + 4.0))
+	Pix.line(self, o, e, Color(color, 0.35 * a), maxf(2.0, sheath * 1.6 + 4.0))
 	Pix.line(self, o, e, Color(color, 0.8 * a), maxf(2.0, sheath))
 	Pix.line(self, o, e, Color(Color.WHITE, a), maxf(2.0, step * (1.0 - k * 0.6)))
-	var ticks := 5 if Global.low_fx else 10
+	var ticks := 10
 	var reach := clampf(k * 3.0, 0.0, 1.0)   # the ticks light up from the muzzle outwards in the first third
 	for i in ticks:
 		var f := (float(i) + 0.5) / ticks
@@ -339,7 +339,7 @@ func _draw_rail(k: float, out: float) -> void:
 		Pix.line(self, p - perp * h, p + perp * h, Color(Color.WHITE if i % 3 == 0 else color, a * 0.8), 2.0)
 	Pix.ring_auto(self, o, 14.0 + 50.0 * out, Color(Color.WHITE, a), 3.0)   # muzzle flare
 	Pix.dot(self, o, Color(Color.WHITE, a), 14.0 * (1.0 - k) + 2.0)
-	for i in (6 if Global.low_fx else 12):   # sparks thrown off the far end
+	for i in (12):   # sparks thrown off the far end
 		var an := dir.angle() + (Pix.rnd(i + _seed) - 0.5) * 2.4
 		var d := 70.0 * out * (0.4 + Pix.rnd(i * 2.3))
 		Pix.dot(self, e + Vector2.from_angle(an) * d, Color(color, a), 3.0)
@@ -352,7 +352,7 @@ func _draw_fire(k: float, out: float) -> void:
 	Pix.dither_disc_tiled(self, Vector2.ZERO, r, Color(1.0, 0.35, 0.05, 0.2 * a))
 	Pix.dither_disc_tiled(self, Vector2.ZERO, r * 0.6, Color(1.0, 0.7, 0.2, 0.14 * a))
 	Pix.ring_auto(self, Vector2.ZERO, r, Color(1.0, 0.3, 0.05, a), 6.0)
-	var n := 24 if Global.low_fx else 48
+	var n := 48
 	for i in n:
 		var u := Vector2.from_angle(TAU * i / n)
 		var flick := 0.6 + 0.4 * sin(t * 20.0 + i * 1.7)
@@ -362,7 +362,7 @@ func _draw_fire(k: float, out: float) -> void:
 		Pix.line(self, b, b + fl * h, Color(0.9, 0.15, 0.03, a), 6.0)
 		Pix.line(self, b, b + fl * h * 0.7, Color(1.0, 0.5, 0.1, a), 4.0)
 		Pix.line(self, b, b + fl * h * 0.4, Color(1.0, 0.9, 0.4, a), 2.0)
-	for i in (10 if Global.low_fx else 24):   # embers
+	for i in (24):   # embers
 		var p := Vector2.from_angle(Pix.rnd(i * 5.1 + _seed) * TAU) * r * Pix.rnd(i * 1.3 + _seed) * 0.95
 		p.y -= k * (40.0 + 80.0 * Pix.rnd(i * 7.7))
 		Pix.dot(self, p, Color(1.0, 0.7 if i % 2 else 0.4, 0.15, a), 3.0 if i % 3 else 2.0)
@@ -375,7 +375,7 @@ func _draw_ice(k: float, out: float) -> void:
 	Pix.dither_disc_tiled(self, Vector2.ZERO, r, Color(0.75, 0.92, 1.0, 0.2 * a))
 	Pix.ring_auto(self, Vector2.ZERO, r, Color(0.9, 0.98, 1.0, a), 5.0)
 	Pix.ring_auto(self, Vector2.ZERO, r * 0.94, Color(0.5, 0.85, 1.0, a * 0.6), 3.0)
-	var n := 14 if Global.low_fx else 28
+	var n := 28
 	for i in n:   # crystal spikes growing off the rim, inward and outward
 		var u := Vector2.from_angle(TAU * i / n + Pix.rnd(i + _seed) * 0.1)
 		var len := (10.0 + 24.0 * Pix.rnd(i * 3.3 + _seed)) * minf(1.0, k * 5.0 + 0.3)
@@ -389,7 +389,7 @@ func _draw_ice(k: float, out: float) -> void:
 			var tip: Vector2 = d * arm * 0.65 * sgn
 			Pix.line(self, tip, tip + (-d * sgn + d.orthogonal()).normalized() * 16.0, Color(Color.WHITE, a * 0.8), 2.0)
 			Pix.line(self, tip, tip + (-d * sgn - d.orthogonal()).normalized() * 16.0, Color(Color.WHITE, a * 0.8), 2.0)
-	for i in (8 if Global.low_fx else 18):   # twinkling plus-sparkles
+	for i in (18):   # twinkling plus-sparkles
 		if ((int(t * 8.0) + i) & 3) < 2:
 			var sp := Vector2.from_angle(Pix.rnd(i * 2.9 + _seed) * TAU) * r * Pix.rnd(i + 9.0 + _seed)
 			Pix.rect(self, sp + Vector2(-3, -1), Vector2(7, 3), Color(Color.WHITE, a))
@@ -419,13 +419,13 @@ func _aura_a() -> float:
 ## OVERCLOCK: a few orbiting spark squares and a jittering amber ring.
 func _draw_aura_overclock() -> void:
 	var a := _aura_a()
-	var n := 3 if Global.low_fx else 5
+	var n := 5
 	for i in n:
 		var ang := t * 7.0 + TAU * i / n
 		var p := Vector2.from_angle(ang) * 22.0
 		Pix.dot(self, p, Color(color, a), 4.0)
 		Pix.dot(self, Vector2.from_angle(ang - 0.35) * 22.0, Color(color, a * 0.5), 2.0)
-	if not Global.low_fx and fmod(t, 0.2) < 0.1:
+	if fmod(t, 0.2) < 0.1:
 		Pix.ring(self, Vector2.ZERO, 26.0, Color(color, a * 0.35), 2.0, 48)
 
 
@@ -446,7 +446,7 @@ func _draw_aura_scan() -> void:
 func _draw_aura_storm() -> void:
 	var a := _aura_a()
 	var step := floorf(t * 12.0)
-	var arcs := 1 if Global.low_fx else 3
+	var arcs := 3
 	for i in arcs:
 		var ang := Pix.rnd(step + i * 7.0 + _seed) * TAU
 		var p := Vector2.from_angle(ang) * 14.0

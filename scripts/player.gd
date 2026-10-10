@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## The antivirus core. WASD / arrows to move; weapons fire on their own.
 ## Base stats are boosted by research (Meta) when the run starts.
 
@@ -337,12 +338,9 @@ func _draw() -> void:
 
 	for i in range(trail.size() - 1, 0, -1):
 		var p: Vector2 = trail[i] - global_position
-		draw_circle(p, radius * (1.0 - i / 12.0), Color(col, 0.05 * (10 - i) / 10.0))
+		FD.circle(self, p, radius * (1.0 - i / 12.0), Color(col, 0.05 * (10 - i) / 10.0))
 
 	var avatar: Texture2D = PixelArt.class_run_tex(class_id)
-	if shield_ready:
-		draw_arc(Vector2.ZERO, radius + 12.0, 0.0, TAU, 32, Color(0.5, 0.9, 1.0, 0.55 + 0.2 * sin(spin * 4.0)), 2.5)
-
 	if avatar == null:   # no pixel avatar: the old ring and spinning hexagon (with the art in, the sprite stands alone)
 		Global.glow_circle(self, Vector2.ZERO, radius + 2.0, col, 1.4 + level_glow * 3.0)
 		var hex := PackedVector2Array()
@@ -364,7 +362,7 @@ func _draw() -> void:
 		IconArt.draw_icon(self, class_icon, Vector2.ZERO, radius * 0.7, col, spin)
 		draw_colored_polygon(PackedVector2Array([f * (radius + 9.0), f * (radius + 2.0) + s * 4.0, f * (radius + 2.0) - s * 4.0]), Color(0.9, 1.0, 1.0))
 	if avatar == null:
-		draw_circle(Vector2.from_angle(-spin * 2.2) * (radius + 10.0), 2.5, col)
+		FD.circle(self, Vector2.from_angle(-spin * 2.2) * (radius + 10.0), 2.5, col)
 
 	var w := 40.0
 	var y := radius + 12.0
@@ -373,4 +371,4 @@ func _draw() -> void:
 	var hp_col := Global.C_GREEN.lerp(Global.C_RED, 1.0 - hp / max_hp)
 	draw_rect(Rect2(-w / 2.0, y, w * hp / max_hp, 5), hp_col)
 	for i in revives:
-		draw_circle(Vector2(-w / 2.0 + 4 + i * 8, y + 11), 2.5, Global.C_GOLD)
+		FD.circle(self, Vector2(-w / 2.0 + 4 + i * 8, y + 11), 2.5, Global.C_GOLD)

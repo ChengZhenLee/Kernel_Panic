@@ -1,4 +1,5 @@
 extends Node
+const FD = preload("res://scripts/fx/fd.gd")
 ## Autoload: shared colors, fonts, theme, settings, CRT overlay and scene fades.
 
 var FONT_BODY: Font = load("res://assets/fonts/VT323-Regular.ttf")
@@ -30,7 +31,6 @@ var music_volume := 0.7   # background music
 var ui_volume := 1.0    # unused (merged into fx_volume); kept so old saves still load
 var screen_shake := true
 var crt_enabled := true
-var low_fx := false          # performance mode: fewer glows/particles/enemies (default on for phones)
 var is_mobile := false
 const UI_SCALES := [1.0, 1.25, 1.5]   # in-run HUD and control size: small / medium / large
 const UI_NAMES := ["SMALL", "MEDIUM", "LARGE"]
@@ -61,7 +61,6 @@ func _ready() -> void:
 	is_mobile = OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios")
 	is_touch = is_mobile or DisplayServer.is_touchscreen_available()
 	if is_mobile:
-		low_fx = true
 		crt_enabled = false
 	_load()
 	ui_theme = _build_theme()
@@ -174,11 +173,8 @@ func roll_rarity(luck := 0.0) -> Dictionary:
 # ---------- drawing helpers used by game objects ----------
 
 func glow_circle(ci: CanvasItem, pos: Vector2, r: float, col: Color, strength := 1.0) -> void:
-	if low_fx:
-		ci.draw_circle(pos, r * 1.5, Color(col, 0.1 * strength))
-		return
-	ci.draw_circle(pos, r * 2.4, Color(col, 0.05 * strength))
-	ci.draw_circle(pos, r * 1.6, Color(col, 0.12 * strength))
+	FD.circle(ci, pos, r * 2.4, Color(col, 0.05 * strength))
+	FD.circle(ci, pos, r * 1.6, Color(col, 0.12 * strength))
 
 
 const RUN_MINUTES := 12.0   # the final boss arrives here; overtime begins after it
@@ -209,7 +205,6 @@ func save() -> void:
 	cfg.set_value("settings", "music_volume", music_volume)
 	cfg.set_value("settings", "screen_shake", screen_shake)
 	cfg.set_value("settings", "crt", crt_enabled)
-	cfg.set_value("settings", "low_fx", low_fx)
 	cfg.set_value("settings", "minimap_on", minimap_on)
 	cfg.set_value("settings", "damage_numbers", damage_numbers)
 	cfg.set_value("settings", "status_words", status_words)
@@ -232,7 +227,6 @@ func _load() -> void:
 	music_volume = cfg.get_value("settings", "music_volume", music_volume)
 	screen_shake = cfg.get_value("settings", "screen_shake", screen_shake)
 	crt_enabled = false   # the CRT filter is gone for good (ignores old saves)
-	low_fx = cfg.get_value("settings", "low_fx", low_fx)
 	minimap_on = cfg.get_value("settings", "minimap_on", true)
 	damage_numbers = cfg.get_value("settings", "damage_numbers", true)
 	status_words = cfg.get_value("settings", "status_words", true)

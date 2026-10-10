@@ -53,7 +53,7 @@ func _draw() -> void:
 	Pix.dither_disc(self, Vector2.ZERO, r, Color(1.0, 0.35, 0.1, 0.05 + 0.05 * pulse))
 	Pix.ring_auto(self, Vector2.ZERO, r + 2.0, Color(0.3, 0.07, 0.03, 0.5), 2.0)   # scorched ground line under the wall
 	# round (not truncate) to a whole number of bricks so the gap stays ~34 px at every radius; the old int()/40 cap let it drift wide on big rings
-	var step := 2 if Global.low_fx else 1
+	var step := 1
 	var n := clampi(roundi(TAU * r / (34.0 * step) ) * step, 8, 120)
 	var order := []
 	for i in range(0, n, step):

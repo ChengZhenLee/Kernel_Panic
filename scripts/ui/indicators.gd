@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## Arrows on the screen edge pointing at off-screen elites and bosses.
 
 
@@ -30,7 +31,7 @@ func _draw() -> void:
 		var col: Color = e.color if e.is_boss else Global.C_GOLD
 		var s := 22.0 if e.is_boss else 15.0
 		var pulse := 0.6 + 0.4 * sin(Time.get_ticks_msec() / 120.0)
-		draw_circle(p, s * 1.4, Color(col, 0.15 * pulse))
+		FD.circle(self, p, s * 1.4, Color(col, 0.15 * pulse))
 		draw_colored_polygon(PackedVector2Array([p + dir * s, p + dir.orthogonal() * s * 0.6 - dir * s * 0.4, p - dir.orthogonal() * s * 0.6 - dir * s * 0.4]), Color(col, pulse))
 		if e.is_boss:
 			draw_string(Global.FONT_BODY, p - dir * 34.0 - Vector2(20, -6), "BOSS", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, col)

@@ -3,6 +3,7 @@ extends Node2D
 ## line of sight and a flow field so enemies path around walls. Not used on THE INTERNET (open endless floor).
 
 const MapsData = preload("res://scripts/maps_data.gd")
+const PixelArt = preload("res://scripts/pixel_art.gd")
 const CELL := 120.0
 const PAD := 14.0            # walls are treated as this much thicker for pathing
 const FLOW_INTERVAL := 0.4
@@ -16,6 +17,16 @@ var phase_b: Array = []
 var phase_on := 0            # 0: set A is solid, 1: set B is solid (only when phase sets exist)
 var phase_t := 0.0
 var color := Color.WHITE
+var wall_tex: Texture2D = null   # art/tiles/wall_<tier>.png: one 128 px tile per grid cell of wall
+var wall_tex_v: Texture2D = null # optional wall_<tier>_v.png: the same tile turned for vertical walls
+var icon_tex: Array = []         # art/tiles/icon_<tier>_<i>.png: walls made of whole icons (the phone's app icons), one per block
+var edge_light := Color.WHITE    # bevel on the exposed top / left edges of a wall
+var edge_dark := Color.BLACK     # and on the bottom / right edges
+const TILE := 128.0              # = MapsData.TILE
+const EDGE_W := 10.0
+## wall bevel colours per device: [light, dark], matching each wall's art
+const EDGES := [["#c8e8f2", "#1d3a48"], ["#ffffff", "#0a0e24"], ["#b8bed6", "#1a1a28"], ["#aab4c8", "#181e2c"],
+	["#d8dce2", "#14141a"], ["#d0daee", "#0c2048"], ["#f0e8cc", "#5a5440"], ["#ffffff", "#5a46c0"]]
 
 var cols := 0
 var rows := 0
@@ -38,6 +49,7 @@ func setup(tier: int, pal: Color, room := false, origin := Vector2.ZERO) -> void
 	phase_a = _shift(d.get("phase_a", []), origin)
 	phase_b = _shift(d.get("phase_b", []), origin)
 	color = pal
+	_load_wall_art(tier % 8)
 	cols = int(ceil(size.x / CELL))
 	rows = int(ceil(size.y / CELL))
 	_rebuild_grid()
@@ -425,6 +437,23 @@ func flow_dir(p: Vector2) -> Vector2:
 
 # ---------- drawing ----------
 
+func _load_wall_art(tier: int) -> void:
+	wall_tex = PixelArt.load_tex("tiles/wall_%d.png" % tier)
+	wall_tex_v = PixelArt.load_tex("tiles/wall_%d_v.png" % tier)
+	icon_tex = []
+	for i in 24:
+		var t: Texture2D = PixelArt.load_tex("tiles/icon_%d_%d.png" % [tier, i])
+		if t == null:
+			break
+		icon_tex.append(t)
+	edge_light = Color(EDGES[tier][0])
+	edge_dark = Color(EDGES[tier][1])
+
+
+func _has_wall_art() -> bool:
+	return wall_tex != null or not icon_tex.is_empty()
+
+
 func _draw() -> void:
 	var void_col := Color(0.01, 0.015, 0.03)
 	var big := 4000.0
@@ -433,15 +462,66 @@ func _draw() -> void:
 	draw_rect(Rect2(bounds.position.x, bounds.position.y - big, bounds.size.x, big), void_col)
 	draw_rect(Rect2(bounds.position.x, bounds.end.y, bounds.size.x, big), void_col)
 	draw_rect(bounds, Color(color, 0.7), false, 5.0)
-	for w in walls:
-		_draw_wall(w, 1.0)
+	if _has_wall_art():
+		_draw_art_walls(walls)   # one merged pass: wall blocks that touch or overlap draw as one shape
+	else:
+		for w in walls:
+			_draw_wall(w, 1.0)
 	if has_phase():
 		var left := MapsData.PHASE_TIME - phase_t
 		var warn := 0.5 + 0.5 * sin(phase_t * 16.0) if left < 1.2 else 0.0
-		for w in phase_a:
-			_draw_wall(w, 1.0 if phase_on == 0 else 0.0, warn if phase_on == 1 else 0.0)
-		for w in phase_b:
-			_draw_wall(w, 1.0 if phase_on == 1 else 0.0, warn if phase_on == 0 else 0.0)
+		for set_i in 2:
+			var list: Array = phase_a if set_i == 0 else phase_b
+			var solid := phase_on == set_i
+			if solid and _has_wall_art():
+				_draw_art_walls(list)
+			else:
+				for w in list:
+					_draw_wall(w, 1.0 if solid else 0.0, warn if phase_on != set_i else 0.0)
+
+
+## Wall art on the tile grid. Tiles: every grid cell of every wall gets the device's wall tile (turned for vertical walls when the device
+## has a _v tile), and the bevel is drawn only along edges that face open floor, so overlapping walls never show a seam or a double outline.
+## Icons: each wall block is made of whole icons (the phone's app icons).
+func _draw_art_walls(list: Array) -> void:
+	if not icon_tex.is_empty():
+		_draw_icon_walls(list)
+		return
+	var cells := {}
+	for r in list:
+		var rect: Rect2 = r
+		var vertical := rect.size.y > rect.size.x
+		for cx in range(roundi(rect.position.x / TILE), roundi(rect.end.x / TILE)):
+			for cy in range(roundi(rect.position.y / TILE), roundi(rect.end.y / TILE)):
+				cells[Vector2i(cx, cy)] = vertical
+	for k in cells:
+		var tex: Texture2D = wall_tex_v if (cells[k] and wall_tex_v != null) else wall_tex
+		draw_texture_rect(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), false)
+	for k in cells:
+		var o := Vector2(k) * TILE
+		if not cells.has(k + Vector2i(0, -1)):
+			draw_rect(Rect2(o, Vector2(TILE, EDGE_W)), edge_light)
+		if not cells.has(k + Vector2i(-1, 0)):
+			draw_rect(Rect2(o, Vector2(EDGE_W, TILE)), edge_light)
+		if not cells.has(k + Vector2i(0, 1)):
+			draw_rect(Rect2(o + Vector2(0.0, TILE - EDGE_W), Vector2(TILE, EDGE_W)), edge_dark)
+		if not cells.has(k + Vector2i(1, 0)):
+			draw_rect(Rect2(o + Vector2(TILE - EDGE_W, 0.0), Vector2(EDGE_W, TILE)), edge_dark)
+
+
+## A block that is square is one icon; a longer one is a row of square icons. Each icon has a soft shadow and a different glyph.
+func _draw_icon_walls(list: Array) -> void:
+	for r in list:
+		var rect: Rect2 = r
+		var side := minf(rect.size.x, rect.size.y)
+		var count := maxi(1, roundi(maxf(rect.size.x, rect.size.y) / side))
+		for i in count:
+			var pos := rect.position + (Vector2(side * i, 0.0) if rect.size.x >= rect.size.y else Vector2(0.0, side * i))
+			var cell := Vector2i(roundi(pos.x / TILE), roundi(pos.y / TILE))
+			var tex: Texture2D = icon_tex[absi(hash(cell)) % icon_tex.size()]
+			var box := Rect2(pos, Vector2(side, side)).grow(-6.0)
+			draw_rect(Rect2(box.position + Vector2(10.0, 14.0), box.size), Color(0.0, 0.0, 0.0, 0.4))
+			draw_texture_rect(tex, box, false)
 
 
 ## amount 1 = solid wall, 0 = faint ghost outline (inactive phase wall); warn flashes a wall about to close.

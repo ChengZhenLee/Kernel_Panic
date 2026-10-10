@@ -1,4 +1,5 @@
 extends RefCounted
+const FD = preload("res://scripts/fx/fd.gd")
 ## Vector icons drawn with canvas primitives. Used on upgrade cards, the HUD and the research tree.
 ## draw_icon(canvas_item, id, center, half_size, color, time, art = true)
 ## With art on, weapon, stat card and item ids draw their pixel sprite (PixelArt) when one exists; pass false for icons that reuse those ids
@@ -20,7 +21,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_arc(c, s * 1.18, 0.0, TAU, 32, Color(1.0, 0.88, 0.35, 0.8), maxf(1.5, s * 0.1))
 				for i in 4:
 					var a := t * 0.8 + TAU * i / 4.0
-					ci.draw_circle(c + Vector2.from_angle(a) * s * 1.18, s * 0.09, Color(1.0, 0.95, 0.6))
+					FD.circle(ci, c + Vector2.from_angle(a) * s * 1.18, s * 0.09, Color(1.0, 0.95, 0.6))
 			return
 	id = PixelArt.FALLBACK.get(id, id)
 	if id.begins_with("evo_"):
@@ -29,11 +30,11 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 		ci.draw_arc(c, s * 1.12, 0.0, TAU, 32, Color(1.0, 0.88, 0.35, 0.8), maxf(1.5, s * 0.1))
 		for i in 4:
 			var a := t * 0.8 + TAU * i / 4.0
-			ci.draw_circle(c + Vector2.from_angle(a) * s * 1.12, s * 0.09, Color(1.0, 0.95, 0.6))
+			FD.circle(ci, c + Vector2.from_angle(a) * s * 1.12, s * 0.09, Color(1.0, 0.95, 0.6))
 		return
 	var w := maxf(1.5, s * 0.12)
 	var glow := Color(col, 0.28)
-	ci.draw_circle(c, s * 1.15, Color(col, 0.06))
+	FD.circle(ci, c, s * 1.15, Color(col, 0.06))
 	match id:
 		"cursor":   # the BASIC class avatar: the white arrow cursor inside the spinning hexagon, as in the game
 			var hex := PackedVector2Array()
@@ -43,7 +44,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			hex.append(hex[0])
 			ci.draw_polyline(hex, col, w * 1.3)
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(s * 0.62, 0), c + Vector2(-s * 0.34, s * 0.4), c + Vector2(-s * 0.11, 0), c + Vector2(-s * 0.34, -s * 0.4)]), Color(0.9, 1.0, 1.0))
-			ci.draw_circle(c + Vector2.from_angle(-t * 1.3) * s * 1.22, maxf(1.5, s * 0.1), col)
+			FD.circle(ci, c + Vector2.from_angle(-t * 1.3) * s * 1.22, maxf(1.5, s * 0.1), col)
 		"laser":
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.95, -s * 0.32), Vector2(s * 0.6, s * 0.64)), col, false, w)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.35, -s * 0.16), Vector2(s * 0.2, s * 0.32)), col)
@@ -81,19 +82,19 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			bolt.append(bolt[0])
 			ci.draw_polyline(bolt, Color.WHITE, w * 0.6)
 		"mines":
-			ci.draw_circle(c + Vector2(-s * 0.1, s * 0.15), s * 0.62, col)
-			ci.draw_circle(c + Vector2(-s * 0.3, -s * 0.05), s * 0.15, Color(1, 1, 1, 0.6))
+			FD.circle(ci, c + Vector2(-s * 0.1, s * 0.15), s * 0.62, col)
+			FD.circle(ci, c + Vector2(-s * 0.3, -s * 0.05), s * 0.15, Color(1, 1, 1, 0.6))
 			ci.draw_rect(Rect2(c + Vector2(s * 0.12, -s * 0.62), Vector2(s * 0.28, s * 0.25)), col)
 			ci.draw_line(c + Vector2(s * 0.3, -s * 0.6), c + Vector2(s * 0.6, -s * 0.85), Color.WHITE, w * 0.7)
 			var spark := 0.5 + 0.5 * sin(t * 18.0)
-			ci.draw_circle(c + Vector2(s * 0.68, -s * 0.9), s * (0.1 + 0.08 * spark), Color(1.0, 0.85, 0.3))
+			FD.circle(ci, c + Vector2(s * 0.68, -s * 0.9), s * (0.1 + 0.08 * spark), Color(1.0, 0.85, 0.3))
 		"scanner":
 			for i in 3:
 				ci.draw_arc(c, s * (0.35 + i * 0.3), 0.0, TAU, 32, Color(col, 0.35), w * 0.5)
 			var a := t * 3.0
 			ci.draw_colored_polygon(PackedVector2Array([c, c + Vector2.from_angle(a) * s * 0.95, c + Vector2.from_angle(a - 0.6) * s * 0.95]), Color(col, 0.35))
 			ci.draw_line(c, c + Vector2.from_angle(a) * s * 0.95, Color.WHITE, w)
-			ci.draw_circle(c + Vector2.from_angle(1.2) * s * 0.55, s * 0.09, Color(1.0, 0.35, 0.4))
+			FD.circle(ci, c + Vector2.from_angle(1.2) * s * 0.55, s * 0.09, Color(1.0, 0.35, 0.4))
 		"quarantine":
 			var hex := PackedVector2Array()
 			for i in 6:
@@ -133,14 +134,14 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 		"bomb":
 			# a round bomb with a fuse and a flickering spark
 			var bc := c + Vector2(-s * 0.1, s * 0.15)
-			ci.draw_circle(bc, s * 0.62, col)
+			FD.circle(ci, bc, s * 0.62, col)
 			ci.draw_arc(bc, s * 0.62, 0.0, TAU, 28, Color.WHITE, w * 0.7)
-			ci.draw_circle(bc + Vector2(-s * 0.2, -s * 0.2), s * 0.14, Color(1, 1, 1, 0.6))
+			FD.circle(ci, bc + Vector2(-s * 0.2, -s * 0.2), s * 0.14, Color(1, 1, 1, 0.6))
 			var fuse := PackedVector2Array([bc + Vector2(s * 0.3, -s * 0.5), c + Vector2(s * 0.5, -s * 0.8), c + Vector2(s * 0.75, -s * 0.75)])
 			ci.draw_polyline(fuse, Color.WHITE, w)
 			var sp := 0.7 + 0.3 * sin(t * 14.0)
-			ci.draw_circle(c + Vector2(s * 0.8, -s * 0.78), s * 0.2 * sp, Color(1.0, 0.8, 0.2))
-			ci.draw_circle(c + Vector2(s * 0.8, -s * 0.78), s * 0.1 * sp, Color.WHITE)
+			FD.circle(ci, c + Vector2(s * 0.8, -s * 0.78), s * 0.2 * sp, Color(1.0, 0.8, 0.2))
+			FD.circle(ci, c + Vector2(s * 0.8, -s * 0.78), s * 0.1 * sp, Color.WHITE)
 		"magnet":
 			ci.draw_arc(c + Vector2(0, -s * 0.1), s * 0.55, PI, TAU, 20, col, s * 0.32)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.71, -s * 0.12), Vector2(s * 0.32, s * 0.5)), col)
@@ -168,13 +169,13 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			for i in 4:
 				var d := Vector2.from_angle(spin + TAU * i / 4.0)
 				ci.draw_line(c + d * s * 0.35, c + d * s * 0.95, col, w)
-			ci.draw_circle(c, s * 0.14, Color.WHITE if id == "crit" else Color(1.0, 0.85, 0.3))
+			FD.circle(ci, c, s * 0.14, Color.WHITE if id == "crit" else Color(1.0, 0.85, 0.3))
 			if id == "critdmg":
 				_star(ci, c + Vector2(s * 0.62, -s * 0.62), s * 0.3, Color(1.0, 0.85, 0.3))
 		"regen":
 			ci.draw_arc(c, s * 0.75, -PI * 0.9 + t, PI * 0.6 + t, 24, col, w * 1.2)
 			var tip := c + Vector2.from_angle(PI * 0.6 + t) * s * 0.75
-			ci.draw_circle(tip, w * 1.6, col)
+			FD.circle(ci, tip, w * 1.6, col)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.35, -s * 0.1), Vector2(s * 0.7, s * 0.2)), Color.WHITE)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.1, -s * 0.35), Vector2(s * 0.2, s * 0.7)), Color.WHITE)
 		"armor", "shield":
@@ -198,8 +199,8 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				var r := s * (0.95 if i % 2 == 0 else 0.55)
 				spikes.append(c + Vector2.from_angle(t * 0.5 + TAU * i / 16.0) * r)
 			ci.draw_colored_polygon(spikes, Color(col, 0.5))
-			ci.draw_circle(c, s * 0.4, col)
-			ci.draw_circle(c, s * 0.18, Color(1.0, 0.85, 0.3))
+			FD.circle(ci, c, s * 0.4, col)
+			FD.circle(ci, c, s * 0.18, Color(1.0, 0.85, 0.3))
 		"xp":
 			_diamond(ci, c, s * 0.85, Color(col, 0.35))
 			_diamond(ci, c, s * 0.55, col)
@@ -211,13 +212,13 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_rect(Rect2(Vector2(c.x - s * 0.7, y), Vector2(s * 1.4, s * 0.38)), Color(col, 0.35 + 0.2 * i))
 				ci.draw_rect(Rect2(Vector2(c.x - s * 0.7, y), Vector2(s * 1.4, s * 0.38)), col, false, w * 0.6)
 				var blink := 0.5 + 0.5 * sin(t * 5.0 + i * 2.0)
-				ci.draw_circle(Vector2(c.x + s * 0.45, y + s * 0.19), s * 0.07, Color(0.4, 1.0, 0.5, blink))
+				FD.circle(ci, Vector2(c.x + s * 0.45, y + s * 0.19), s * 0.07, Color(0.4, 1.0, 0.5, blink))
 		"luck":
 			var r := Rect2(c - Vector2(s, s) * 0.72, Vector2(s, s) * 1.44)
 			ci.draw_rect(r, Color(col, 0.3))
 			ci.draw_rect(r, col, false, w)
 			for p in [Vector2(-0.38, -0.38), Vector2(0.38, 0.38), Vector2(0, 0), Vector2(0.38, -0.38), Vector2(-0.38, 0.38)]:
-				ci.draw_circle(c + p * s, s * 0.12, Color.WHITE)
+				FD.circle(ci, c + p * s, s * 0.12, Color.WHITE)
 		"cache":
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.85, -s * 0.45), Vector2(s * 1.7, s * 1.15)), Color(col, 0.3))
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.85, -s * 0.45), Vector2(s * 1.7, s * 1.15)), col, false, w)
@@ -232,8 +233,8 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 		"reroll":
 			ci.draw_arc(c, s * 0.7, -2.6 + t, 0.2 + t, 20, col, w * 1.2)
 			ci.draw_arc(c, s * 0.7, 0.55 + t, 3.35 + t, 20, Color.WHITE, w * 1.2)
-			ci.draw_circle(c + Vector2.from_angle(0.2 + t) * s * 0.7, w * 1.8, col)
-			ci.draw_circle(c + Vector2.from_angle(3.35 + t) * s * 0.7, w * 1.8, Color.WHITE)
+			FD.circle(ci, c + Vector2.from_angle(0.2 + t) * s * 0.7, w * 1.8, col)
+			FD.circle(ci, c + Vector2.from_angle(3.35 + t) * s * 0.7, w * 1.8, Color.WHITE)
 		"choice":
 			for i in 3:
 				var a := (i - 1) * 0.3
@@ -245,28 +246,28 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				pts.append(pts[0])
 				ci.draw_polyline(pts, Color.WHITE if i == 1 else col, w * 0.6)
 		"boss":
-			ci.draw_circle(c + Vector2(0, -s * 0.15), s * 0.65, col)
+			FD.circle(ci, c + Vector2(0, -s * 0.15), s * 0.65, col)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.38, s * 0.25), Vector2(s * 0.76, s * 0.45)), col)
-			ci.draw_circle(c + Vector2(-s * 0.25, -s * 0.15), s * 0.17, DARK)
-			ci.draw_circle(c + Vector2(s * 0.25, -s * 0.15), s * 0.17, DARK)
+			FD.circle(ci, c + Vector2(-s * 0.25, -s * 0.15), s * 0.17, DARK)
+			FD.circle(ci, c + Vector2(s * 0.25, -s * 0.15), s * 0.17, DARK)
 			for i in 3:
 				ci.draw_line(c + Vector2((i - 1) * s * 0.22, s * 0.35), c + Vector2((i - 1) * s * 0.22, s * 0.7), DARK, w * 0.6)
 		"elite":
 			var crown := PackedVector2Array([c + Vector2(-s * 0.85, s * 0.5), c + Vector2(-s * 0.85, -s * 0.45), c + Vector2(-s * 0.4, 0),
 				c + Vector2(0, -s * 0.75), c + Vector2(s * 0.4, 0), c + Vector2(s * 0.85, -s * 0.45), c + Vector2(s * 0.85, s * 0.5)])
 			ci.draw_colored_polygon(crown, col)
-			ci.draw_circle(c + Vector2(0, s * 0.18), s * 0.14, Color.WHITE)
+			FD.circle(ci, c + Vector2(0, s * 0.18), s * 0.14, Color.WHITE)
 		"area":
 			for i in 3:
 				var k := fmod(t * 0.7 + i / 3.0, 1.0)
 				ci.draw_arc(c, s * (0.25 + k * 0.75), 0.0, TAU, 32, Color(col, 1.0 - k), w)
-			ci.draw_circle(c, s * 0.2, Color.WHITE)
+			FD.circle(ci, c, s * 0.2, Color.WHITE)
 		"proj":
 			for i in 3:
 				var y := (i - 1) * s * 0.5
 				ci.draw_line(c + Vector2(-s * 0.8, y), c + Vector2(s * 0.5, y), glow, w * 3.0)
 				ci.draw_line(c + Vector2(-s * 0.8, y), c + Vector2(s * 0.5, y), col, w)
-				ci.draw_circle(c + Vector2(s * 0.6, y), w * 1.4, Color.WHITE)
+				FD.circle(ci, c + Vector2(s * 0.6, y), w * 1.4, Color.WHITE)
 		"pierce":
 			for i in 3:
 				ci.draw_arc(c + Vector2((i - 1) * s * 0.5, 0), s * 0.22, 0.0, TAU, 16, Color(col, 0.7), w * 0.8)
@@ -285,7 +286,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_line(c + Vector2(-s * 0.02, 0), c + Vector2(s * 0.9, 0), col, w * 1.3)
 			ci.draw_line(c + Vector2(s * 0.55, 0), c + Vector2(s * 0.55, s * 0.35), col, w * 1.3)
 			ci.draw_line(c + Vector2(s * 0.8, 0), c + Vector2(s * 0.8, s * 0.3), col, w * 1.3)
-			ci.draw_circle(c + Vector2(-s * 0.4, 0), s * 0.12, Color.WHITE)
+			FD.circle(ci, c + Vector2(-s * 0.4, 0), s * 0.12, Color.WHITE)
 		"infinity":
 			var pts := PackedVector2Array()
 			for i in 41:
@@ -295,7 +296,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_polyline(pts, glow, w * 3.0)
 			ci.draw_polyline(pts, col, w * 1.2)
 			var k := fmod(t * 0.4, 1.0)
-			ci.draw_circle(pts[int(k * 40)], w * 1.6, Color.WHITE)
+			FD.circle(ci, pts[int(k * 40)], w * 1.6, Color.WHITE)
 		"core":
 			var r := Rect2(c - Vector2(s, s) * 0.6, Vector2(s, s) * 1.2)
 			ci.draw_rect(r, Color(col, 0.3))
@@ -306,7 +307,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_line(c + Vector2(o, s * 0.6), c + Vector2(o, s * 0.9), col, w * 0.7)
 				ci.draw_line(c + Vector2(-s * 0.6, o), c + Vector2(-s * 0.9, o), col, w * 0.7)
 				ci.draw_line(c + Vector2(s * 0.6, o), c + Vector2(s * 0.9, o), col, w * 0.7)
-			ci.draw_circle(c, s * (0.2 + 0.05 * sin(t * 4.0)), Color.WHITE)
+			FD.circle(ci, c, s * (0.2 + 0.05 * sin(t * 4.0)), Color.WHITE)
 		"drone":
 			for k in 4:
 				var tip := c + Vector2.from_angle(PI / 4.0 + k * PI / 2.0) * s * 0.75
@@ -314,16 +315,16 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_arc(tip, s * 0.28, 0.0, TAU, 12, Color(col, 0.6), w * 0.6)
 				var blade := Vector2.from_angle(t * 14.0 + k) * s * 0.28
 				ci.draw_line(tip - blade, tip + blade, Color.WHITE, w * 0.6)
-			ci.draw_circle(c, s * 0.3, col)
-			ci.draw_circle(c, s * 0.12, Color.WHITE)
+			FD.circle(ci, c, s * 0.3, col)
+			FD.circle(ci, c, s * 0.12, Color.WHITE)
 		"totem":
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.45, s * 0.35), Vector2(s * 0.9, s * 0.4)), col)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.32, -s * 0.2), Vector2(s * 0.64, s * 0.5)), Color(col, 0.7))
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.22, -s * 0.7), Vector2(s * 0.44, s * 0.45)), col)
-			ci.draw_circle(c + Vector2(0, -s * 0.48), s * (0.1 + 0.04 * sin(t * 6.0)), Color.WHITE)
+			FD.circle(ci, c + Vector2(0, -s * 0.48), s * (0.1 + 0.04 * sin(t * 6.0)), Color.WHITE)
 			ci.draw_arc(c + Vector2(0, -s * 0.48), s * (0.5 + 0.1 * sin(t * 3.0)), 0.0, TAU, 20, Color(col, 0.5), w * 0.6)
 		"backfire":
-			ci.draw_circle(c, s * 0.28, Color.WHITE)
+			FD.circle(ci, c, s * 0.28, Color.WHITE)
 			for k in 8:
 				var d := Vector2.from_angle(TAU * k / 8.0 + t)
 				ci.draw_line(c + d * s * 0.4, c + d * s * (0.9 if k % 2 == 0 else 0.68), col, w)
@@ -341,7 +342,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			for k in 3:
 				var y := (k - 1) * s * 0.4
 				ci.draw_line(c + Vector2(-s * 0.95, y), c + Vector2(-s * 0.45, y), Color(col, 0.6), w)
-			ci.draw_circle(c + Vector2(s * 0.15, 0), s * 0.15, Color.WHITE)
+			FD.circle(ci, c + Vector2(s * 0.15, 0), s * 0.15, Color.WHITE)
 		"glasscannon":
 			var gem := PackedVector2Array([c + Vector2(0, -s * 0.9), c + Vector2(s * 0.6, 0), c + Vector2(0, s * 0.9), c + Vector2(-s * 0.6, 0)])
 			ci.draw_colored_polygon(gem, Color(col, 0.3))
@@ -354,9 +355,9 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_line(c + Vector2(-s * 0.85, s * 0.5), c + Vector2(-s * 0.5, s * 0.85), col, w * 1.5)
 			ci.draw_line(c + Vector2(s * 0.05, -s * 0.55), c + Vector2(s * 0.55, -s * 0.05), Color.WHITE, w * 1.2)
 		"collector":
-			ci.draw_circle(c + Vector2(0, -s * 0.1), s * 0.45, col)
-			ci.draw_circle(c + Vector2(-s * 0.17, -s * 0.15), s * 0.1, DARK)
-			ci.draw_circle(c + Vector2(s * 0.17, -s * 0.15), s * 0.1, DARK)
+			FD.circle(ci, c + Vector2(0, -s * 0.1), s * 0.45, col)
+			FD.circle(ci, c + Vector2(-s * 0.17, -s * 0.15), s * 0.1, DARK)
+			FD.circle(ci, c + Vector2(s * 0.17, -s * 0.15), s * 0.1, DARK)
 			ci.draw_arc(c + Vector2(0, s * 0.2), s * 0.28, 0.0, PI, 10, DARK, w * 0.8)
 			_diamond(ci, c + Vector2(0, s * 0.78), s * 0.2, Color.WHITE)
 		"decoy":
@@ -365,7 +366,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				hx.append(c + Vector2.from_angle(TAU * k / 6.0 + t * 0.5) * s * 0.8)
 			for k in 6:
 				ci.draw_dashed_line(hx[k], hx[k + 1], col, w, 5.0)
-			ci.draw_circle(c, s * 0.2, Color.WHITE)
+			FD.circle(ci, c, s * 0.2, Color.WHITE)
 		"beacon":
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.14, -s * 0.3), Vector2(s * 0.28, s * 0.9)), col)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.4, s * 0.6), Vector2(s * 0.8, s * 0.2)), col)
@@ -377,14 +378,14 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_polyline(zig, Color(col, 0.35), w * 3.0)
 			ci.draw_polyline(zig, Color.WHITE, w)
 			for zp in zig:
-				ci.draw_circle(zp, w * 1.3, col)
+				FD.circle(ci, zp, w * 1.3, col)
 		"recycler":
 			for k in 3:
 				var ra := t + TAU * k / 3.0
 				var r0 := c + Vector2.from_angle(ra) * s * 0.7
 				var r1 := c + Vector2.from_angle(ra + 1.6) * s * 0.7
 				ci.draw_line(r0, r1, col, w * 1.2)
-				ci.draw_circle(r0, w * 1.6, Color.WHITE)
+				FD.circle(ci, r0, w * 1.6, Color.WHITE)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.12, -s * 0.3), Vector2(s * 0.24, s * 0.6)), Color(col, 0.8))
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.3, -s * 0.12), Vector2(s * 0.6, s * 0.24)), Color(col, 0.8))
 		"swarmshield":
@@ -393,13 +394,13 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			shd.append(shd[0])
 			ci.draw_polyline(shd, col, w)
 			for k in 5:
-				ci.draw_circle(c + Vector2.from_angle(t * 1.5 + TAU * k / 5.0) * s * 0.5, w * 1.2, Color.WHITE)
+				FD.circle(ci, c + Vector2.from_angle(t * 1.5 + TAU * k / 5.0) * s * 0.5, w * 1.2, Color.WHITE)
 		"guardian":
 			ci.draw_arc(c, s * 0.75, 0.0, TAU, 28, Color(col, 0.4), w * 0.6)
 			var orb := c + Vector2.from_angle(t * 2.0) * s * 0.75
-			ci.draw_circle(orb, s * 0.3, col)
-			ci.draw_circle(orb, s * 0.12, Color.WHITE)
-			ci.draw_circle(c, s * 0.12, Color(col, 0.6))
+			FD.circle(ci, orb, s * 0.3, col)
+			FD.circle(ci, orb, s * 0.12, Color.WHITE)
+			FD.circle(ci, c, s * 0.12, Color(col, 0.6))
 		"striker":
 			var sa := -0.6
 			var stip := c + Vector2.from_angle(sa) * s * 0.9
@@ -414,7 +415,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.9), c + Vector2(s * 0.55, s * 0.1), c + Vector2(0, s * 0.85), c + Vector2(-s * 0.55, s * 0.1)]), Color(col, 0.6))
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.2), c + Vector2(s * 0.28, s * 0.25), c + Vector2(0, s * 0.7), c + Vector2(-s * 0.28, s * 0.25)]), Color.WHITE)
 		"berserker":
-			ci.draw_circle(c + Vector2(0, -s * 0.1), s * 0.55, col)
+			FD.circle(ci, c + Vector2(0, -s * 0.1), s * 0.55, col)
 			ci.draw_line(c + Vector2(-s * 0.5, -s * 0.6), c + Vector2(-s * 0.15, -s * 0.3), DARK, w * 1.5)
 			ci.draw_line(c + Vector2(s * 0.5, -s * 0.6), c + Vector2(s * 0.15, -s * 0.3), DARK, w * 1.5)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.3, s * 0.15), Vector2(s * 0.6, s * 0.25)), DARK)
@@ -423,7 +424,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_arc(hub, s * 0.8, PI, TAU, 20, col, w * 1.3)
 			var needle := PI + (0.5 + 0.5 * sin(t * 2.0)) * PI
 			ci.draw_line(hub, hub + Vector2.from_angle(needle) * s * 0.7, Color.WHITE, w)
-			ci.draw_circle(hub, w * 1.5, col)
+			FD.circle(ci, hub, w * 1.5, col)
 		"duration":
 			# hourglass
 			var top := PackedVector2Array([c + Vector2(-s * 0.55, -s * 0.8), c + Vector2(s * 0.55, -s * 0.8), c])
@@ -449,7 +450,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			for i in 16:
 				spikes.append(c + Vector2.from_angle(TAU * i / 16.0 + t) * s * (0.9 if i % 2 == 0 else 0.45))
 			ci.draw_colored_polygon(spikes, Color(col, 0.6))
-			ci.draw_circle(c, s * 0.3, Color.WHITE)
+			FD.circle(ci, c, s * 0.3, Color.WHITE)
 		"trophy":
 			# a cup
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-s * 0.55, -s * 0.7), c + Vector2(s * 0.55, -s * 0.7), c + Vector2(s * 0.3, s * 0.1), c + Vector2(-s * 0.3, s * 0.1)]), col)
@@ -476,7 +477,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_rect(body, Color(col, 0.25))
 			ci.draw_rect(body, col, false, w)
 			ci.draw_rect(Rect2(c + Vector2(-s * 0.32, -s * 0.68), Vector2(s * 0.64, s * 1.2)), Color(col, 0.55))
-			ci.draw_circle(c + Vector2(0, s * 0.72), w * 0.9, Color.WHITE)
+			FD.circle(ci, c + Vector2(0, s * 0.72), w * 0.9, Color.WHITE)
 		"dev_laptop":
 			var scr := Rect2(c + Vector2(-s * 0.65, -s * 0.7), Vector2(s * 1.3, s * 0.95))
 			ci.draw_rect(scr, Color(col, 0.3))
@@ -490,7 +491,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_rect(row, Color(col, 0.25))
 				ci.draw_rect(row, col, false, w * 0.8)
 				var blink := 1.0 if fmod(t * 2.0 + k * 0.37, 1.0) < 0.6 else 0.3
-				ci.draw_circle(row.position + Vector2(s * 0.22, s * 0.24), w * 0.8, Color(Global.C_GREEN, blink))
+				FD.circle(ci, row.position + Vector2(s * 0.22, s * 0.24), w * 0.8, Color(Global.C_GREEN, blink))
 				ci.draw_line(row.position + Vector2(s * 0.5, s * 0.24), row.position + Vector2(s * 1.2, s * 0.24), Color(col, 0.7), w * 0.6)
 		"dev_datacenter":
 			for k in 3:
@@ -511,7 +512,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				var pts := PackedVector2Array([pc - xa * s * 0.3 - ya * s * 0.3, pc + xa * s * 0.3 - ya * s * 0.3, pc + xa * s * 0.3 + ya * s * 0.3, pc - xa * s * 0.3 + ya * s * 0.3])
 				ci.draw_colored_polygon(pts, Color(col, 0.55))
 				ci.draw_line(pc - ya * s * 0.3, pc + ya * s * 0.3, Color.WHITE, w * 0.5)
-			ci.draw_circle(c, s * 0.28, col)
+			FD.circle(ci, c, s * 0.28, col)
 			ci.draw_line(c - ya * s * 0.25, c - ya * s * 0.65, Color.WHITE, w)
 			ci.draw_arc(c - ya * s * 0.75, s * 0.18, rot + PI, rot + TAU, 8, Color.WHITE, w * 0.8)
 		"dev_mainframe":
@@ -525,7 +526,7 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 				ci.draw_line(reel, reel + Vector2.from_angle(a) * s * 0.26, col, w * 0.8)
 			for k in 5:
 				var lit := 1.0 if fmod(t * 2.5 + k * 0.29, 1.0) < 0.5 else 0.3
-				ci.draw_circle(c + Vector2((k - 2) * s * 0.3, s * 0.45), w * 0.7, Color(Global.C_GOLD, lit))
+				FD.circle(ci, c + Vector2((k - 2) * s * 0.3, s * 0.45), w * 0.7, Color(Global.C_GOLD, lit))
 		"dev_quantum":
 			for k in 3:
 				var a := t * 1.2 + k * PI / 3.0
@@ -534,10 +535,10 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 					var u := TAU * i / 24.0
 					pts.append(c + Vector2(cos(u) * s * 0.9, sin(u) * s * 0.32).rotated(a))
 				ci.draw_polyline(pts, Color(col, 0.8), w * 0.7)
-			ci.draw_circle(c, s * 0.24, Color.WHITE)
-			ci.draw_circle(c, s * 0.38, Color(col, 0.35))
+			FD.circle(ci, c, s * 0.24, Color.WHITE)
+			FD.circle(ci, c, s * 0.38, Color(col, 0.35))
 		"knockback":
-			ci.draw_circle(c + Vector2(-s * 0.55, 0), s * 0.28, col)
+			FD.circle(ci, c + Vector2(-s * 0.55, 0), s * 0.28, col)
 			for i in 3:
 				var k := i * s * 0.32
 				ci.draw_line(c + Vector2(-s * 0.15 + k, -s * 0.42), c + Vector2(s * 0.15 + k, 0), Color(col, 0.9 - i * 0.25), w)
@@ -548,12 +549,12 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_arc(c, s * (0.85 + 0.06 * sin(t * 4.0)), 0.0, TAU, 24, Color(col, 0.5), w * 0.7)
 		"lifesteal":
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.85), c + Vector2(s * 0.55, s * 0.15), c + Vector2(0, s * 0.8), c + Vector2(-s * 0.55, s * 0.15)]), col)
-			ci.draw_circle(c + Vector2(-s * 0.15, s * 0.1), s * 0.14, Color(1, 1, 1, 0.8))
+			FD.circle(ci, c + Vector2(-s * 0.15, s * 0.1), s * 0.14, Color(1, 1, 1, 0.8))
 		"dodge":
 			var off := sin(t * 5.0) * s * 0.12
-			ci.draw_circle(c + Vector2(-s * 0.5 + off, 0), s * 0.35, Color(col, 0.25))
-			ci.draw_circle(c + Vector2(-s * 0.1 + off, 0), s * 0.35, Color(col, 0.5))
-			ci.draw_circle(c + Vector2(s * 0.3 + off, 0), s * 0.35, col)
+			FD.circle(ci, c + Vector2(-s * 0.5 + off, 0), s * 0.35, Color(col, 0.25))
+			FD.circle(ci, c + Vector2(-s * 0.1 + off, 0), s * 0.35, Color(col, 0.5))
+			FD.circle(ci, c + Vector2(s * 0.3 + off, 0), s * 0.35, col)
 		"projspeed":
 			for i in 3:
 				var y := (i - 1) * s * 0.5
@@ -570,29 +571,29 @@ static func draw_icon(ci: CanvasItem, id: String, c: Vector2, s: float, col: Col
 			ci.draw_rect(die, Color(col, 0.3))
 			ci.draw_rect(die, col, false, w * 1.3)
 			for pip in [Vector2(-0.25, 0.1), Vector2(0.0, 0.35), Vector2(0.25, 0.6)]:
-				ci.draw_circle(c + pip * s, w * 1.2, Color.WHITE)
+				FD.circle(ci, c + pip * s, w * 1.2, Color.WHITE)
 			var flick := 0.08 * sin(t * 6.0)
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * (0.95 + flick)), c + Vector2(s * 0.28, -s * 0.2), c + Vector2(-s * 0.28, -s * 0.2)]), Color(1.0, 0.55, 0.2))
 		"burn":
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.95), c + Vector2(s * 0.55, s * 0.1), c + Vector2(s * 0.3, s * 0.75), c + Vector2(-s * 0.3, s * 0.75), c + Vector2(-s * 0.55, s * 0.1)]), col)
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.2), c + Vector2(s * 0.28, s * 0.35), c + Vector2(0, s * 0.7), c + Vector2(-s * 0.28, s * 0.35)]), Color(1.0, 0.95, 0.6))
 		"poison":
-			ci.draw_circle(c + Vector2(0, s * 0.25), s * 0.5, col)
+			FD.circle(ci, c + Vector2(0, s * 0.25), s * 0.5, col)
 			ci.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -s * 0.9), c + Vector2(s * 0.42, s * 0.05), c + Vector2(-s * 0.42, s * 0.05)]), col)
-			ci.draw_circle(c + Vector2(-s * 0.15, s * 0.15), s * 0.1, Color(1, 1, 1, 0.7))
+			FD.circle(ci, c + Vector2(-s * 0.15, s * 0.15), s * 0.1, Color(1, 1, 1, 0.7))
 		"freeze":
 			for i in 3:
 				var a := PI * i / 3.0 + t * 0.3
 				ci.draw_line(c + Vector2.from_angle(a) * s * 0.9, c - Vector2.from_angle(a) * s * 0.9, col, w * 1.3)
-			ci.draw_circle(c, s * 0.18, Color.WHITE)
+			FD.circle(ci, c, s * 0.18, Color.WHITE)
 		"shock":
 			ci.draw_polyline(PackedVector2Array([c + Vector2(s * 0.3, -s * 0.9), c + Vector2(-s * 0.35, s * 0.05), c + Vector2(s * 0.1, s * 0.05), c + Vector2(-s * 0.3, s * 0.9)]), col, w * 1.8)
-			ci.draw_circle(c, s * 0.8, Color(col, 0.12))
+			FD.circle(ci, c, s * 0.8, Color(col, 0.12))
 		"potency":
 			_star(ci, c, s * 0.85, col)
-			ci.draw_circle(c, s * 0.25, Color.WHITE)
+			FD.circle(ci, c, s * 0.25, Color.WHITE)
 		_:
-			ci.draw_circle(c, s * 0.5, col)
+			FD.circle(ci, c, s * 0.5, col)
 
 
 static func _diamond(ci: CanvasItem, c: Vector2, r: float, col: Color) -> void:

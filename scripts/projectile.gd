@@ -27,10 +27,18 @@ func _process(delta: float) -> void:
 	if Global.game and Global.game.arena != null and Global.game.arena.point_blocked(global_position):
 		queue_free()   # bolts stop at walls
 		return
-	for e in get_tree().get_nodes_in_group("enemies"):
-		if already_hit.has(e):
-			continue
-		if global_position.distance_to(e.global_position) < radius * size + e.radius:
+	var g = Global.game
+	g.refresh_enemies()
+	var en: Array = g.enemy_nodes
+	var ep: PackedVector2Array = g.enemy_pos
+	var er: PackedFloat64Array = g.enemy_rad
+	var gp := global_position
+	var reach := radius * size
+	for i in en.size():
+		if gp.distance_to(ep[i]) < reach + er[i]:
+			var e = en[i]
+			if already_hit.has(e):
+				continue
 			already_hit[e] = true
 			var d = Global.game.player.calc_damage(base_damage, weapon_id, e)
 			e.take_damage(d[0], velocity.normalized() * 160.0, d[1])

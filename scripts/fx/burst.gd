@@ -34,12 +34,15 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	var o := global_position   # Pix.dot() inlined: one position read for the whole burst instead of one per mark
 	for p in parts:
 		if p[2] <= 0.0:
 			continue
 		var k: float = p[2] / p[3]
 		var s := maxf(2.0, roundf(p[4] * (0.4 + 0.6 * k) / 2.0) * 2.0)   # shrinks in 2 px steps
 		var c: Color = p[5]
+		var sz := Vector2(s, s)
+		var h := sz * 0.5
 		if k > 0.55 and p[1].length() > 40.0:   # a one-pixel-step trail while it is still moving fast
-			Pix.dot(self, p[0] - p[1].normalized() * s, Color(c, 0.5), s)
-		Pix.dot(self, p[0], Color(c, 1.0 if k > 0.25 else 0.6), s)
+			draw_rect(Rect2((o + (p[0] - p[1].normalized() * s - h)).round() - o, sz), Color(c, 0.5))
+		draw_rect(Rect2((o + (p[0] - h)).round() - o, sz), Color(c, 1.0 if k > 0.25 else 0.6))

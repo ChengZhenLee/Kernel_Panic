@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 const PixelArt = preload("res://scripts/pixel_art.gd")
 const Pix = preload("res://scripts/fx/pix.gd")
 ## Things enemies drop: XP data bits, PATCH (heal), DEFRAG (magnet), and encrypted caches.
@@ -81,7 +82,7 @@ func _draw() -> void:
 			for k in 8:
 				var d := Vector2.from_angle(TAU * k / 8.0 + t * 2.0)
 				draw_line(Vector2(0, bob) + d * 7.0, Vector2(0, bob) + d * (15.0 if k % 2 == 0 else 11.0), Global.C_GOLD, 2.5)
-			draw_circle(Vector2(0, bob), 5.0, Color.WHITE)
+			FD.circle(self, Vector2(0, bob), 5.0, Color.WHITE)
 		"cache":
 			var pulse := 0.5 + 0.5 * sin(t * 5.0)
 			_halo(bob, 30.0, Global.C_GOLD, 1.0 + pulse * 0.5)
@@ -112,8 +113,6 @@ func _halo(bob: float, r: float, col: Color, strength: float) -> void:
 
 ## Square sparks orbiting the pickup (n of them), so the special pickups read as live objects.
 func _sparks(bob: float, r: float, col: Color, n: int) -> void:
-	if Global.low_fx:
-		n = maxi(2, n / 2)
 	for i in n:
 		var ang := t * 2.0 + TAU * i / n
 		Pix.dot(self, Vector2(cos(ang) * r, bob + sin(ang) * r * 0.8), Color(Color.WHITE if i % 2 == 0 else col, 0.9), 3.0 if i % 2 == 0 else 2.0)

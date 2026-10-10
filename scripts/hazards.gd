@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## One environmental hazard per device (THE INTERNET mixes them). Zones only affect the player, never walls: nothing blocks movement.
 ## Damage is a share of max HP so it scales with any build. Two families:
 ##   FIXED (frost, jam, arc, fan, well): built into the device. They sit at the same spots, and fans blow the same way, every run,
@@ -451,20 +452,20 @@ static func draw_strike_beam(ci: CanvasItem, c: Vector2, r: float, t: float, vis
 	ci.draw_rect(Rect2(c.x - w * 0.7, top, w * 1.4, c.y - top), Color(1.0, 0.35, 0.3, 0.4 * a))
 	ci.draw_rect(Rect2(c.x - w * 0.5, top, w, c.y - top), Color(1.0, 0.6, 0.5, 0.85 * a))
 	ci.draw_rect(Rect2(c.x - w * 0.2, top, w * 0.4, c.y - top), Color(1.0, 1.0, 0.95, a))
-	ci.draw_circle(c, w * 0.9, Color(1.0, 0.85, 0.7, 0.55 * a))   # blast glow where it lands
+	FD.circle(ci, c, w * 0.9, Color(1.0, 0.85, 0.7, 0.55 * a))   # blast glow where it lands
 
 
 ## Draws one zone of a hazard kind (also used by the CODEX page): c = centre, r = radius, t = the zone's clock, vis = 0..1 visibility.
 static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Color, t: float, ang := 0.35, vis := 1.0) -> void:
 	match id:
 		"frost":
-			ci.draw_circle(c, r, Color(col, 0.12))
+			FD.circle(ci, c, r, Color(col, 0.12))
 			ci.draw_arc(c, r, 0.0, TAU, 40, Color(col, 0.45), 2.0)
 			for i in 6:
 				var a := TAU * i / 6.0
 				ci.draw_line(c, c + Vector2.from_angle(a) * r * 0.6, Color(col, 0.5), 2.0)
 		"jam":
-			ci.draw_circle(c, r, Color(col, 0.08))
+			FD.circle(ci, c, r, Color(col, 0.08))
 			ci.draw_arc(c, r, 0.0, TAU, 40, Color(col, 0.4), 2.0)
 			for i in 8:
 				var y := fmod(t * 60.0 + i * 31.0, r * 2.0) - r
@@ -473,13 +474,13 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 		"vent":
 			var ph := fmod(t, VENT_CYCLE)
 			var warn := clampf((ph - 2.3) / 0.9, 0.0, 1.0)
-			ci.draw_circle(c, r, Color(col, (0.08 + 0.3 * warn) * vis))
+			FD.circle(ci, c, r, Color(col, (0.08 + 0.3 * warn) * vis))
 			ci.draw_arc(c, r, 0.0, TAU, 32, Color(col, (0.5 + 0.5 * warn) * vis), 2.0 + 3.0 * warn)
 			if ph >= 3.2:
-				ci.draw_circle(c, r * 1.15, Color(1.0, 0.8, 0.3, 0.6 * (1.0 - (ph - 3.2) / 0.8)))
+				FD.circle(ci, c, r * 1.15, Color(1.0, 0.8, 0.3, 0.6 * (1.0 - (ph - 3.2) / 0.8)))
 		"arc":
 			var on := fmod(t, ARC_CYCLE) < 1.2
-			ci.draw_circle(c, r, Color(col, 0.25 if on else 0.05))
+			FD.circle(ci, c, r, Color(col, 0.25 if on else 0.05))
 			ci.draw_arc(c, r, 0.0, TAU, 32, Color(col, 0.9 if on else 0.3), 3.0 if on else 1.5)
 			if on:
 				# Lightning strikes down into the zone: a new jagged bolt every ~0.13s, each at its own spot.
@@ -501,9 +502,9 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 					pts.append(ground)
 					ci.draw_polyline(pts, Color(col, 0.35 * fade), 7.0)
 					ci.draw_polyline(pts, Color(1.0, 1.0, 0.8, 0.95 * fade), 2.5)
-					ci.draw_circle(ground, 14.0 * fade, Color(1.0, 1.0, 0.7, 0.5 * fade))
+					FD.circle(ci, ground, 14.0 * fade, Color(1.0, 1.0, 0.7, 0.5 * fade))
 		"fan":
-			ci.draw_circle(c, r, Color(col, 0.07))
+			FD.circle(ci, c, r, Color(col, 0.07))
 			ci.draw_arc(c, r, 0.0, TAU, 40, Color(col, 0.35), 2.0)
 			var dir := Vector2.from_angle(ang)
 			for i in 5:
@@ -512,7 +513,7 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 				ci.draw_line(p, p + dir * 26.0, Color(col, 0.5 * (1.0 - f)), 3.0)
 		"strike":
 			var warn: float = clampf(t / 1.3, 0.0, 1.0)
-			ci.draw_circle(c, r, Color(col, 0.08 + 0.22 * warn))
+			FD.circle(ci, c, r, Color(col, 0.08 + 0.22 * warn))
 			ci.draw_arc(c, r, 0.0, TAU, 32, Color(col, 0.8), 3.0)
 			ci.draw_arc(c, r * warn, 0.0, TAU, 32, Color(1.0, 0.8, 0.6, 0.9), 2.0)
 			if t >= 1.3:   # the giant laser beam from the sky
@@ -522,12 +523,12 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 				ci.draw_line(top, c, Color(col, 0.35 * (1.0 - f)), w * 1.6)
 				ci.draw_line(top, c, Color(1.0, 0.55, 0.45, 0.8 * (1.0 - f)), w)
 				ci.draw_line(top, c, Color(1.0, 1.0, 0.95, 1.0 - f), w * 0.4)
-				ci.draw_circle(c, r * (0.6 + f * 0.6), Color(1.0, 0.9, 0.7, 0.7 * (1.0 - f)))
+				FD.circle(ci, c, r * (0.6 + f * 0.6), Color(1.0, 0.9, 0.7, 0.7 * (1.0 - f)))
 		"well":
 			# dark core, glowing accretion disk, spiral arms dragging inward, and rings collapsing toward the centre
-			ci.draw_circle(c, r, Color(col, 0.08))
-			ci.draw_circle(c, r * 0.6, Color(col, 0.08))
-			ci.draw_circle(c, r * 0.3, Color(0.05, 0.0, 0.12, 0.35))
+			FD.circle(ci, c, r, Color(col, 0.08))
+			FD.circle(ci, c, r * 0.6, Color(col, 0.08))
+			FD.circle(ci, c, r * 0.3, Color(0.05, 0.0, 0.12, 0.35))
 			for i in 5:
 				var f := fmod(t * 0.9 + i * 0.2, 1.0)
 				ci.draw_arc(c, r * (1.0 - f * f), 0.0, TAU, 48, Color(col, 0.6 * f), 2.0 + 3.0 * f)
@@ -543,7 +544,7 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 					prev = q
 			ci.draw_arc(c, 38.0, 0.0, TAU, 32, Color(1.0, 0.85, 1.0, 0.8), 4.0)
 			ci.draw_arc(c, 38.0, 0.0, TAU, 32, Color(col, 0.35), 14.0)
-			ci.draw_circle(c, 30.0, Color(0.02, 0.0, 0.05, 0.97))
+			FD.circle(ci, c, 30.0, Color(0.02, 0.0, 0.05, 0.97))
 		"flux":
 			# fade between the fast (green) and slow (red) tint over ~1 s around each swap instead of snapping
 			var cyc := fmod(t, FLUX_PHASE * 2.0)
@@ -551,6 +552,6 @@ static func draw_zone(ci: CanvasItem, id: String, c: Vector2, r: float, col: Col
 			if cyc < 0.5:
 				slow_w = 1.0 - clampf((cyc + 0.5) / 1.0, 0.0, 1.0)
 			var fc := Color(0.4, 1.0, 0.7).lerp(Color(1.0, 0.45, 0.45), slow_w)
-			ci.draw_circle(c, r, Color(fc, 0.1 * vis))
+			FD.circle(ci, c, r, Color(fc, 0.1 * vis))
 			ci.draw_arc(c, r, 0.0, TAU, 40, Color(fc, 0.6 * vis), 2.5)
 			ci.draw_arc(c, r * 0.5, t, t + PI, 20, Color(fc, 0.5 * vis), 2.0)

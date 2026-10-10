@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## Game root: spawning, bosses, upgrades with rarities, DATA economy and effects.
 ## Timeline: new malware every ~45-90s, elites every 60s, slowing to 100s late, swarms every 60s,
 ## bosses at 3:00 / 6:00 / 9:00 and the final ROOT KERNEL at 12:00 (defeat it to cure the device).
@@ -22,8 +23,7 @@ const ItemData = preload("res://scripts/items.gd")
 const BossData = preload("res://scripts/boss_data.gd")
 const TelegraphScript = preload("res://scripts/fx/telegraph.gd")
 
-const MAX_ENEMIES_HIGH := 150
-const MAX_ENEMIES_LOW := 110   # Performance mode
+const MAX_ENEMIES := 150
 const BOSS_ADD_CAP := 24   # most enemies summoned by bosses that may be alive at once
 const SWARM_EXTRA := 50         # swarms (and the rest of a mite pack) may go this far over the cap
 const ELITE_EXTRA := 15         # elites too; bosses always spawn
@@ -607,8 +607,7 @@ func _ability_impact(pos: Vector2, col: Color, sup: bool) -> void:
 	hud.flash(Color(col, 0.6), 0.25 if sup else 0.15)
 	shake(1.0 if sup else 0.7)
 	Sfx.play("impact_s" if sup else "impact", 1.0, -7.0, 0.0)   # under the ability's own cast sound
-	if not Global.low_fx:
-		slow_mo(0.15, 0.09 if sup else 0.06)
+	slow_mo(0.15, 0.09 if sup else 0.06)
 
 
 ## RAIL STRIKE: one straight beam along the facing direction. Pierces walls and every threat on the line, always crits.
@@ -667,6 +666,30 @@ func _all_enemies() -> Array:
 	if is_instance_valid(current_boss):
 		list.append(current_boss)
 	return list
+
+
+## One shared list of the live threats per frame, built the first time a weapon, item or bolt asks (they all run after the threats
+## have moved this frame, so the positions are exactly what each would have read). Replaces ~40 scripts each calling
+## get_nodes_in_group("enemies") and reading e.global_position / e.radius on every threat, every frame.
+var enemy_nodes: Array = []
+var enemy_pos := PackedVector2Array()
+var enemy_rad := PackedFloat64Array()
+var _enemy_frame := -1
+
+
+func refresh_enemies() -> void:
+	var f := Engine.get_process_frames()
+	if f == _enemy_frame:
+		return
+	_enemy_frame = f
+	enemy_nodes = get_tree().get_nodes_in_group("enemies")
+	var n := enemy_nodes.size()
+	enemy_pos.resize(n)
+	enemy_rad.resize(n)
+	for i in n:
+		var e = enemy_nodes[i]
+		enemy_pos[i] = e.global_position
+		enemy_rad[i] = e.radius
 
 
 func _tick_ability(delta: float) -> void:
@@ -840,8 +863,7 @@ func _process(delta: float) -> void:
 				next_boss += 1
 
 	frame += 1
-	if not Global.low_fx or frame % 2 == 0:
-		_separate_enemies()
+	_separate_enemies()
 	hud.update_stats(player, elapsed, kills, data_earned(), current_boss)
 
 
@@ -901,7 +923,7 @@ func _pick_kind(m: float) -> String:
 
 
 func max_enemies() -> int:
-	return MAX_ENEMIES_LOW if Global.low_fx else MAX_ENEMIES_HIGH
+	return MAX_ENEMIES
 
 
 ## Distance just beyond the edge of the screen (works for any phone aspect ratio).
@@ -990,8 +1012,6 @@ func _spawn_swarm(minutes: float) -> void:
 	var formation: String = FORMATIONS[0] if w == 1 else FORMATIONS.pick_random()
 	# size grows every wave; members get tougher every wave on top of normal time scaling
 	var count := 30 + w * 14 + int(minutes * 4.0)
-	if Global.low_fx:
-		count = int(count * 0.8)
 	var toughness := 1.0 + 0.18 * (w - 1)
 	var elites := clampi((w - 2) / 2, 0, SWARM_ELITE_CAP)
 	var extra := ("  +%d ELITE%s" % [elites, "S" if elites > 1 else ""]) if elites > 0 else ""
@@ -1404,10 +1424,8 @@ func on_player_revived() -> void:
 # ---------- effects API ----------
 
 func burst(pos: Vector2, color: Color, count := 10, speed := 220.0, size := 4.0, life := 0.5) -> void:
-	if fx_layer.get_child_count() > (70 if Global.low_fx else 140):
+	if fx_layer.get_child_count() > 140:
 		return
-	if Global.low_fx:
-		count = maxi(3, count / 2)
 	var b = BurstScript.new()
 	b.setup(count, color, speed, size, life)
 	b.position = pos
@@ -1418,7 +1436,7 @@ var live_rings := 0
 
 
 func ring(pos: Vector2, color: Color, radius := 120.0, life := 0.4, width := 6.0) -> void:
-	if live_rings >= (6 if Global.low_fx else 12):
+	if live_rings >= 12:
 		return
 	live_rings += 1
 	var r = RingScript.new()
@@ -1433,7 +1451,7 @@ func ring(pos: Vector2, color: Color, radius := 120.0, life := 0.4, width := 6.0
 
 ## Pixel-snapped ability FX (see fx/ability_fx.gd). Skipped when the fx layer is already crowded; returns the node or null.
 func afx(kind: String, pos: Vector2, color: Color, radius := 200.0, life := 0.5, size := 4.0, count := 16, sup := false):
-	if ability_fx_layer.get_child_count() > (70 if Global.low_fx else 140):
+	if ability_fx_layer.get_child_count() > 140:
 		return null
 	var f = AbilityFxScript.new()
 	f.kind = kind
@@ -1453,7 +1471,7 @@ const ItemFxScript = preload("res://scripts/fx/item_fx.gd")
 
 ## Pixel-snapped item / pickup FX (see fx/item_fx.gd). Skipped when the layer is crowded; returns the node or null.
 func ifx(kind: String, pos: Vector2, color: Color, radius := 160.0, life := 0.5, size := 3.0):
-	if ability_fx_layer.get_child_count() > (70 if Global.low_fx else 140):
+	if ability_fx_layer.get_child_count() > 140:
 		return null
 	var f = ItemFxScript.new()
 	f.kind = kind
@@ -1517,8 +1535,6 @@ func damage_number(pos: Vector2, amount: float, crit = 0) -> void:
 	if not Global.damage_numbers or challenge.get("rule", "") == "incognito":
 		return
 	var tier := int(crit)
-	if Global.low_fx and tier == 0 and randf() < 0.5:
-		return
 	if tier > 0:
 		# more crit tiers = bigger, hotter numbers: gold, orange, magenta, white
 		var cols := [Global.C_GOLD, Global.C_ORANGE, Global.C_MAGENTA, Color.WHITE]
@@ -2229,16 +2245,7 @@ func _finish_run() -> void:
 func _draw_backdrop(c: Vector2, half: Vector2, base: Color) -> void:
 	var t := Time.get_ticks_msec() / 1000.0
 	var tier := Meta.run_tier() % 8
-	var low: bool = Global.low_fx
-	# 1) large colour patches: 640 px cells with a hashed hue shift and strength, breathing slowly
-	var pc := 640.0
-	for px in range(floori((c.x - half.x) / pc), ceili((c.x + half.x) / pc) + 1):
-		for py in range(floori((c.y - half.y) / pc), ceili((c.y + half.y) / pc) + 1):
-			var hh := absi(hash(Vector2i(px, py) + Vector2i(tier * 31, 7)))
-			var shade := base
-			shade.h = fposmod(base.h + (float(hh % 100) / 100.0 - 0.5) * 0.14, 1.0)
-			var breathe := 0.5 + 0.5 * sin(t * 0.25 + float(hh % 628) / 100.0)
-			draw_rect(Rect2(px * pc, py * pc, pc, pc), Color(shade, 0.04 + 0.05 * breathe + 0.03 * float(hh % 3)))
+	# 1) (removed) the 640 px colour patches: they showed as a big tinted grid over the floor and muddied the floor tiles
 	# 2) a faint scanline band sweeping down the view
 	# (anchored to the world, so moving does not drag it along with the player)
 	var span := half.y * 2.0 + 200.0
@@ -2246,7 +2253,7 @@ func _draw_backdrop(c: Vector2, half: Vector2, base: Color) -> void:
 	draw_rect(Rect2(c.x - half.x, sweep_y, half.x * 2.0, 70.0), Color(base, 0.04))
 	draw_rect(Rect2(c.x - half.x, sweep_y + 70.0, half.x * 2.0, 2.0), Color(base, 0.10))
 	# 3) per-device animated layer (parallax particles wrap around the view)
-	var n := 18 if low else 36
+	var n := 36
 	var w := half.x * 2.0
 	var h := half.y * 2.0
 	var bright := base.lerp(Color.WHITE, 0.5)
@@ -2272,7 +2279,7 @@ func _draw_backdrop(c: Vector2, half: Vector2, base: Color) -> void:
 		var tw := 0.5 + 0.5 * sin(t * (1.0 + 2.0 * r3) + i)
 		match tier:
 			0:
-				draw_circle(p, 1.5 + 2.0 * r3, Color(bright, 0.35))
+				FD.circle(self, p, 1.5 + 2.0 * r3, Color(bright, 0.35))
 			1:
 				draw_rect(Rect2(p, Vector2(10, 10) * (0.8 + r3)), Color(bright, 0.12 + 0.1 * tw), false, 1.5)
 			2:
@@ -2280,13 +2287,13 @@ func _draw_backdrop(c: Vector2, half: Vector2, base: Color) -> void:
 				draw_rect(Rect2(p, Vector2(26, 26)), Color(bright, 0.22 if pressed else 0.05), pressed)
 			3:
 				draw_line(p, p - Vector2(30.0 + 30.0 * r3, 0), Color(bright, 0.3), 2.0)
-				draw_circle(p, 2.5, Color(bright, 0.6))
+				FD.circle(self, p, 2.5, Color(bright, 0.6))
 			4:
 				draw_rect(Rect2(p.x, p.y, 120.0 + 100.0 * r2, 6.0), Color(1.0, 0.6, 0.2, 0.05 + 0.04 * tw))   # heat band
 				if i % 6 == 0:
 					draw_arc(p, 40.0, t * 3.0, t * 3.0 + 4.0, 16, Color(bright, 0.18), 3.0)   # fan blades
 			5:
-				draw_circle(p, 1.0 + 1.6 * r3, Color(Color.WHITE, 0.2 + 0.6 * tw))
+				FD.circle(self, p, 1.0 + 1.6 * r3, Color(Color.WHITE, 0.2 + 0.6 * tw))
 			6:
 				draw_line(p, p + Vector2(0, 26), Color(bright, 0.2), 2.0)
 				draw_rect(Rect2(p + Vector2(-2, 26), Vector2(4, 6)), Color(bright, 0.5))
@@ -2332,7 +2339,7 @@ func _ensure_floor_tile() -> void:
 	floor_vp.disable_3d = true
 	floor_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var ft = FloorTileScript.new()
-	ft.tier = Meta.run_tier() % 8
+	ft.tier = 8 if Meta.run_internet() else Meta.run_tier() % 8   # THE INTERNET has its own floor art set (8)
 	ft.base = Meta.device_palette()
 	floor_vp.add_child(ft)
 	add_child(floor_vp)

@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## RESEARCH: the permanent tech tree.
 ## Tap/click a node to inspect it, then BUY (or tap it again). Drag to pan, pinch / scroll to zoom.
 ## Outer rings are gated behind bosses beaten on the current device.
@@ -711,7 +712,7 @@ func _draw() -> void:
 			var edge := Vector2.from_angle(deg_to_rad(Meta.branch_angle(b, tab) + 36.0))
 			var d := 120.0
 			while d < 1500.0:
-				draw_circle(edge * d, 2.5 / zoom, Color(0.6, 0.75, 0.85, 0.4))   # dotted
+				FD.circle(self, edge * d, 2.5 / zoom, Color(0.6, 0.75, 0.85, 0.4))   # dotted
 				d += 24.0
 
 	# connections
@@ -725,7 +726,7 @@ func _draw() -> void:
 		if Meta.rank(n["id"]) > 0:
 			draw_line(a, b, Color(col, 0.3), 12.0)
 			draw_line(a, b, col, 4.0)
-			draw_circle(a.lerp(b, fmod(t * 0.8 + a.x * 0.001, 1.0)), 5.0, Color.WHITE)
+			FD.circle(self, a.lerp(b, fmod(t * 0.8 + a.x * 0.001, 1.0)), 5.0, Color.WHITE)
 		elif vis and Meta.is_unlocked(n):
 			draw_line(a, b, Color(col, 0.7), 3.0)
 		else:
@@ -821,11 +822,11 @@ func _draw_node(n: Dictionary, font: Font) -> void:
 
 	if affordable:
 		var pulse := 0.5 + 0.5 * sin(t * 5.0)
-		draw_circle(p, r * (1.55 + 0.15 * pulse), Color(col, 0.15 + 0.12 * pulse))
+		FD.circle(self, p, r * (1.55 + 0.15 * pulse), Color(col, 0.15 + 0.12 * pulse))
 	elif maxed:
-		draw_circle(p, r * 1.45, Color(Global.C_GOLD, 0.12))
+		FD.circle(self, p, r * 1.45, Color(Global.C_GOLD, 0.12))
 	if hovered:
-		draw_circle(p, r * 1.65, Color(1, 1, 1, 0.08))
+		FD.circle(self, p, r * 1.65, Color(1, 1, 1, 0.08))
 
 	_shape(n, p, r, fill, edge, 3.5 if (hovered or is_sel) else 3.0)
 	var cspr: Texture2D = _class_sprite(n)
@@ -843,7 +844,7 @@ func _draw_node(n: Dictionary, font: Font) -> void:
 	if not unlocked and rank == 0:
 		_lock(p + Vector2(r * 0.7, r * 0.65), r * 0.34)
 	if affordable:
-		draw_circle(p + Vector2(-r * 0.75, -r * 0.75), 7.0, Global.C_GOLD)
+		FD.circle(self, p + Vector2(-r * 0.75, -r * 0.75), 7.0, Global.C_GOLD)
 
 	if zoom > (0.3 if tab == "arsenal" or tab == "classes" else 0.4) or is_sel or hovered:
 		var fs := 24
@@ -874,7 +875,7 @@ func _shape(n: Dictionary, p: Vector2, r: float, fill: Color, edge: Color, width
 			sides = 8
 			rot = PI / 8.0
 	if sides == 0:
-		draw_circle(p, r, fill)
+		FD.circle(self, p, r, fill)
 		draw_arc(p, r, 0.0, TAU, 40, edge, width)
 		return
 	var pts := PackedVector2Array()
@@ -892,7 +893,7 @@ func _shape(n: Dictionary, p: Vector2, r: float, fill: Color, edge: Color, width
 
 
 func _lock(p: Vector2, s: float) -> void:
-	draw_circle(p, s * 1.25, Color(0.03, 0.035, 0.08))
+	FD.circle(self, p, s * 1.25, Color(0.03, 0.035, 0.08))
 	draw_arc(p + Vector2(0, -s * 0.4), s * 0.5, PI, TAU, 10, Color(0.9, 0.9, 0.95), s * 0.24)
 	draw_rect(Rect2(p + Vector2(-s * 0.7, -s * 0.4), Vector2(s * 1.4, s * 1.1)), Color(0.9, 0.9, 0.95))
 

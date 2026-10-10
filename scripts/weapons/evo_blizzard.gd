@@ -81,7 +81,7 @@ func _draw() -> void:
 		return
 	# crystals on the hit edge, back of the ring first so the front ones overlap them
 	var n := clampi(int(TAU * Rv / 56.0), 12, 36)
-	var step := 2 if Global.low_fx else 1
+	var step := 1
 	var order := []
 	for i in range(0, n, step):
 		order.append([sin(TAU * i / n) * Rv, i])
@@ -90,7 +90,7 @@ func _draw() -> void:
 		var a: float = TAU * o[1] / n
 		WFx.draw(self, "evo_blizzard_crystal", WFx.at(t, o[1], 6.0), Vector2.from_angle(a) * Rv, Vector2(32, 84), 1.0, Color(1, 1, 1, 0.85), o[1] % 2 == 1)
 	# snow drifting down through the whole area; every 4th flake is a big (2x) one
-	var flakes := 10 if Global.low_fx else 18
+	var flakes := 18
 	for i in flakes:
 		var x := (Pix.rnd(i * 3.7) * 2.0 - 1.0) * Rv * 0.97
 		var h := sqrt(maxf(0.0, Rv * Rv - x * x))
@@ -101,13 +101,13 @@ func _draw() -> void:
 
 
 func _draw_fallback_extras(r: float, q: float, fade: float) -> void:
-	var shards := 28 if not Global.low_fx else 14
+	var shards := 28
 	for i in shards:   # ice shards standing off the rim, tipped white
 		var u := Vector2.from_angle(TAU * i / shards + 0.3 * q)
 		var l := 6.0 + float(i % 3) * 6.0
 		Pix.line(self, u * r, u * (r + l), Color(0.5, 0.85, 1.0 if i % 2 else 0.85, fade * 0.8), 2.0)
 		Pix.dot(self, u * (r + l), Color(1, 1, 1, fade), 3.0)
-	for i in (7 if Global.low_fx else 14):   # snowflake sparkles, on for two frames of every four
+	for i in (14):   # snowflake sparkles, on for two frames of every four
 		if ((int(t * 6.0) + i) & 3) < 2:
 			var sp := Vector2.from_angle(Pix.rnd(i) * TAU) * (Pix.rnd(i + 4) * r * 0.9)
 			Pix.dot(self, sp, Color(1, 1, 1, 0.9 * fade), 3.0)

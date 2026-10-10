@@ -17,7 +17,7 @@ static func play(sheet_name: String, pos: Vector2, scale := 1.0, rotation := 0.0
 	var g = Global.game
 	if g == null or not WFx.has(sheet_name):
 		return null
-	if g.fx_layer.get_child_count() > (70 if Global.low_fx else 140):
+	if g.fx_layer.get_child_count() > 140:
 		return null
 	var f := new()
 	f.sheet = sheet_name

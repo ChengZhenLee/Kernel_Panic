@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## Hostile projectile fired by spyware and bosses.
 
 var velocity := Vector2.ZERO
@@ -33,6 +34,6 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, radius * 2.2, Color(color, 0.15))
-	draw_circle(Vector2.ZERO, radius, color)
-	draw_circle(Vector2.ZERO, radius * 0.45, Color.WHITE)
+	FD.circle(self, Vector2.ZERO, radius * 2.2, Color(color, 0.15))
+	FD.circle(self, Vector2.ZERO, radius, color)
+	FD.circle(self, Vector2.ZERO, radius * 0.45, Color.WHITE)

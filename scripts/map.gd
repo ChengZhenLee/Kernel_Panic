@@ -1,4 +1,5 @@
 extends Control
+const FD = preload("res://scripts/fx/fd.gd")
 ## DEVICE MAP: devices laid out along a winding path. Cured devices are lit, the next one is the
 ## frontier, the rest are locked. Tap an unlocked device to select it, then press PLAY.
 
@@ -403,7 +404,7 @@ func _draw() -> void:
 		if gi < Meta.devices_cured:
 			draw_line(a, b, Color(col, 0.25), 14.0)
 			draw_line(a, b, col, 4.0)
-			draw_circle(a.lerp(b, fmod(t * 0.5 + i * 0.3, 1.0)), 5.0, Color.WHITE)
+			FD.circle(self, a.lerp(b, fmod(t * 0.5 + i * 0.3, 1.0)), 5.0, Color.WHITE)
 		else:
 			draw_dashed_line(a, b, Color(0.5, 0.55, 0.65, 0.35), 3.0, 12.0)
 	for i in per_page:
@@ -420,13 +421,18 @@ func _draw_net() -> void:
 	var on := Meta.mode_internet
 	var col := Color(0.4, 0.95, 0.85)
 	var r := 36.0
-	draw_circle(p, r * (1.5 + (0.1 * sin(t * 4.0) if on else 0.0)), Color(col, 0.14 if on else 0.06))
-	draw_circle(p, r, Color(col.r * 0.12, col.g * 0.12, col.b * 0.12))
+	FD.circle(self, p, r * (1.5 + (0.1 * sin(t * 4.0) if on else 0.0)), Color(col, 0.14 if on else 0.06))
+	FD.circle(self, p, r, Color(col.r * 0.12, col.g * 0.12, col.b * 0.12))
 	draw_arc(p, r, 0.0, TAU, 40, col if on else Color(col, 0.6), 4.0)
-	draw_arc(p, r * 0.62, PI / 2.0, PI * 1.5, 16, Color(col, 0.7), 2.0)
-	draw_arc(p, r * 0.62, -PI / 2.0, PI / 2.0, 16, Color(col, 0.7), 2.0)
-	draw_line(p + Vector2(-r, 0), p + Vector2(r, 0), Color(col, 0.7), 2.0)
-	draw_line(p + Vector2(0, -r), p + Vector2(0, r), Color(col, 0.7), 2.0)
+	var globe: Texture2D = IconArt.PixelArt.icon_tex("internet")   # art/ui/internet.png; the old drawn globe is the fallback
+	if globe != null:
+		var gs := r * 1.55
+		draw_texture_rect(globe, Rect2(p - Vector2(gs, gs) / 2.0, Vector2(gs, gs)), false, Color.WHITE if on else Color(0.75, 0.8, 0.85))
+	else:
+		draw_arc(p, r * 0.62, PI / 2.0, PI * 1.5, 16, Color(col, 0.7), 2.0)
+		draw_arc(p, r * 0.62, -PI / 2.0, PI / 2.0, 16, Color(col, 0.7), 2.0)
+		draw_line(p + Vector2(-r, 0), p + Vector2(r, 0), Color(col, 0.7), 2.0)
+		draw_line(p + Vector2(0, -r), p + Vector2(0, r), Color(col, 0.7), 2.0)
 	if on:
 		draw_arc(p, r + 10.0 + 2.0 * sin(t * 6.0), 0.0, TAU, 48, Color.WHITE, 3.0)
 	_text("THE INTERNET", p + Vector2(0, r + 26.0), 20, Color(0.9, 0.96, 1.0))
@@ -445,10 +451,10 @@ func _draw_node(i: int) -> void:
 	var r := NODE_R
 	if frontier:
 		var pulse := 0.5 + 0.5 * sin(t * 4.0)
-		draw_circle(p, r * (1.5 + 0.15 * pulse), Color(col, 0.12 + 0.1 * pulse))
+		FD.circle(self, p, r * (1.5 + 0.15 * pulse), Color(col, 0.12 + 0.1 * pulse))
 		_text("NEXT", p + Vector2(-r - 44.0, 8.0), 24, Global.C_GOLD)   # beside the node, clear of the row above
 	elif cured:
-		draw_circle(p, r * 1.4, Color(Global.C_GOLD, 0.08))
+		FD.circle(self, p, r * 1.4, Color(Global.C_GOLD, 0.08))
 	var hex := PackedVector2Array()
 	for k in 6:
 		hex.append(p + Vector2.from_angle(TAU * k / 6.0 + PI / 6.0) * r)
@@ -460,11 +466,11 @@ func _draw_node(i: int) -> void:
 	_text(str(gidx + 1), p + Vector2(-r + 6.0, -r + 18.0), 18, Color.WHITE if not locked else Color(0.55, 0.6, 0.7), Global.FONT_TITLE)
 	if cured:
 		var ck := p + Vector2(r * 0.78, -r * 0.78)
-		draw_circle(ck, 15.0, Global.C_GOLD)
+		FD.circle(self, ck, 15.0, Global.C_GOLD)
 		draw_polyline(PackedVector2Array([ck + Vector2(-7, 0), ck + Vector2(-2, 6), ck + Vector2(8, -6)]), Color(0.05, 0.05, 0.1), 3.5)
 	elif locked:
 		var lp := p + Vector2(r * 0.74, r * 0.7)
-		draw_circle(lp, 15.0, Color(0.03, 0.035, 0.08))
+		FD.circle(self, lp, 15.0, Color(0.03, 0.035, 0.08))
 		draw_arc(lp + Vector2(0, -5), 6.0, PI, TAU, 8, Color(0.9, 0.9, 0.95), 3.0)
 		draw_rect(Rect2(lp + Vector2(-8, -4), Vector2(16, 12)), Color(0.9, 0.9, 0.95))
 	if gidx == Meta.selected_device and not Meta.run_internet():

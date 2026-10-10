@@ -1,4 +1,5 @@
 extends Node2D
+const FD = preload("res://scripts/fx/fd.gd")
 ## CODEX cage: a small barred pen where the game's own enemy or boss node walks around at random and now and then attacks.
 ## The creature is never part of a run: it is given a stand-in target that is "not alive", so its own AI stays idle and
 ## only animates, and this cage moves it and plays its attacks (real enemy bullets, bursts, rings and summoned minions).
@@ -42,9 +43,9 @@ class Slam extends Node2D:
 
 	func _draw() -> void:
 		var k := clampf(t / delay, 0.0, 1.0)
-		draw_circle(Vector2.ZERO, radius, Color(color, 0.08 + 0.12 * k))
+		FD.circle(self, Vector2.ZERO, radius, Color(color, 0.08 + 0.12 * k))
 		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 40, Color(color, 0.8), 2.5)
-		draw_circle(Vector2.ZERO, radius * k, Color(color, 0.25))
+		FD.circle(self, Vector2.ZERO, radius * k, Color(color, 0.25))
 
 
 ## The bars and frame, drawn above everything inside the cage.
