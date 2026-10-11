@@ -66,9 +66,9 @@ static func build() -> Array:
 	_at(N.back(), 0, 0)
 	var cls_rows := [
 		["sysadmin", "SYSADMIN", "vitality", 1, 0, "Class: starts with FIREWALL. +25 max HP, +0.3 HP/s. Ability RESTORE", 136.0],
-		["hacker", "HACKER", "crit", 2, 0, "Class: starts with PING.EXE. +10% crit, +20% crit damage. Ability OVERCLOCK", 340.0],
+		["hacker", "HACKER", "crit", 2, 0, "Class: starts with BACKDOOR. +10% crit, +20% crit damage. Ability OVERCLOCK", 340.0],
 		["architect", "ARCHITECT", "area", 3, 0, "Class: starts with LOGIC MINE. +20% area and duration. Ability LOCKDOWN", 680.0],
-		["ghost", "GHOST", "speed", 0, 2.4, "Class: starts with BACKDOOR. +10% speed, +8% dodge. Ability PHASE", 1020.0],
+		["ghost", "GHOST", "speed", 0, 2.4, "Class: starts with PING.EXE. +10% speed, +8% dodge. Ability PHASE", 1020.0],
 		["analyst", "ANALYST", "xp", 1, 2.4, "Class: starts with SCANNER. +25% XP, +8% luck. Ability DEEP SCAN", 1360.0],
 		["pacifist", "PACIFIST", "haste", 2, 2.4, "Secret class: starts with NO weapon. +30% XP, +10% luck. Ability PAUSE", 340.0],
 		["railgunner", "RAILGUNNER", "evo_railgun", 0, 4.8, "Secret class: starts with the RAILGUN. +15% crit, +30% crit damage. Ability RAIL STRIKE", 1700.0],

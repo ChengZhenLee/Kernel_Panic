@@ -515,6 +515,7 @@ func _show_panel(id: String) -> void:
 	panel.add_theme_stylebox_override("panel", Global.make_box(Color(0.02, 0.03, 0.07, 0.96), col, 2, 16, 6))
 	p_icon.icon_id = n["icon"] if Meta.is_visible(n) else "key"
 	p_icon.color = col
+	p_icon.sprite = _class_sprite(n) if Meta.is_visible(n) else null
 	if not Meta.is_visible(n):
 		p_name.text = "ENCRYPTED NODE"
 		p_info.text = "Locked"

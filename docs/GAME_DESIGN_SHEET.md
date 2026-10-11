@@ -19,9 +19,9 @@ How unlocking works today:
 |---|---|---|---|---|---|---|
 | BASIC | PACKET LASER | none | PURGE: wipe every threat on screen, not bosses (60s, charges only) | always | none | |
 | SYSADMIN | FIREWALL | +25 max HP, +0.3 HP/s | RESTORE: heal 40% max HP, 1.5s invulnerable (60s) | DATA | buy in CLASSES tree (cost x136) | |
-| HACKER | PING.EXE | +10% crit, +20% crit dmg | OVERCLOCK: +50% weapon speed 6s (45s) | DATA | buy in CLASSES tree (cost x340) | |
+| HACKER | BACKDOOR | +10% crit, +20% crit dmg | OVERCLOCK: +50% weapon speed 6s (45s) | DATA | buy in CLASSES tree (cost x340) | |
 | ARCHITECT | LOGIC BOMB | +20% area, +20% duration | LOCKDOWN: slow and hit everything nearby for 4s (60s) | Prestige | ARCHITECT LICENSE (10 PP), then buy (x680) | |
-| GHOST | BACKDOOR | +10% move speed, +8% dodge | PHASE: dash forward, untouchable 1.5s (20s) | Challenge | GLASS CANNON: max HP 35%, defeat 2 bosses; then buy (x1020) | |
+| GHOST | PING.EXE | +10% move speed, +8% dodge | PHASE: dash forward, untouchable 1.5s (20s) | Challenge | GLASS CANNON: max HP 35%, defeat 2 bosses; then buy (x1020) | |
 | ANALYST | SCANNER | +25% XP, +8% luck | DEEP SCAN: threats take +25% damage 8s (40s) | Challenge | SINGLE THREAD: only PACKET LASER, survive 6 min; then buy (x1360) | |
 | PACIFIST | none (no weapon) | +30% XP, +10% luck | PAUSE: stop time 4s (60s) | DATA | buy in CLASSES tree (cost x340) | |
 | RAILGUNNER (secret) | RAILGUN | +15% crit, +30% crit dmg | RAIL STRIKE: piercing beam, guaranteed heavy crit (30s) | Secret | evolve RAILGUN, then survive 6 min taking 5 hits or fewer; then buy (x1700) | |
