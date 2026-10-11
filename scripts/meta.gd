@@ -96,6 +96,7 @@ var cured_tiers := {}     # device tiers ever cured (first cure of a tier pays m
 var cured: bool:          # is the selected device cured?
 	get:
 		return selected_device < devices_cured
+var lore := {}   # lore snippets found (id -> true), kept through reformats
 var lifetime := {"runs": 0, "kills": 0, "data": 0.0, "cured": 0, "bosses": 0}
 
 
@@ -834,6 +835,7 @@ func save() -> void:
 	cfg.set_value("meta", "active_challenge", active_challenge)
 	cfg.set_value("meta", "selected_class", selected_class)
 	cfg.set_value("meta", "lifetime", lifetime)
+	cfg.set_value("meta", "lore", lore)
 	cfg.save(SAVE_PATH)
 
 
@@ -874,6 +876,7 @@ func _load() -> void:
 	if not cfg.has_section_key("meta", "cured_tiers"):   # older saves: every device below the frontier was cured once
 		for d in devices_cured:
 			cured_tiers[d] = true
+	lore = cfg.get_value("meta", "lore", {})
 	var lt: Dictionary = cfg.get_value("meta", "lifetime", {})
 	for k in lt:
 		lifetime[k] = lt[k]
@@ -982,3 +985,12 @@ func reset_all() -> void:
 	lifetime = {"runs": 0, "kills": 0, "data": 0.0, "cured": 0, "bosses": 0}
 	recompute()
 	save()
+
+
+## Lore snippets (secret rooms, memos): returns true the first time one is found.
+func lore_found(id: String) -> bool:
+	if lore.has(id):
+		return false
+	lore[id] = true
+	save()
+	return true

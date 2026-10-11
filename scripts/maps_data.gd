@@ -126,6 +126,33 @@ static func _boss_room(tier: int) -> Dictionary:
 		"phase_b": [Rect2(-460, -100, 60, 520), Rect2(400, -420, 60, 520)]}
 
 
+## Secret side rooms (A1 to A8), sealed arenas like the boss rooms. The player enters on the left.
+static func secret_room(id: String) -> Dictionary:
+	match id:
+		"freezer":   # frozen shelves: two ice pillars and a long cold slab
+			return _snap({"size": Vector2(2200, 1500), "start": Vector2(-800, 0), "walls": [
+				Rect2(-420, -420, 120, 360), Rect2(300, 60, 120, 360), Rect2(-120, -40, 240, 80)]})
+		"lounge":   # the manager's lounge: desks and a sofa row
+			return _snap({"size": Vector2(2400, 1600), "start": Vector2(-900, 0), "walls": [
+				Rect2(-500, -500, 400, 120), Rect2(100, -500, 400, 120), Rect2(-500, 380, 400, 120), Rect2(100, 380, 400, 120)]})
+		"app":   # a small app room: two pillars
+			return _snap({"size": Vector2(2000, 1300), "start": Vector2(-700, 0), "walls": [Rect2(-120, -420, 240, 240), Rect2(-120, 180, 240, 240)]})
+		"corrupt":   # the corrupted app: scattered blocks
+			return _snap({"size": Vector2(2200, 1500), "start": Vector2(-800, 0), "walls": [
+				Rect2(-400, -400, 240, 240), Rect2(160, -400, 240, 240), Rect2(-400, 160, 240, 240), Rect2(160, 160, 240, 240)]})
+		"periph":   # a peripheral's room: a few pillars
+			return _snap({"size": Vector2(2400, 1500), "start": Vector2(-900, 0), "walls": [Rect2(-300, -450, 200, 200), Rect2(100, 250, 200, 200)]})
+		"moon":   # the moon base: crater rocks
+			return _snap({"size": Vector2(3600, 2200), "start": Vector2(-1500, 0), "walls": [Rect2(-1000, -700, 200, 200), Rect2(-1000, 500, 200, 200), Rect2(100, -100, 200, 200)]})
+		"hq":   # the Overseer HQ: an open hall
+			return _snap({"size": Vector2(3600, 1500), "start": Vector2(-1400, 300), "walls": []})
+		"unobserved":   # the unobserved room: empty
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-800, 0), "walls": []})
+		"upload":   # the data upload hallway: long and empty
+			return _snap({"size": Vector2(7040, 768), "start": Vector2(-3000, 0), "walls": []})
+	return _snap({"size": Vector2(1900, 1300), "start": Vector2(-600, 0), "walls": []})
+
+
 static func name_of(tier: int) -> String:
 	return NAMES[tier % 8]
 

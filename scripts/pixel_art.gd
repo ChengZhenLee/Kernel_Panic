@@ -218,7 +218,7 @@ static func draw_hazard_zone(ci: CanvasItem, tex: Texture2D, c: Vector2, r: floa
 
 ## boss id (boss_data.gd) -> file stem in art/bosses; two idle frames per state, swapped every BOSS_MS
 const BOSS_FILE := {"megaworm": "megaworm", "locker": "the_locker", "hive": "botnet_hive", "popupking": "pop_up_king", "keylogger": "keylogger",
-	"phisher": "phisher", "kernel": "root_kernel", "baseband": "baseband", "bluescreen": "blue_screen"}
+	"phisher": "phisher", "golem": "golem", "window": "window", "intern": "intern", "alien": "alien", "kbd": "keyboard_boss", "clicker": "clicker_boss", "webcam": "webcam_boss", "headset": "headset_boss", "kernel": "root_kernel", "baseband": "baseband", "bluescreen": "blue_screen"}
 const BOSS_MS := 400.0
 const BOSS_FINALS := ["kernel", "baseband", "bluescreen"]   # 56 px sheets (48 px art); the rest are 40 px (32 px art)
 
@@ -237,6 +237,8 @@ const BOSS_VISUAL_MULT := 2.0   # bosses are drawn at 2x so they read apart from
 
 ## The whole-number scale of a boss sprite: about 2x the radius, and never less than BOSS_MIN_ART px of art.
 static func boss_scale(id: String, radius: float) -> float:
+	if id == "intern":
+		return 3.0   # a tiny boss: 32 px of art at 3x (about the size of an elite)
 	var art := 48.0 if BOSS_FINALS.has(id) else 32.0
 	return maxf(maxf(1.0, floorf(2.0 * radius / art + 0.35)), ceilf(BOSS_MIN_ART / art)) * BOSS_VISUAL_MULT
 

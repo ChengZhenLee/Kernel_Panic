@@ -15,7 +15,7 @@ const AFFIXES := ["SWIFT", "ARMORED", "VAMPIRIC", "SUMMONER", "VOLATILE"]
 const NAMES := {"bug": "BUG", "worm": "WORM", "adware": "ADWARE", "popup": "POPUP", "trojan": "TROJAN",
 	"spyware": "SPYWARE", "botnet": "BOTNET", "ransom": "RANSOMWARE", "rootkit": "ROOTKIT",
 	"mite": "MITE", "miner": "MINER", "leech": "LEECH", "sentry": "SENTRY",
-	"nanobot": "NANOBOT", "ram": "RAM", "zipbomb": "ZIP BOMB"}
+	"nanobot": "NANOBOT", "ram": "RAM", "zipbomb": "ZIP BOMB", "paperjam": "PAPER JAM"}
 
 var kind := "bug"
 var speed := 60.0
@@ -182,6 +182,8 @@ func setup(enemy_kind: String, run_minutes: float, is_elite := false) -> void:
 			_stats(70.0, 42.0, 12.0, 15.0, 4, Color(0.85, 0.6, 0.35))
 		"zipbomb":
 			_stats(96.0, 14.0, 30.0, 12.0, 2, Color(1.0, 0.72, 0.15))
+		"paperjam":   # the printer's jam in the OFFICE SERVER secret room chain (scripts/secret_rooms.gd)
+			_stats(60.0, 70.0, 10.0, 16.0, 5, Color(0.95, 0.95, 0.95))
 	var m := run_minutes
 	max_hp *= (1.0 + 0.5 * m) * pow(1.18, m) * Meta.enemy_hp_mult()
 	damage *= (1.0 + 0.2 * m) * pow(1.04, m) * Meta.enemy_dmg_mult()   # linear ramp plus mild compounding

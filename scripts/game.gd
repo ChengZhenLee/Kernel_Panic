@@ -21,6 +21,7 @@ const AbilityFxScript = preload("res://scripts/fx/ability_fx.gd")
 const TimeClockScript = preload("res://scripts/fx/time_clock.gd")
 const ItemData = preload("res://scripts/items.gd")
 const BossData = preload("res://scripts/boss_data.gd")
+const SecretRoomsScript = preload("res://scripts/secret_rooms.gd")
 const TelegraphScript = preload("res://scripts/fx/telegraph.gd")
 
 const MAX_ENEMIES := 150
@@ -219,6 +220,7 @@ var hazards: Node2D
 var main_arena: Node2D        # the device arena; arena points at the boss room while a boss fight is on
 var room_arena: Node2D
 var in_room := false
+var secret   # SecretRooms: the hidden rooms of the device (scripts/secret_rooms.gd)
 var room_return := Vector2.ZERO
 var arena: Node2D              # the fixed walled arena (null on THE INTERNET)
 var internet := false          # THE INTERNET: no final boss, overtime starts at 12:00 and never ends
@@ -284,6 +286,8 @@ func _ready() -> void:
 		room_arena.setup(Meta.selected_device, Meta.device_palette(), true, Vector2(0, arena.bounds.end.y + 2200.0))
 		add_child(room_arena)
 		room_arena.set_active(false)
+	secret = SecretRoomsScript.new()
+	add_child(secret)
 	pickup_layer = _layer(0)   # was -1: under the opaque floor, pickups were invisible (art-v2)
 	enemy_layer = _layer(0)
 	ability_fx_layer = _layer(0)   # added before the player at the same z, so the player always draws over ability FX
@@ -1281,6 +1285,9 @@ func _volatile_blast(pos: Vector2, dmg: float) -> void:
 
 
 func _on_boss_killed(b) -> void:
+	if b.has_meta("secret"):   # a secret room mini-boss: no codex, no boss counters, no boss room exit
+		secret.on_boss_killed(b)
+		return
 	Meta.codex_kill("boss:" + b.boss_id)
 	if b.overtime:
 		overtime_bosses += 1
@@ -2082,6 +2089,7 @@ func _celebrate(tier: int) -> void:
 
 func _system_purge() -> void:
 	var pos: Vector2 = player.position
+	secret.on_purge(pos)
 	purging = true
 	hud.flash(Global.C_GOLD, 0.7)
 	hud.announce("SYSTEM PURGE", Global.C_GOLD, true)

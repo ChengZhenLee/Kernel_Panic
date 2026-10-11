@@ -40,8 +40,8 @@ var player
 
 
 ## room = true builds the device's boss room instead, centred on origin (far from the main arena).
-func setup(tier: int, pal: Color, room := false, origin := Vector2.ZERO) -> void:
-	var d: Dictionary = MapsData.room(tier) if room else MapsData.layout(tier)
+func setup(tier: int, pal: Color, room := false, origin := Vector2.ZERO, layout := {}) -> void:
+	var d: Dictionary = layout if not layout.is_empty() else (MapsData.room(tier) if room else MapsData.layout(tier))
 	var size: Vector2 = d["size"]
 	bounds = Rect2(-size / 2.0 + origin, size)
 	start = Vector2(d["start"]) + origin
