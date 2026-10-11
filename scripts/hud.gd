@@ -261,7 +261,20 @@ func _ready() -> void:
 	boss_bar.show_percentage = false
 	boss_bar.custom_minimum_size = Vector2(600, 14)
 	boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	boss_bar.add_theme_stylebox_override("fill", Global.make_box(Global.C_RED, Global.C_RED, 0, 10, 2))
+	# The themed bar styles carry 14px side content margins, which pad the fill to a minimum width (and inset the track):
+	# the bar then still showed a sliver while the boss had almost no HP left. Zero them so width == HP share exactly.
+	var boss_fill := Global.make_box(Global.C_RED, Global.C_RED, 0, 10, 2)
+	boss_fill.content_margin_left = 0
+	boss_fill.content_margin_right = 0
+	boss_fill.content_margin_top = 0
+	boss_fill.content_margin_bottom = 0
+	boss_bar.add_theme_stylebox_override("fill", boss_fill)
+	var boss_track := Global.make_box(Color(0.02, 0.05, 0.08, 0.9), Color(Global.C_CYAN, 0.5), 1, 0, 2)
+	boss_track.content_margin_left = 0
+	boss_track.content_margin_right = 0
+	boss_track.content_margin_top = 0
+	boss_track.content_margin_bottom = 0
+	boss_bar.add_theme_stylebox_override("background", boss_track)
 	boss_box.add_child(boss_bar)
 	boss_box.hide()
 

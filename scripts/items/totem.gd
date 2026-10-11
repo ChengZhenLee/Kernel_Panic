@@ -27,7 +27,7 @@ func _process(delta: float) -> void:
 	if timer <= 0.0:
 		timer = 15.0 * player.item_cd()
 		totems.append([player.global_position, 6.0 * player.duration_mult, 0.0])
-		Global.game.ifx("drop", player.global_position, Global.C_GREEN, radius(), 0.7)
+		Global.game.ifx("drop", player.global_position, Global.C_RED, radius(), 0.7)
 		Sfx.play("it_totem_drop", 1.0, -3.0, 0.0)
 	var r := radius()
 	for tm in totems.duplicate():
@@ -35,7 +35,7 @@ func _process(delta: float) -> void:
 		tm[2] -= delta
 		if tm[2] <= 0.0:
 			tm[2] = 0.5
-			Global.game.ifx("pulse", tm[0], Global.C_GREEN, r, 0.4)
+			Global.game.ifx("pulse", tm[0], Global.C_RED, r, 0.4)
 			Sfx.play("it_totem_pulse", 1.0, -8.0)
 			for e in get_tree().get_nodes_in_group("enemies"):
 				if e.global_position.distance_to(tm[0]) < r + e.radius:
@@ -51,15 +51,15 @@ func _draw() -> void:
 		var p: Vector2 = tm[0]
 		var fade := clampf(tm[1], 0.0, 1.0)
 		var flash := clampf(tm[2] / 0.5, 0.0, 1.0)   # 1 right after a pulse
-		ItemArt.zone(self, p, r, Global.C_GREEN, fade, t, 14, 0.07 + 0.08 * flash)
+		ItemArt.zone(self, p, r, Global.C_RED, fade, t, 14, 0.07 + 0.08 * flash)
 		ItemArt.shadow(self, p + Vector2(0, 14), 14.0, 0.4 * fade)
 		var bob := roundf(sin(t * 3.0 + p.x) * 1.0) * 2.0
 		if not ItemArt.icon(self, "totem", p + Vector2(0, bob - 10.0), 2.0, Color(1, 1, 1, fade)):
-			Pix.rect(self, p + Vector2(-9, -2), Vector2(18, 14), Color(0.05, 0.2, 0.1))
-			Pix.rect(self, p + Vector2(-6, -16), Vector2(12, 14), Global.C_GREEN)
+			Pix.rect(self, p + Vector2(-9, -2), Vector2(18, 14), Color(0.2, 0.05, 0.08))
+			Pix.rect(self, p + Vector2(-6, -16), Vector2(12, 14), Global.C_RED)
 		if flash > 0.5:   # a white flash across the carving right after each pulse
 			Pix.dither_disc(self, p + Vector2(0, -14.0), 16.0, Color(Color.WHITE, (flash - 0.5) * 1.2))
-		ItemArt.motes(self, p + Vector2(0, -26.0), Global.C_GREEN, fade, t + p.x * 0.01, p.x, 5, 12.0, 34.0)
+		ItemArt.motes(self, p + Vector2(0, -26.0), Global.C_RED, fade, t + p.x * 0.01, p.x, 5, 12.0, 34.0)
 
 
 ## HUD: 0 = about to drop, 1 = just dropped.
