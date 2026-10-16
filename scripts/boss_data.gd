@@ -26,9 +26,10 @@ const MID := {
 }
 
 ## Mini-bosses of the secret rooms (not part of any lineup). Stats scale like slot 0 bosses.
+## "radius" is the hit radius (it matches the drawn body, about 1.65x the art scale radius); "vis_radius" only picks the sprite scale.
 const SECRET := {
-	"golem": {"id": "golem", "name": "ICE CUBE GOLEM", "color": Color(0.55, 0.9, 1.0), "radius": 100.0, "speed": 60.0, "hp": 0.6, "dmg": 0.8,
-		"attacks": [["radial", 3.5, 2.0], ["slam", 5.0, 3.0]]},
+	"golem": {"id": "golem", "name": "ICE CUBE GOLEM", "color": Color(0.55, 0.9, 1.0), "radius": 165.0, "vis_radius": 100.0, "speed": 60.0, "hp": 0.6, "dmg": 0.8,
+		"attacks": [["radial", 3.5, 2.0], ["slam", 5.0, 3.0], ["dash", 9.0, 5.0]]},
 	"intern": {"id": "intern", "name": "THE INTERN", "color": Color(0.4, 0.55, 0.95), "radius": 40.0, "speed": 95.0, "hp": 0.02, "dmg": 0.05, "kite": true,
 		"attacks": []},
 	"alien": {"id": "alien", "name": "THE VISITOR", "color": Color(0.5, 1.0, 0.6), "radius": 120.0, "speed": 65.0, "hp": 1.6, "dmg": 1.0,
@@ -41,8 +42,8 @@ const SECRET := {
 		"attacks": [["radial", 3.5, 2.0], ["aimed", 2.0, 1.0]]},
 	"headset": {"id": "headset", "name": "STATIC", "color": Color(0.8, 0.5, 1.0), "radius": 90.0, "speed": 60.0, "hp": 0.8, "dmg": 0.8,
 		"attacks": [["spiral", 6.0, 2.0], ["aimed", 2.2, 1.0]]},
-	"window": {"id": "window", "name": "NOT RESPONDING", "color": Color(0.7, 0.8, 1.0), "radius": 96.0, "speed": 55.0, "hp": 0.6, "dmg": 0.8,
-		"attacks": [["aimed", 2.0, 1.0], ["summon_popup", 7.0, 4.0]]},
+	"window": {"id": "window", "name": "NOT RESPONDING", "color": Color(0.7, 0.8, 1.0), "radius": 150.0, "vis_radius": 96.0, "speed": 55.0, "hp": 0.6, "dmg": 0.8,
+		"attacks": [["aimed", 2.0, 1.0], ["fan", 5.0, 2.5], ["summon_popup", 7.0, 4.0]]},
 }
 
 const FINALS := [

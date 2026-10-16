@@ -123,8 +123,8 @@ func setup(node, kind: String, boost := 1.0) -> void:
 		cid = node.boss_id if is_boss else node.kind
 	if is_boss:
 		node.intro = 0.0   # the codex boss is fully grown at once
-		s = BOSS_SIZE / node.radius * boost
-		var art_w: float = PixelArt.boss_art_width(node.boss_id, node.radius) * s   # in the cage a boss is never smaller than 1.2x a regular enemy sprite (ENEMY_SIZE * 2.6 wide)
+		s = BOSS_SIZE / (node.vis_radius if node.vis_radius > 0.0 else node.radius) * boost
+		var art_w: float = PixelArt.boss_art_width(node.boss_id, node.vis_radius if node.vis_radius > 0.0 else node.radius) * s   # in the cage a boss is never smaller than 1.2x a regular enemy sprite (ENEMY_SIZE * 2.6 wide)
 		var min_w := ENEMY_SIZE * 2.6 * 1.2
 		if art_w > 0.0 and art_w < min_w:
 			s *= min_w / art_w

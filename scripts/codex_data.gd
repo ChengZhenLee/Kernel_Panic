@@ -41,6 +41,11 @@ const BOSSES := [
 	{"key": "boss:bluescreen", "name": "BLUE SCREEN", "desc": "Final boss of the Gaming Laptop. Heavy slams, rings and Popups.", "color": Color(0.25, 0.45, 1.0), "sides": 12},
 ]
 
+## Songs of the secret rooms, found in a run and then playable here ("music:<id>" -> assets/audio/music/music_<id>.wav).
+const MUSIC := [
+	{"key": "music:truth", "name": "THE TRUTH", "desc": "A song that was never meant to be heard. Title stage 3. A snippet is found by repeating the melody in the MUSIC app of the smartphone.", "color": Color(1.0, 0.6, 0.9), "sides": 0},
+]
+
 const SECTIONS := [["ENEMIES", ENEMIES], ["MODIFIERS", AFFIXES], ["BOSSES", BOSSES]]
 
 
@@ -58,7 +63,8 @@ static func classes() -> Array:
 ## One entry per device hazard (hazards.gd), blacked out until a run has had that hazard.
 static func hazards() -> Array:
 	var out := []
-	for h in preload("res://scripts/hazards.gd").TYPES:
+	var hz = preload("res://scripts/hazards.gd")
+	for h in hz.TYPES + [hz.THUNDER]:
 		out.append({"key": "hazard:" + h["id"], "name": h["name"], "desc": h["text"] + ".", "color": h["color"], "sides": 0})
 	return out
 
@@ -122,4 +128,4 @@ static func is_weapon(id: String) -> bool:
 
 
 static func sections() -> Array:
-	return SECTIONS + [["HAZARDS", hazards()], ["STATUS", status_pages()], ["WEAPONS", weapons()], ["CLASSES", classes()]]
+	return SECTIONS + [["HAZARDS", hazards()], ["STATUS", status_pages()], ["WEAPONS", weapons()], ["CLASSES", classes()], ["MUSIC", MUSIC]]

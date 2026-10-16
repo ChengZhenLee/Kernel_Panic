@@ -20,6 +20,9 @@ const TYPES := [
 	{"id": "well", "mode": "fixed", "name": "GRAVITY WELLS", "text": "Wells drag you hard toward their centre, harder the closer you get. They sit in the same spots every run", "color": Color(0.7, 0.5, 1.0), "r": 360.0},
 	{"id": "flux", "mode": "event", "name": "QUANTUM FLUX", "text": "Rifts open at random near you and swing your weapons between fast and slow, then fade away", "color": Color(0.85, 0.9, 1.0), "r": 150.0},
 ]
+## THUNDER STRIKES: a hazard of the smartphone's WEATHER app (not tied to a device). Like an orbital strike, but a bolt of lightning that also shocks.
+const THUNDER := {"id": "thunder", "mode": "event", "name": "THUNDER STRIKES", "text": "Dark clouds drop lightning near you: a ring shows the spot, then a bolt lands there after a second. It hurts and shocks anything inside", "color": Color(1.0, 0.9, 0.4), "r": 90.0}
+const THUNDER_FRAC := 0.18   # of max HP, plus a shock
 ## THE INTERNET: fixed zones of every fixed kind are baked into the floor chunk by chunk, and all three event kinds pop up near you.
 const MIXED := {"id": "mixed", "mode": "mixed", "name": "MIXED HAZARDS", "text": "Every kind of hazard is scattered across the net, and vents, orbital strikes and flux rifts flare up near you", "color": Color(0.4, 0.95, 0.85), "r": 140.0}
 const FIXED_IDS := ["frost", "jam", "arc", "fan", "well"]
@@ -46,7 +49,7 @@ const EVENT_GAP_THREAT := 0.15  # per threat level: event timers run this much f
 const EVENT_MAX_THREAT := 0.5   # per threat level: extra live events allowed (+2 at threat 5)
 const EVENT_R_THREAT := 0.08     # per threat level: event zones grow this much (x1.4 at threat 5)
 const EVENT_BURST_EVERY := 3    # every this many threat levels, each spawn drops one more event at once
-const ART_R := {"vent": 19.5, "strike": 19.5}   # radius (page px) of the ring in the vent / strike sheets, drawn at the zone radius
+const ART_R := {"vent": 19.5, "strike": 19.5, "thunder": 28.0}   # radius (page px) of the ring in the vent / strike sheets, drawn at the zone radius
 const FADE_IN := 0.35
 const FADE_OUT := 0.8
 const STRIKE_FADE_OUT := 0.8   # the strike's scorch mark fades over the last stretch of its life (beam at 1.3 s, particles gone by 2.0 s)
@@ -227,9 +230,43 @@ func _event_spot(pp: Vector2, r: float, dist: Array):
 static func zone_fade(z: Dictionary) -> float:
 	if not z.has("life"):
 		return 1.0
-	if z["id"] == "strike":
+	if z["id"] == "strike" or z["id"] == "thunder":
 		return clampf((z["life"] - z["t"]) / STRIKE_FADE_OUT, 0.0, 1.0)   # the scorch mark fades after the beam instead of popping out
 	return clampf(z["t"] / FADE_IN, 0.0, 1.0) * clampf((z["life"] - z["t"]) / FADE_OUT, 0.0, 1.0)
+
+
+## A thunder strike at pos (the WEATHER app's storm calls this); it plays out like an orbital strike.
+func spawn_thunder(pos: Vector2, r := 90.0) -> void:
+	Meta.codex_see("hazard:thunder")
+	zones.append({"pos": pos, "r": r, "t": 0.0, "hit": false, "id": "thunder", "col": THUNDER["color"], "life": 2.2})
+
+
+## Runs the thunder zones only (the other hazards are switched off inside rooms).
+func _tick_thunder(delta: float, pp: Vector2) -> void:
+	_tick_status(delta)
+	for z in zones.duplicate():
+		if z["id"] != "thunder":
+			continue
+		z["t"] += delta
+		if z["t"] >= z["life"]:
+			zones.erase(z)
+			continue
+		var d: float = z["pos"].distance_to(pp)
+		if z["t"] >= 0.6 and not z.get("warned", false):
+			z["warned"] = true
+			_snd("hz_strike_warn", d, z, 1.0)
+		if z["t"] >= 1.3 and not z["hit"]:
+			z["hit"] = true
+			_snd("hz_strike", d, z, 1.0)
+			if d < z["r"]:
+				_hurt(THUNDER_FRAC)
+				shock_t = SHOCK_SLOW_TIME
+			Global.game.burst(z["pos"], z["col"], 40, 420.0, 6.0, 0.7)
+			Global.game.ring(z["pos"], Color(0.7, 0.85, 1.0), z["r"] * 1.4, 0.4, 8.0)
+			Global.game.shake(0.3)
+			for e in get_tree().get_nodes_in_group("enemies"):
+				if e.global_position.distance_to(z["pos"]) < z["r"] + e.radius:
+					e.take_damage(150.0)
 
 
 func _process(delta: float) -> void:
@@ -238,8 +275,9 @@ func _process(delta: float) -> void:
 		return
 	if Global.game and Global.game.time_stop > 0.0:
 		return   # PAUSE ability
-	if get_parent().in_room:   # no device hazards inside a boss room
-		player.hazard_speed = 1.0
+	if get_parent().in_room:   # no device hazards inside a boss room (the thunder of a secret room's storm still runs)
+		_tick_thunder(delta, player.global_position)
+		player.hazard_speed = 0.5 if shock_t > 0.0 else 1.0
 		player.hazard_push = Vector2.ZERO
 		if not is_equal_approx(cd_now, 1.0):
 			cd_now = 1.0
@@ -412,7 +450,7 @@ static func frame_at(id: String, t: float) -> int:
 			if ph < 1.2:
 				return [0, 1, 2, 6, 7][int(ph / 0.12) % 5]
 			return 3 + int((ph - 1.2) / 0.6) % 3
-		"strike":   # 20 frames: 0-11 telegraph over 1.3 s, 12-15 beam impact over 0.25 s, 16-19 crater cooling over 1.55-2.2 s, last frame held while the zone fades out
+		"strike", "thunder":   # 20 frames: 0-11 telegraph over 1.3 s, 12-15 beam impact over 0.25 s, 16-19 crater cooling over 1.55-2.2 s, last frame held while the zone fades out
 			if t < 1.3:
 				return clampi(int(t / 1.3 * 12.0), 0, 11)
 			if t < 1.55:
@@ -432,6 +470,8 @@ func _draw() -> void:
 			PixelArt.draw_hazard_zone(self, page, z["pos"] - origin, z["r"], z["t"], 0.85 * zone_fade(z), z.get("ang", 0.0), -1, _art_frame(z), ART_R.get(String(z["id"]), 0.0))
 			if z["id"] == "strike":
 				draw_strike_beam(self, z["pos"] - origin, z["r"], z["t"], zone_fade(z))
+			elif z["id"] == "thunder":
+				draw_thunder_bolt(self, z["pos"] - origin, z["r"], z["t"], zone_fade(z))
 		else:   # vector fallback only when the art file is missing; with art it is the whole picture
 			draw_zone(self, String(z["id"]), z["pos"] - origin, z["r"], z["col"], z["t"], z.get("ang", 0.35), zone_fade(z))
 
@@ -453,6 +493,31 @@ static func draw_strike_beam(ci: CanvasItem, c: Vector2, r: float, t: float, vis
 	ci.draw_rect(Rect2(c.x - w * 0.5, top, w, c.y - top), Color(1.0, 0.6, 0.5, 0.85 * a))
 	ci.draw_rect(Rect2(c.x - w * 0.2, top, w * 0.4, c.y - top), Color(1.0, 1.0, 0.95, a))
 	FD.circle(ci, c, w * 0.9, Color(1.0, 0.85, 0.7, 0.55 * a))   # blast glow where it lands
+
+
+## The bolt of a thunder strike: a faint crackling line from the clouds while the ring closes, then a jagged white-blue bolt at 1.3 s that fades.
+static func draw_thunder_bolt(ci: CanvasItem, c: Vector2, r: float, t: float, vis := 1.0, height := 1500.0) -> void:
+	var top := c.y - height
+	var seed_i := int(t * 14.0)   # the bolt flickers: a new jag pattern a few times a second
+	var pts := PackedVector2Array()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(c.x * 7.0 + c.y * 13.0) + (seed_i if t >= 1.3 else 0)
+	var steps := 14
+	for i in steps + 1:
+		var k := float(i) / steps
+		var x := c.x + (rng.randf() - 0.5) * 120.0 * (1.0 - k) * (0.4 if t < 1.3 else 1.0)
+		pts.append(Vector2(x if i < steps else c.x, top + (c.y - top) * k))
+	if t < 1.3:
+		var u := clampf((t - 0.4) / 0.9, 0.0, 1.0)
+		if u > 0.0:
+			ci.draw_polyline(pts, Color(1.0, 0.95, 0.5, (0.08 + 0.25 * u) * vis), 2.0)
+		return
+	var f := clampf((t - 1.5) / 0.7, 0.0, 1.0)
+	var a := (1.0 - f) * vis
+	ci.draw_polyline(pts, Color(0.5, 0.7, 1.0, 0.45 * a), 22.0 * (1.0 - 0.5 * f))
+	ci.draw_polyline(pts, Color(0.85, 0.92, 1.0, 0.9 * a), 10.0 * (1.0 - 0.5 * f))
+	ci.draw_polyline(pts, Color(1.0, 1.0, 1.0, a), 4.0)
+	FD.circle(ci, c, r * 0.8, Color(0.85, 0.92, 1.0, 0.45 * a))
 
 
 ## Draws one zone of a hazard kind (also used by the CODEX page): c = centre, r = radius, t = the zone's clock, vis = 0..1 visibility.

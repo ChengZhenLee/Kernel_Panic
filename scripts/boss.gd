@@ -5,6 +5,9 @@ extends "res://scripts/enemy.gd"
 const BossData = preload("res://scripts/boss_data.gd")
 var boss_id := ""
 var kite := false
+const HIT_FIT := 0.9   # the hitbox is this share of the sprite's drawn body (the body has rounded corners and glow)
+static var _body_px := {}
+var vis_radius := 0.0   # sprite scale radius when it differs from the hit radius (secret mini-bosses); 0 = same
 var boss_index := 0   # slot: 0-2 regular bosses, 3 the final boss
 var attacks := []      # [name, interval, timer]
 var enraged := false
@@ -37,6 +40,10 @@ func setup_boss(def: Dictionary, slot: int, run_minutes: float) -> void:
 		_stats(def["speed"], BossData.SLOT_HP[slot] * def["hp"], BossData.SLOT_DMG[slot] * def["dmg"], def["radius"], BossData.SLOT_XP[slot], def["color"])
 	else:
 		_stats(def["speed"], def["hp"], def["dmg"], def["radius"], def["xp"], def["color"])
+	# the hit radius follows the drawn body: bosses are drawn at BOSS_VISUAL_MULT times their art scale, so the data radius alone left the hitbox about half the size of the sprite
+	vis_radius = def.get("vis_radius", def["radius"])
+	var body: float = _body_half_px(boss_id) * PixelArt.boss_scale(boss_id, vis_radius) * HIT_FIT
+	radius = maxf(radius, body)
 	attacks = []
 	for a in def["attacks"]:
 		attacks.append(a.duplicate())
@@ -49,6 +56,31 @@ func setup_boss(def: Dictionary, slot: int, run_minutes: float) -> void:
 func _ready() -> void:
 	super._ready()
 	add_to_group("bosses")
+
+
+## Half the size (px of art) of a boss sprite's opaque body: the mean of its half width and half height over the pixels that are more than half opaque.
+static func _body_half_px(id: String) -> float:
+	if _body_px.has(id):
+		return _body_px[id]
+	var half := 0.0
+	var tex: Texture2D = PixelArt.boss_tex(id, false, 0.0)
+	if tex != null:
+		var img: Image = tex.get_image()
+		var x0 := img.get_width()
+		var y0 := img.get_height()
+		var x1 := -1
+		var y1 := -1
+		for y in img.get_height():
+			for x in img.get_width():
+				if img.get_pixel(x, y).a > 0.5:
+					x0 = mini(x0, x)
+					x1 = maxi(x1, x)
+					y0 = mini(y0, y)
+					y1 = maxi(y1, y)
+		if x1 >= 0:
+			half = ((x1 - x0 + 1) + (y1 - y0 + 1)) * 0.25
+	_body_px[id] = half
+	return half
 
 
 ## No burst can skip the enrage: the hit that crosses 50% stops at 49% and the boss enrages on the spot.
@@ -250,7 +282,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, mirror)
 
 	if bspr != null:
-		PixelArt.draw_boss(self, bspr, boss_id, radius, not face_left, grow, Color(2.0, 2.0, 2.0) if flash > 0.0 else Color.WHITE)
+		PixelArt.draw_boss(self, bspr, boss_id, vis_radius if vis_radius > 0.0 else radius, not face_left, grow, Color(2.0, 2.0, 2.0) if flash > 0.0 else Color.WHITE)
 	match "" if bspr != null else boss_id:
 		"megaworm":
 			# a long ringed body that tapers to a tail and wriggles, ending in a head with a toothed mouth (the hurt zones still follow history)

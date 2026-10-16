@@ -403,12 +403,16 @@ def g_clock(d):
     d.line((32, 32, 32, 18), fill=K, width=3); d.line((32, 32, 43, 38), fill=hx("#e83a3a"), width=3)
 
 
-def g_calc(d):
-    d.rounded_rectangle((14, 11, 50, 53), radius=5, fill=hx("#2a2a34"))
-    d.rectangle((18, 15, 46, 24), fill=hx("#9affb0"))
-    for r in range(3):
-        for c in range(3):
-            d.rectangle((18 + c * 10, 29 + r * 8, 25 + c * 10, 34 + r * 8), fill=hx("#ffb43a") if c == 2 else hx("#c8ccd8"))
+def g_cart(d):
+    """A shopping cart: handle, basket with slats, two wheels (the STORE app icon)."""
+    d.line((10, 15, 18, 15), fill=W, width=4); d.line((18, 15, 24, 38), fill=W, width=4)      # the handle and the frame
+    d.polygon([(20, 21), (53, 21), (48, 37), (25, 37)], fill=W)                                # the basket
+    for x in (28, 36, 44):
+        d.line((x, 23, x - 1, 35), fill=hx("#d86a1a"), width=2)                               # slats
+    d.line((24, 38, 49, 38), fill=W, width=3)
+    d.line((24, 38, 22, 44), fill=W, width=3); d.line((22, 44, 47, 44), fill=W, width=3)
+    for x in (28, 43):
+        d.ellipse((x - 5, 46, x + 5, 56), fill=K); d.ellipse((x - 3, 48, x + 3, 54), fill=W)    # wheels
 
 
 def g_gear(d):
@@ -443,7 +447,7 @@ def g_notes(d):
 
 
 ICONS = [("#5ae88a", "#1a9a4a", g_phone), ("#6ae8a8", "#18a070", g_msg), ("#8a90a8", "#3a3e56", g_cam), ("#ff7aa0", "#d82a5a", g_music),
-         ("#6aa8ff", "#2a5ad8", g_mail), ("#7ad8a0", "#2a9a6a", g_maps), ("#3a3e56", "#14162a", g_clock), ("#ffa84a", "#d86a1a", g_calc),
+         ("#6aa8ff", "#2a5ad8", g_mail), ("#7ad8a0", "#2a9a6a", g_maps), ("#3a3e56", "#14162a", g_clock), ("#ffa84a", "#d86a1a", g_cart),
          ("#a0a6b8", "#5a6078", g_gear), ("#f2f4ff", "#c0c8e0", g_photos), ("#6ac8ff", "#2a82d8", g_weather), ("#ffe05a", "#e8a81a", g_notes)]
 
 

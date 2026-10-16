@@ -135,6 +135,36 @@ static func secret_room(id: String) -> Dictionary:
 		"lounge":   # the manager's lounge: desks and a sofa row
 			return _snap({"size": Vector2(2400, 1600), "start": Vector2(-900, 0), "walls": [
 				Rect2(-500, -500, 400, 120), Rect2(100, -500, 400, 120), Rect2(-500, 380, 400, 120), Rect2(100, 380, 400, 120)]})
+		"app_mail":   # the inbox: two long stacks of letters with a lane between them and a lane on either side
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-700, 0), "walls": [Rect2(-420, -330, 840, 130), Rect2(-420, 200, 840, 130)]})
+		"app_messages":   # a chat: bubbles stagger left and right down the room
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-700, 0), "walls": [
+				Rect2(-560, -440, 330, 190), Rect2(-100, -180, 330, 190), Rect2(-560, 90, 330, 190), Rect2(360, -440, 330, 190), Rect2(360, 150, 330, 190)]})
+		"app_maps":   # a map: pins scattered over the floor
+			return _snap({"size": Vector2(2400, 1500), "start": Vector2(-800, 0), "walls": [
+				Rect2(-560, -450, 140, 140), Rect2(-240, 250, 140, 140), Rect2(60, -300, 140, 140), Rect2(420, 40, 140, 140), Rect2(-80, -20, 140, 140)]})
+		"app_clock":   # a clock face: a block at each of 12, 3, 6 and 9
+			return _snap({"size": Vector2(2200, 1500), "start": Vector2(-700, 0), "walls": [
+				Rect2(-70, -480, 140, 140), Rect2(330, -70, 140, 140), Rect2(-70, 340, 140, 140), Rect2(-470, -70, 140, 140)]})
+		"app_music":   # an equaliser: bars of different heights standing on the bottom edge
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-700, 0), "walls": [
+				Rect2(-400, 160, 120, 540), Rect2(-160, -20, 120, 720), Rect2(80, 260, 120, 440), Rect2(320, -140, 120, 840)]})
+		"app_phone":   # a keypad: 1 2 3 / 4 5 6 / 7 8 9 / 0, ten 128 px number buttons, evenly spaced
+			return _snap({"size": Vector2(2600, 2000), "start": Vector2(-1000, 0), "walls": [   # on the 128 grid, pitch 384 both ways (256 px gaps), so the spacing is exactly even
+				Rect2(-512, -640, 128, 128), Rect2(-128, -640, 128, 128), Rect2(256, -640, 128, 128),
+				Rect2(-512, -256, 128, 128), Rect2(-128, -256, 128, 128), Rect2(256, -256, 128, 128),
+				Rect2(-512, 128, 128, 128), Rect2(-128, 128, 128, 128), Rect2(256, 128, 128, 128), Rect2(-128, 512, 128, 128)]})
+		"app_settings":   # three slider tracks with gaps to walk around
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-700, 0), "walls": [
+				Rect2(-480, -380, 640, 110), Rect2(-120, -50, 640, 110), Rect2(-480, 280, 640, 110)]})
+		"app_photos":   # snapshots stacked on a diagonal
+			return _snap({"size": Vector2(2200, 1500), "start": Vector2(-700, 0), "walls": [
+				Rect2(-560, -400, 260, 260), Rect2(-130, -130, 260, 260), Rect2(300, 140, 260, 260)]})
+		"app_weather":   # a cloud: three puffs at the top of the room
+			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-700, 0), "walls": [
+				Rect2(-420, -400, 280, 170), Rect2(-200, -470, 320, 210), Rect2(70, -400, 300, 170)]})
+		"shop":   # the store: an open hall with room for four pedestals in a row
+			return _snap({"size": Vector2(2800, 1500), "start": Vector2(-1100, 0), "walls": []})
 		"app":   # a small app room: two pillars
 			return _snap({"size": Vector2(2000, 1300), "start": Vector2(-700, 0), "walls": [Rect2(-120, -420, 240, 240), Rect2(-120, 180, 240, 240)]})
 		"corrupt":   # the corrupted app: scattered blocks
@@ -171,8 +201,17 @@ static func _phone() -> Dictionary:
 		for gy in range(-2, 3):
 			if gx == 0 and gy == 0:
 				continue
-			walls.append(Rect2(gx * 540 - 75, gy * 500 - 75, 150, 150))
+			# every app pillar is exactly 3x3 art tiles (384 px) centred on a tile centre, so the icon art, the hitbox and the grid all agree
+			var side := 3.0 * TILE / WALL_SCALE
+			var cx := _tile_centre(gx * 540.0 * MAP_SCALE) / MAP_SCALE
+			var cy := _tile_centre(gy * 500.0 * MAP_SCALE) / MAP_SCALE
+			walls.append(Rect2(cx - side / 2.0, cy - side / 2.0, side, side))
 	return {"size": Vector2(3000, 2800), "start": Vector2.ZERO, "walls": walls}
+
+
+## The centre of the 128 px tile nearest to v (an odd number of tiles wide block centred here has both edges on the grid).
+static func _tile_centre(v: float) -> float:
+	return roundf(v / TILE - 0.5) * TILE + TILE / 2.0
 
 
 ## Gaming Laptop: rows of key blocks along the top and a touchpad slab at the bottom.

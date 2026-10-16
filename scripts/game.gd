@@ -220,6 +220,7 @@ var hazards: Node2D
 var main_arena: Node2D        # the device arena; arena points at the boss room while a boss fight is on
 var room_arena: Node2D
 var in_room := false
+var room_enemy_cap := 26      # most non-elite enemies a boss/secret room allows (the corrupted app raises it for its big waves)
 var secret   # SecretRooms: the hidden rooms of the device (scripts/secret_rooms.gd)
 var room_return := Vector2.ZERO
 var arena: Node2D              # the fixed walled arena (null on THE INTERNET)
@@ -347,7 +348,6 @@ func _ready() -> void:
 	hud.announce("MAP: THE INTERNET" if internet else "INFECTED DEVICE: %s" % Meta.device_name(), Global.C_CYAN)
 	if not internet:
 		hud.announce("MAP: %s" % Meta.MapsData.name_of(Meta.selected_device), Global.C_CYAN)
-	hud.announce("HAZARD: %s. %s" % [hazards.kind["name"], hazards.kind["text"]], hazards.kind["color"])
 
 	for i in int(Meta.stat("startlevels")):
 		offer_queue.append({"title": "BOOTSTRAP", "color": Global.C_GREEN, "luck": 0.5, "decrypt": false})
@@ -836,7 +836,7 @@ func _process(delta: float) -> void:
 
 	if overtime:
 		hud.set_overtime(elapsed - overtime_start, Global.overtime_dmg_mult(minutes))
-		if not boss_alive and boss_warning < 0.0 and elapsed >= next_ot_boss - 3.0:
+		if not boss_alive and boss_warning < 0.0 and elapsed >= next_ot_boss - 3.0 and not _in_secret_room():
 			boss_warning = 3.0
 			ot_boss_def = BossData.random_mid()
 			hud.boss_warning(ot_boss_def["name"], false)
@@ -847,14 +847,17 @@ func _process(delta: float) -> void:
 	# bosses
 	if internet and not overtime and not boss_alive and boss_warning < 0.0 and elapsed >= BOSS_TIMES[BOSS_TIMES.size() - 1]:
 		_start_internet_overtime()
-	if next_boss < BOSS_TIMES.size() - (1 if internet else 0) and not boss_alive and boss_warning < 0.0 and elapsed >= BOSS_TIMES[next_boss] - 3.0:
+	if next_boss < BOSS_TIMES.size() - (1 if internet else 0) and not boss_alive and boss_warning < 0.0 and elapsed >= BOSS_TIMES[next_boss] - 3.0 and not _in_secret_room():
 		boss_warning = 3.0
 		hud.boss_warning(boss_lineup[next_boss]["name"], next_boss == 3)
 		if not Sfx.announce("warning_incoming_boss"):
 			Sfx.play("boss_final" if next_boss == 3 and Sfx.streams.has("boss_final") else "boss")
 		shake(0.4)
 	if boss_warning >= 0.0:
-		boss_warning -= delta
+		if _in_secret_room():   # the regular boss waits outside until the player is back
+			boss_warning = maxf(boss_warning, 0.0)
+		else:
+			boss_warning -= delta
 		if boss_warning < 0.0:
 			if overtime:
 				if ot_boss_def.is_empty():
@@ -869,6 +872,11 @@ func _process(delta: float) -> void:
 	frame += 1
 	_separate_enemies()
 	hud.update_stats(player, elapsed, kills, data_earned(), current_boss)
+
+
+## True while the player is inside a secret side room (no regular bosses, elites or swarms there).
+func _in_secret_room() -> bool:
+	return secret != null and secret.active
 
 
 # ---------- spawning ----------
@@ -939,7 +947,7 @@ func _spawn_enemy(kind: String, minutes: float, elite := false, pos = null, swar
 	var cap := max_enemies() + (SWARM_EXTRA if swarm else 0) + (ELITE_EXTRA if elite else 0)
 	if enemy_layer.get_child_count() >= cap:
 		return null
-	if in_room and enemy_layer.get_child_count() >= 26 and not elite:
+	if in_room and enemy_layer.get_child_count() >= room_enemy_cap and not elite:
 		return null   # boss rooms are small: keep the adds manageable
 	var e = EnemyScript.new()
 	e.setup(kind, minutes, elite)
@@ -1116,12 +1124,15 @@ func _enter_boss_room() -> void:
 	player.invuln = maxf(player.invuln, 1.5)
 	_arena_changed()
 	hud.announce("BOSS ROOM", Global.C_RED, true)
+	if secret != null:
+		secret.arrive_fx(true)
 
 
 func _leave_boss_room() -> void:
 	if not in_room:
 		return
 	in_room = false
+	room_enemy_cap = 26
 	var back: Vector2 = main_arena.nearest_open(room_return)
 	for p in pickup_layer.get_children():   # leftover drops come along
 		if room_arena.bounds.has_point(p.position):
@@ -1133,6 +1144,8 @@ func _leave_boss_room() -> void:
 	room_arena.set_active(false)
 	main_arena.set_active(true)
 	arena = main_arena
+	if secret != null:
+		secret.arrive_fx(false)
 	player.global_position = back
 	player.invuln = maxf(player.invuln, 1.5)
 	_arena_changed()
@@ -2314,8 +2327,11 @@ func _draw() -> void:
 	if player == null:
 		return
 	var c: Vector2 = player.global_position
+	if camera != null:   # the floor follows the view, not the player: near a map edge the camera stops but the player walks off-centre
+		c = camera.get_screen_center_position()
 	var cell := 64.0
-	var half := get_viewport_rect().size / 2.0 + Vector2(120, 120)
+	var zoom_k: Vector2 = camera.zoom if camera != null else Vector2.ONE
+	var half := get_viewport_rect().size / 2.0 / Vector2(maxf(zoom_k.x, 0.05), maxf(zoom_k.y, 0.05)) + Vector2(120, 120)
 	var x0 := floori((c.x - half.x) / cell)
 	var x1 := ceili((c.x + half.x) / cell)
 	var y0 := floori((c.y - half.y) / cell)

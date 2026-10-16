@@ -19,9 +19,12 @@ var phase_t := 0.0
 var color := Color.WHITE
 var wall_tex: Texture2D = null   # art/tiles/wall_<tier>.png: one 128 px tile per grid cell of wall
 var wall_tex_v: Texture2D = null # optional wall_<tier>_v.png: the same tile turned for vertical walls
+var icon_index := {}               # wall position -> icon art index, to give chosen blocks their own icon
+var skip_icons: Array = []        # wall rects whose icon is drawn by someone else (the corrupted app)
 var icon_tex: Array = []         # art/tiles/icon_<tier>_<i>.png: walls made of whole icons (the phone's app icons), one per block
 var edge_light := Color.WHITE    # bevel on the exposed top / left edges of a wall
 var edge_dark := Color.BLACK     # and on the bottom / right edges
+const ICON_INSET := 8.0           # app icons are drawn this far inside their hitbox (secret_rooms.gd uses the same)
 const TILE := 128.0              # = MapsData.TILE
 const EDGE_W := 10.0
 ## wall bevel colours per device: [light, dark], matching each wall's art
@@ -496,7 +499,11 @@ func _draw_art_walls(list: Array) -> void:
 				cells[Vector2i(cx, cy)] = vertical
 	for k in cells:
 		var tex: Texture2D = wall_tex_v if (cells[k] and wall_tex_v != null) else wall_tex
-		draw_texture_rect(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), false)
+		var nv := maxi(1, tex.get_width() / 128)   # a strip of tiles (the clock app): each wall block shows a different one
+		if nv > 1:
+			draw_texture_rect_region(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), Rect2(posmod(k.x * 5 + k.y * 7, nv) * 128, 0, 128, 128))
+		else:
+			draw_texture_rect(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), false)
 	for k in cells:
 		var o := Vector2(k) * TILE
 		if not cells.has(k + Vector2i(0, -1)):
@@ -514,14 +521,28 @@ func _draw_icon_walls(list: Array) -> void:
 	for r in list:
 		var rect: Rect2 = r
 		var side := minf(rect.size.x, rect.size.y)
-		var count := maxi(1, roundi(maxf(rect.size.x, rect.size.y) / side))
+		var count := maxi(1, floori(maxf(rect.size.x, rect.size.y) / side + 0.01))   # whole icons only: they never stick out of the hitbox
+		var lead := (maxf(rect.size.x, rect.size.y) - side * count) * 0.5   # a leftover is split to both ends
 		for i in count:
-			var pos := rect.position + (Vector2(side * i, 0.0) if rect.size.x >= rect.size.y else Vector2(0.0, side * i))
+			var pos := rect.position + (Vector2(lead + side * i, 0.0) if rect.size.x >= rect.size.y else Vector2(0.0, lead + side * i))
 			var cell := Vector2i(roundi(pos.x / TILE), roundi(pos.y / TILE))
-			var tex: Texture2D = icon_tex[absi(hash(cell)) % icon_tex.size()]
-			var box := Rect2(pos, Vector2(side, side)).grow(-6.0)
-			draw_rect(Rect2(box.position + Vector2(10.0, 14.0), box.size), Color(0.0, 0.0, 0.0, 0.4))
+			var tex: Texture2D = icon_tex[int(icon_index[rect.position]) % icon_tex.size()] if icon_index.has(rect.position) else icon_tex[absi(hash(cell)) % icon_tex.size()]
+			var box := Rect2(pos, Vector2(side, side)).grow(-ICON_INSET)   # centred in its hitbox, same inset on every side
+			if skip_icons.has(rect):
+				continue
+			# a soft shadow in the icon's own rounded shape (a plain square shadow showed as black corners around the icon)
+			draw_texture_rect(tex, Rect2(box.position + Vector2(6.0, 9.0), box.size), false, Color(0.0, 0.0, 0.0, 0.35))
 			draw_texture_rect(tex, box, false)
+
+
+## The icon texture of one app block (for the opening animation).
+func icon_for_block(rect: Rect2) -> Texture2D:
+	if icon_tex.is_empty():
+		return null
+	if icon_index.has(rect.position):
+		return icon_tex[int(icon_index[rect.position]) % icon_tex.size()]
+	var cell := Vector2i(roundi(rect.position.x / TILE), roundi(rect.position.y / TILE))
+	return icon_tex[absi(hash(cell)) % icon_tex.size()]
 
 
 ## amount 1 = solid wall, 0 = faint ghost outline (inactive phase wall); warn flashes a wall about to close.

@@ -57,6 +57,54 @@ class StatusSprite extends Node2D:
 			draw_line(Vector2(0.0, -9.0), Vector2(0.0, 9.0), Color.WHITE, 4.0)
 
 ## A hazard zone for the HAZARDS pages: drawn by the game's own zone code, looping its clock.
+## A song of the MUSIC section: a big note and a PLAY / STOP button (the stream stops with the page).
+class MusicSprite extends Node2D:
+	var id := ""
+	var col := Color.WHITE
+	var unknown := false
+	var player: AudioStreamPlayer
+	var button: Button
+
+	func _ready() -> void:
+		player = AudioStreamPlayer.new()
+		var path := "res://assets/audio/music/music_%s.wav" % id
+		if ResourceLoader.exists(path):
+			player.stream = load(path)
+		add_child(player)
+		button = Button.new()
+		button.text = "PLAY"
+		button.focus_mode = Control.FOCUS_NONE
+		button.custom_minimum_size = Vector2(150, 48)
+		button.position = Vector2(-75, 70)
+		button.pressed.connect(func():
+			if player.playing:
+				player.stop()
+				button.text = "PLAY"
+			else:
+				player.volume_db = linear_to_db(maxf(Global.music_volume * Global.music_volume, 0.05))
+				player.play()
+				button.text = "STOP")
+		add_child(button)
+		button.visible = not unknown
+
+	func set_unknown(on: bool) -> void:
+		unknown = on
+		modulate = Color(0.0, 0.0, 0.0) if on else Color.WHITE
+		if button != null:
+			button.visible = not on
+
+	func _process(_d: float) -> void:
+		if button != null and player != null and button.text == "STOP" and not player.playing:
+			button.text = "PLAY"
+		queue_redraw()
+
+	func _draw() -> void:
+		var tex: Texture2D = PixelArt.load_tex("secret/smartphone_secret_room_glyph_note.png")
+		var bob := sin(Time.get_ticks_msec() / 300.0) * 4.0
+		if tex != null:
+			draw_texture_rect(tex, Rect2(Vector2(-64, -90 + bob), Vector2(128, 128)), false, col)
+
+
 class HazardSprite extends Node2D:
 	const HazardScript = preload("res://scripts/hazards.gd")
 	var id := ""
@@ -76,8 +124,8 @@ class HazardSprite extends Node2D:
 			queue_redraw()
 
 	## Seconds the page's clock runs before it starts over (the timed zones play their whole life, then a beat of rest).
-	const CYCLES := {"vent": 5.2, "strike": 3.6, "flux": 8.0, "arc": 3.0}
-	const LIVES := {"vent": 4.7, "strike": 3.0}   # fade-outs, same as a run (EVENTS life)
+	const CYCLES := {"vent": 5.2, "strike": 3.6, "thunder": 3.6, "flux": 8.0, "arc": 3.0}
+	const LIVES := {"vent": 4.7, "strike": 3.0, "thunder": 2.2}   # fade-outs, same as a run (EVENTS life)
 
 	func _frame() -> int:
 		if CYCLES.has(id):   # same frame mapping and clock as a run
@@ -95,6 +143,8 @@ class HazardSprite extends Node2D:
 			PixelArt.draw_hazard_zone(self, page, Vector2.ZERO, 62.0 if art_r > 0.0 else 70.0, ct, vis, 0.0, -1, _frame(), art_r)
 			if id == "strike":
 				HazardScript.draw_strike_beam(self, Vector2.ZERO, 62.0, ct, vis, 220.0)
+			elif id == "thunder":
+				HazardScript.draw_thunder_bolt(self, Vector2.ZERO, 62.0, ct, vis, 220.0)
 			return
 		HazardScript.draw_zone(self, id, Vector2.ZERO, 70.0, col, fmod(t, cycle))
 
@@ -318,7 +368,7 @@ func _show_spread() -> void:
 		if known and item["section"] == "WEAPONS":
 			pg[3].text += "\n\n" + _weapon_status(String(e["key"]).substr(7))
 		pg[3].add_theme_color_override("font_color", Color(0.8, 0.9, 0.95) if known else Color(0.45, 0.5, 0.58))
-		pg[4].text = ("Deleted: %d" % int(entry.get("kills", 0))) if known and not (item["section"] in ["CLASSES", "HAZARDS", "STATUS"]) else ""
+		pg[4].text = ("Deleted: %d" % int(entry.get("kills", 0))) if known and not (item["section"] in ["CLASSES", "HAZARDS", "STATUS", "MUSIC"]) else ""
 		if known and item["section"] == "STATUS":
 			pg[4].text = ("Triggered: %d" % int(entry.get("applied", 0))) if String(e["key"]).begins_with("combo:") else ("Kills: %d" % int(entry.get("kills", 0)))
 		if known and item["section"] == "WEAPONS":
@@ -396,10 +446,19 @@ func _make_sprite(key: String):
 						ss.cols.append(CodexData.STATUS_EFFECTS[["burn", "poison", "freeze", "shock"].find(p)]["color"])
 		ss.scale = Vector2.ONE * 1.3
 		return ss
+	if kind == "music":
+		var ms := MusicSprite.new()
+		ms.id = id
+		for e in CodexData.MUSIC:
+			if e["key"] == key:
+				ms.col = e["color"]
+		ms.scale = Vector2.ONE * 1.3
+		return ms
 	if kind == "hazard":
 		var hs := HazardSprite.new()
 		hs.id = id
-		for h in preload("res://scripts/hazards.gd").TYPES:
+		var hz = preload("res://scripts/hazards.gd")
+		for h in hz.TYPES + [hz.THUNDER]:
 			if h["id"] == id:
 				hs.col = h["color"]
 		return hs
