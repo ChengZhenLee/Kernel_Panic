@@ -20,6 +20,7 @@ var color := Color.WHITE
 var wall_tex: Texture2D = null   # art/tiles/wall_<tier>.png: one 128 px tile per grid cell of wall
 var wall_tex_v: Texture2D = null # optional wall_<tier>_v.png: the same tile turned for vertical walls
 var icon_index := {}               # wall position -> icon art index, to give chosen blocks their own icon
+var wall_variant_map := {}   # cell (Vector2i) -> variant of a wall strip, to give chosen blocks a specific tile (the keyboard room: one key each); other cells use a position formula
 var skip_icons: Array = []        # wall rects whose icon is drawn by someone else (the corrupted app)
 var icon_tex: Array = []         # art/tiles/icon_<tier>_<i>.png: walls made of whole icons (the phone's app icons), one per block
 var edge_light := Color.WHITE    # bevel on the exposed top / left edges of a wall
@@ -438,6 +439,75 @@ func flow_dir(p: Vector2) -> Vector2:
 	return (target - p).normalized()
 
 
+# ---------- a route to any goal (the office intern runs to the lounge door with this) ----------
+
+var route_dist := PackedInt32Array()
+var route_cell := Vector2i(-9999, -9999)
+
+
+func _rebuild_route(goal_pos: Vector2) -> void:
+	var g := cell_of(goal_pos)
+	if g == route_cell and route_dist.size() == cols * rows:
+		return
+	route_cell = g
+	route_dist.resize(cols * rows)
+	route_dist.fill(-1)
+	var start := g
+	if blocked[_idx(g.x, g.y)] != 0:   # the goal cell touches a wall: start from the nearest open cell
+		var best := 1 << 30
+		for dy in range(-3, 4):
+			for dx in range(-3, 4):
+				var cx := g.x + dx
+				var cy := g.y + dy
+				if cx < 0 or cy < 0 or cx >= cols or cy >= rows or blocked[_idx(cx, cy)] != 0:
+					continue
+				if dx * dx + dy * dy < best:
+					best = dx * dx + dy * dy
+					start = Vector2i(cx, cy)
+	var queue := PackedInt32Array([_idx(start.x, start.y)])
+	route_dist[queue[0]] = 0
+	var head := 0
+	while head < queue.size():
+		var ci: int = queue[head]
+		head += 1
+		var cx := ci % cols
+		var cy := ci / cols
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var nx: int = cx + d.x
+			var ny: int = cy + d.y
+			if nx < 0 or ny < 0 or nx >= cols or ny >= rows:
+				continue
+			var ni := ny * cols + nx
+			if blocked[ni] != 0 or route_dist[ni] != -1:
+				continue
+			route_dist[ni] = route_dist[ci] + 1
+			queue.append(ni)
+
+
+## Direction to walk from p to reach goal around the walls (zero if there is no way).
+func route_dir(p: Vector2, goal: Vector2) -> Vector2:
+	_rebuild_route(goal)
+	var c := cell_of(p)
+	var here: int = route_dist[_idx(c.x, c.y)]
+	var best_cost := here if here >= 0 else (1 << 30)
+	var best := Vector2i(-1, -1)
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if dx == 0 and dy == 0:
+				continue
+			var nx := c.x + dx
+			var ny := c.y + dy
+			if nx < 0 or ny < 0 or nx >= cols or ny >= rows:
+				continue
+			var nd: int = route_dist[_idx(nx, ny)]
+			if nd >= 0 and nd < best_cost and (dx == 0 or dy == 0 or (blocked[_idx(c.x + dx, c.y)] == 0 and blocked[_idx(c.x, c.y + dy)] == 0)):
+				best_cost = nd
+				best = Vector2i(nx, ny)
+	if best.x < 0:
+		return Vector2.ZERO
+	return ((bounds.position + (Vector2(best) + Vector2(0.5, 0.5)) * CELL) - p).normalized()
+
+
 # ---------- drawing ----------
 
 func _load_wall_art(tier: int) -> void:
@@ -501,7 +571,8 @@ func _draw_art_walls(list: Array) -> void:
 		var tex: Texture2D = wall_tex_v if (cells[k] and wall_tex_v != null) else wall_tex
 		var nv := maxi(1, tex.get_width() / 128)   # a strip of tiles (the clock app): each wall block shows a different one
 		if nv > 1:
-			draw_texture_rect_region(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), Rect2(posmod(k.x * 5 + k.y * 7, nv) * 128, 0, 128, 128))
+			var vi: int = posmod(int(wall_variant_map[k]), nv) if wall_variant_map.has(k) else posmod(k.x * 5 + k.y * 7, nv)
+			draw_texture_rect_region(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), Rect2(vi * 128, 0, 128, 128))
 		else:
 			draw_texture_rect(tex, Rect2(Vector2(k) * TILE, Vector2(TILE, TILE)), false)
 	for k in cells:

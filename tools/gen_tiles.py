@@ -365,8 +365,8 @@ K = hx("#14183a")
 
 
 def g_phone(d):
-    d.line((20, 44, 44, 20), fill=W, width=9)
-    d.ellipse((13, 38, 27, 52), fill=W); d.ellipse((37, 12, 51, 26), fill=W)
+    """A telephone handset (earpiece top-left, mouthpiece bottom-right, a curved grip between them), tilted 45 degrees like the usual call icon."""
+    d.polygon([(9, 19), (19, 11), (28, 24), (22, 29), (26, 38), (35, 42), (40, 36), (53, 45), (45, 55), (32, 53), (17, 40), (10, 28)], fill=W)
 
 
 def g_msg(d):

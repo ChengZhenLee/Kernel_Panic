@@ -5,6 +5,10 @@ extends "res://scripts/enemy.gd"
 const BossData = preload("res://scripts/boss_data.gd")
 var boss_id := ""
 var kite := false
+var stationary := false   # never moves (the data-stream boss)
+var hold := false   # stands still (the hiding intern)
+var route_goal = null   # Vector2: runs along a route to this point (the office intern), waiting whenever the player is far behind
+var flee := false   # runs away from the player (THE INTERN)
 const HIT_FIT := 0.9   # the hitbox is this share of the sprite's drawn body (the body has rounded corners and glow)
 static var _body_px := {}
 var vis_radius := 0.0   # sprite scale radius when it differs from the hit radius (secret mini-bosses); 0 = same
@@ -34,6 +38,10 @@ func setup_boss(def: Dictionary, slot: int, run_minutes: float) -> void:
 	kind = "boss"
 	display_name = def["name"]
 	kite = def.get("kite", false)
+	flee = def.get("flee", false)
+	stationary = def.get("stationary", false)
+	if stationary:
+		no_teleport = true   # a stationary boss never jumps to the player
 	var hp_mult := Meta.enemy_hp_mult()
 	var dmg_mult := Meta.enemy_dmg_mult() * (1.0 + 0.1 * run_minutes)
 	if slot < 3:   # regular boss: health, damage and rewards scale by slot, not by which boss it is
@@ -143,7 +151,26 @@ func _process(delta: float) -> void:
 	var move := chase * speed
 	if boss_id == "megaworm":
 		move = move.rotated(sin(t * 2.5) * 0.7)
-	if kite:   # keeps its distance and circles
+	if hold or stationary:
+		move = Vector2.ZERO
+	elif route_goal != null:
+		move = Vector2.ZERO
+		if dist < 1300.0 and arena != null:
+			move = arena.route_dir(global_position, route_goal) * speed
+	elif flee:   # runs from the player: of 12 directions, the open one that ends farthest from them (cornered ones just slide along the wall)
+		move = Vector2.ZERO
+		if dist < 1100.0:
+			var best := -INF
+			for k in 12:
+				var d := Vector2.from_angle(TAU * k / 12.0)
+				var probe: Vector2 = global_position + d * 200.0
+				if arena != null and arena.point_blocked(probe):
+					continue
+				var score := probe.distance_to(player.global_position) + randf() * 20.0
+				if score > best:
+					best = score
+					move = d * speed
+	elif kite:   # keeps its distance and circles
 		if dist < 320.0:
 			move = -dir * speed
 		elif dist < 430.0:
@@ -176,7 +203,7 @@ func _process(delta: float) -> void:
 				player.take_damage(damage * 0.6)
 				break
 
-	if dist > 1300.0:
+	if dist > 1300.0 and not no_teleport:
 		global_position = arena.random_open_point(player.global_position, 550.0, 700.0) if arena != null else player.global_position + dir * 650.0
 		history.clear()
 
@@ -212,6 +239,23 @@ func _attack(name: String, dir: Vector2) -> void:
 			spiral_time = 3.0
 		"dash":
 			dash_windup = 0.8
+		"stream_spit":   # the data-stream boss spits a handful of enemies out to the left; the hallway then carries them along (secret_rooms.gd)
+			var kinds := ["bug", "worm", "mite", "spyware", "miner"]
+			var n_out := 5 if enraged else 3
+			var b_area: Rect2 = game.arena.bounds.grow(-130.0) if game.arena != null else Rect2(global_position - Vector2(100, 300), Vector2(200, 600))
+			for i in n_out:
+				var at := Vector2(global_position.x - radius - 30.0, clampf(global_position.y + randf_range(-320.0, 320.0), b_area.position.y, b_area.end.y))
+				game._spawn_enemy(kinds[randi() % kinds.size()], 2.0, false, at)
+			Sfx.play("stream_warn", 1.0, -4.0, 0.0)
+		"keywall":   # a wall of keycaps sweeps across the room: a row of bullets perpendicular to the throw with a two-bullet gap to run through
+			var kn := 15
+			var gap := randi_range(2, kn - 3)
+			var side := dir.orthogonal()
+			for i in kn:
+				if absi(i - gap) <= 1 and not (enraged and i == gap + 1):   # the gap is 3 bullets wide, 2 when enraged
+					continue
+				game.enemy_shot(global_position + side * (i - (kn - 1) / 2.0) * 80.0, dir * 230.0, damage * 0.55, color.lightened(0.3), true)
+			Sfx.play("en_boss_attack", 0.85)
 		"fan":
 			var fan_n := 11 if enraged else 7
 			for i in fan_n:

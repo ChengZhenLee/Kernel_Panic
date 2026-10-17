@@ -20,6 +20,8 @@ func _draw() -> void:
 	for e in Global.game.enemy_layer.get_children():
 		if not (e.elite or e.is_boss):
 			continue
+		if e.is_boss and e.get("hold") == true:   # a boss that is holding still (the sleeping office intern) gets no marker until it is activated
+			continue
 		var sp: Vector2 = xf * e.global_position
 		if rect.grow(30.0).has_point(sp):
 			continue

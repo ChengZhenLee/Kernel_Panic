@@ -526,6 +526,153 @@ def floor_corrupt():
     return t
 
 
+# ------------------------------------------------------------------ A3 peripheral rooms (gaming laptop): one wall strip + one floor per peripheral
+# gaming_laptop_secret_room_<peripheral>_wall.png (six 32x32 variants x4) and gaming_laptop_secret_room_<peripheral>_floor.png (16x16 x4)
+LETTERS = {   # 5x5 pixel letters for the keycaps (each pixel drawn 2x2)
+    "Q": [" ### ", "#   #", "# # #", "#  # ", " ## #"], "W": ["#   #", "#   #", "# # #", "## ##", "#   #"], "E": ["#####", "#    ", "#### ", "#    ", "#####"],
+    "R": ["#### ", "#   #", "#### ", "#  # ", "#   #"], "T": ["#####", "  #  ", "  #  ", "  #  ", "  #  "], "A": [" ### ", "#   #", "#####", "#   #", "#   #"],
+    "S": [" ####", "#    ", " ### ", "    #", "#### "], "D": ["#### ", "#   #", "#   #", "#   #", "#### "], "F": ["#####", "#    ", "#### ", "#    ", "#    "],
+    "G": [" ####", "#    ", "# ###", "#   #", " ####"], "Z": ["#####", "   # ", "  #  ", " #   ", "#####"], "X": ["#   #", " # # ", "  #  ", " # # ", "#   #"],
+    "C": [" ####", "#    ", "#    ", "#    ", " ####"], "V": ["#   #", "#   #", "#   #", " # # ", "  #  "], "B": ["#### ", "#   #", "#### ", "#   #", "#### "],
+}
+KEY_ORDER = "QWERTASDFGZXCVB"   # the layout's rows, left to right, top to bottom; variant 15 is the space bar
+KEY_GLOWS = ["#ff4ad0", "#3ad8ff", "#7a4ad8", "#ffe03a", "#4ad86a", "#ff7a3a"]
+
+
+def wall_keyboard(v):
+    """A keycap: bevelled plastic key with its own letter (Q W E R T / A S D F G / Z X C V B) and an RGB edge; variant 15 is the space bar. Every block of the keyboard room is a different key."""
+    glow = KEY_GLOWS[v % len(KEY_GLOWS)]
+    t = T("#14162a")
+    t.box(0, 0, 32, 32, glow)
+    t.box(1, 1, 30, 30, "#0a0e24")
+    t.r(3, 3, 26, 26, "#4a5070"); t.r(3, 3, 26, 2, "#8890b8"); t.r(3, 3, 2, 26, "#8890b8")      # the bevel: light top-left, dark bottom-right
+    t.r(3, 27, 26, 2, "#2a2e48"); t.r(27, 3, 2, 26, "#2a2e48")
+    t.r(6, 6, 20, 20, "#3a4060"); t.r(6, 6, 20, 1, "#5a628a")
+    if v < 15:
+        for y, row in enumerate(LETTERS[KEY_ORDER[v]]):
+            for x, ch in enumerate(row):
+                if ch == "#":
+                    t.r(11 + x * 2, 11 + y * 2, 2, 2, "#f0f4ff")
+    else:                                                                # the space bar: a long underscore bracket
+        t.r(8, 14, 16, 2, "#f0f4ff"); t.r(8, 11, 2, 5, "#f0f4ff"); t.r(22, 11, 2, 5, "#f0f4ff")
+    return t
+
+
+def wall_mouse(v):
+    """A mouse seen from above: buttons, scroll wheel, a sensor light, the cable and a DPI switch (one per variant)."""
+    t = T("#2a2e48")
+    t.box(0, 0, 32, 32, "#14162a")
+    t.r(5, 2, 22, 28, "#0a0e24"); t.r(6, 3, 20, 26, "#56608a"); t.r(6, 3, 20, 2, "#8890b8")
+    if v == 0:                                                           # left and right buttons with the split line
+        t.r(6, 15, 20, 1, "#0a0e24"); t.r(15, 3, 2, 12, "#0a0e24"); t.r(7, 6, 7, 6, "#6a74a0"); t.r(18, 6, 7, 6, "#6a74a0")
+    elif v == 1:                                                         # scroll wheel
+        t.r(14, 6, 4, 10, "#0a0e24"); t.r(15, 7, 2, 8, "#ff4ad0")
+        for y in (8, 10, 12, 14):
+            t.p(14, y, "#3a4060"); t.p(17, y, "#3a4060")
+    elif v == 2:                                                         # sensor light underneath: a red glow on the table
+        t.disc(16, 22, 5, "#3a0a14"); t.disc(16, 22, 3.4, "#ff3a3a"); t.disc(16, 22, 1.6, "#ffd0d0")
+    elif v == 3:                                                         # the cable
+        t.r(14, 0, 4, 8, "#1a1e34")
+        for y in range(8, 26):
+            t.r(14 + round(3 * math.sin(y / 3.0)), y, 3, 1, "#c0c9e6")
+    elif v == 4:                                                         # DPI switch with led dots
+        t.r(11, 10, 10, 6, "#0a0e24")
+        for i, c in enumerate(("#4ad86a", "#ffe03a", "#ff4a4a")):
+            t.r(12 + i * 3, 11, 2, 4, c)
+    else:                                                                # side buttons
+        t.r(2, 10, 4, 6, "#ff4ad0"); t.box(2, 10, 4, 6, O); t.r(2, 18, 4, 6, "#3ad8ff"); t.box(2, 18, 4, 6, O)
+    return t
+
+
+def wall_webcam(v):
+    """A webcam: lens, record light, privacy shutter, tripod clip, microphone holes and a status ring (one per variant)."""
+    t = T("#1a2038")
+    t.box(0, 0, 32, 32, "#0a0e24")
+    t.r(2, 2, 28, 28, "#2a3050"); t.r(2, 2, 28, 2, "#4a5478")
+    if v == 0:                                                           # the lens
+        t.disc(16, 16, 11, O); t.disc(16, 16, 10, "#1a2038"); t.disc(16, 16, 7, "#2d63e0"); t.disc(16, 16, 4.5, "#0d1d52"); t.p(13, 13, "#cfe3ff"); t.p(14, 13, "#cfe3ff")
+    elif v == 1:                                                         # the record light
+        t.disc(16, 16, 6, O); t.disc(16, 16, 5, "#d9503e"); t.disc(16, 16, 2.6, "#ffb0a0"); t.ring(16, 16, 9, "#6a74a0", 1.2)
+    elif v == 2:                                                         # privacy shutter half closed
+        t.disc(16, 16, 11, O); t.disc(16, 16, 10, "#1a2038"); t.r(5, 16, 22, 11, "#4a5478")
+        for x in range(5, 27, 3):
+            t.r(x, 16, 1, 11, "#2a3050")
+    elif v == 3:                                                         # the clip that hooks over a monitor
+        t.r(8, 4, 16, 8, "#0a0e24"); t.r(9, 5, 14, 6, "#56608a"); t.r(12, 12, 8, 12, "#0a0e24"); t.r(13, 13, 6, 10, "#4a5478"); t.r(10, 24, 12, 4, "#0a0e24")
+    elif v == 4:                                                         # microphone holes
+        for y in range(8, 25, 4):
+            for x in range(8, 25, 4):
+                t.p(x, y, "#0a0e24"); t.p(x + 1, y, "#4a5478")
+    else:                                                                # a status ring that is lit green
+        t.ring(16, 16, 10, "#4ad86a", 2.0); t.ring(16, 16, 6, "#1a5a30", 1.0); t.disc(16, 16, 3, O)
+    return t
+
+
+def wall_headset(v):
+    """A headset: ear cup, cushion, mic boom, volume dial, equaliser lights and the cable jack (one per variant)."""
+    t = T("#241b3a")
+    t.box(0, 0, 32, 32, "#0b0818")
+    if v == 0:                                                           # the ear cup
+        t.disc(16, 16, 13, O); t.disc(16, 16, 12, "#3b2c5e"); t.disc(16, 16, 8, "#14101f"); t.ring(16, 16, 8, "#ff5fb0", 1.2); t.disc(16, 16, 4, "#3b2c5e")
+    elif v == 1:                                                         # the soft cushion
+        t.disc(16, 16, 13, O); t.disc(16, 16, 12, "#8a6ac0"); t.disc(16, 16, 9, "#6a4aa0"); t.disc(16, 16, 6, "#14101f")
+        t.ring(16, 16, 10, "#a98ae0", 1.0)
+    elif v == 2:                                                         # the microphone boom
+        t.r(3, 20, 22, 3, "#0b0818"); t.r(4, 21, 20, 1, "#6a5aa8"); t.disc(26, 21, 4, O); t.disc(26, 21, 3, "#ff5fb0"); t.p(25, 20, "#ffd0ec")
+    elif v == 3:                                                         # volume dial
+        t.disc(16, 16, 11, O); t.disc(16, 16, 9.5, "#56608a"); t.line(16, 16, 22, 9, "#ffe03a")
+        for a in range(-135, 136, 30):
+            t.p(round(16 + math.sin(math.radians(a)) * 12), round(16 - math.cos(math.radians(a)) * 12), "#c9b8ff")
+    elif v == 4:                                                         # equaliser lights
+        for i, h in enumerate((6, 12, 18, 9, 14, 20)):
+            for k in range(h // 3):
+                t.r(4 + i * 4, 28 - k * 3, 3, 2, "#ff5fb0" if k > 3 else "#a06ae0")
+    else:                                                                # the cable jack
+        t.r(14, 2, 4, 10, "#1a1e34"); t.r(12, 12, 8, 4, "#c0c9e6"); t.r(14, 16, 4, 10, "#a0a8c8"); t.r(15, 26, 2, 4, "#e8d878")
+    return t
+
+
+def floor_keyboard():
+    """Dark circuit board under the keys: a faint trace grid, solder dots and a few lit RGB pixels."""
+    t = T("#0e1022")
+    t.r(0, 0, 16, 1, "#161a34"); t.r(0, 0, 1, 16, "#161a34")
+    t.r(4, 4, 8, 1, "#1d2a52"); t.r(4, 4, 1, 6, "#1d2a52"); t.p(4, 10, "#3ad8ff"); t.p(11, 4, "#ff4ad0"); t.p(8, 12, "#7a4ad8")
+    return t
+
+
+def floor_mouse():
+    """A cloth mousepad: dark grey weave with a stitched border line."""
+    t = T("#1a1c28")
+    for y in range(0, 16, 2):
+        t.r(0, y, 16, 1, "#202436")
+    for x in range(0, 16, 4):
+        t.r(x, 0, 1, 16, "#161826")
+    t.p(5, 5, "#3a4060"); t.p(12, 10, "#3a4060")
+    return t
+
+
+def floor_webcam():
+    """Matte black with a faint scan grid and a tiny red 'REC' dot now and then."""
+    t = T("#0c1022")
+    t.r(0, 8, 16, 1, "#141a34"); t.r(8, 0, 1, 16, "#141a34")
+    t.p(3, 3, "#3a0a14"); t.p(12, 12, "#2d63e0")
+    return t
+
+
+def floor_headset():
+    """Sound waves in the floor: purple concentric bands and a few pink pixels."""
+    t = T("#14101f")
+    for y in range(16):
+        k = round(2.5 * math.sin(y / 2.5))
+        t.p(8 + k, y, "#2a1f4a"); t.p(4 + k, y, "#1f1838")
+    t.p(10, 4, "#ff5fb0"); t.p(3, 12, "#a06ae0")
+    return t
+
+
+PERIPH_WALLS = {"keyboard": wall_keyboard, "mouse": wall_mouse, "webcam": wall_webcam, "headset": wall_headset}
+PERIPH_FLOORS = {"keyboard": floor_keyboard, "mouse": floor_mouse, "webcam": floor_webcam, "headset": floor_headset}
+
+
 WALLS = {"notes": wall_notes, "camera": wall_camera, "store": wall_store, "mail": wall_mail, "messages": wall_messages, "maps": wall_maps,
          "clock": wall_clock, "music": wall_music, "settings": wall_settings, "photos": wall_photos, "weather": wall_weather, "phone": wall_phone,
          "corrupt": wall_corrupt}
@@ -847,6 +994,10 @@ def thunder_sheet():
 
 # ------------------------------------------------------------------ run
 def main():
+    for k, fn in PERIPH_WALLS.items():
+        secret("gaming_laptop_secret_room_%s_wall" % k, strip(fn, 16 if k == "keyboard" else NV), 4)
+    for k, fn in PERIPH_FLOORS.items():
+        secret("gaming_laptop_secret_room_%s_floor" % k, fn(), 4)
     secret("smartphone_secret_room_floor_corrupt", floor_corrupt(), 4)
     for k, fn in WALLS.items():
         secret("smartphone_secret_room_wall_" + k, strip(fn, WALL_VARIANTS.get(k, NV)), 4)

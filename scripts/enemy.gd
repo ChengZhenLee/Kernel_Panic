@@ -141,6 +141,8 @@ var state_timer := 0.0
 var los := true              # clear line to the player (walls); refreshed every ~0.3s
 var los_timer := 0.0
 var action_timer := 2.0
+var stream_vec := Vector2.ZERO   # the data-stream hallway: this enemy is carried along this velocity instead of chasing (shooters still aim)
+var no_teleport := false     # never jumps back to the player (the office intern stays where the story puts it)
 var tp_check := 0.5          # elites check every half second whether they have been left too far behind
 var dash_dir := Vector2.ZERO
 var player
@@ -207,7 +209,7 @@ func setup(enemy_kind: String, run_minutes: float, is_elite := false) -> void:
 ## Elites always carry a modifier; regular enemies can too on later devices and higher threat levels (see game._spawn_enemy).
 ## Elites and bosses left about 1.5 minimaps behind jump back inside the minimap range (still off screen). Checked twice a second.
 func _teleport_if_far(dist: float, arena) -> void:
-	if not (elite or is_boss) or Global.game == null or Global.game.in_room:
+	if not (elite or is_boss) or no_teleport or Global.game == null or Global.game.in_room:
 		return
 	tp_check -= get_process_delta_time()
 	if tp_check > 0.0:
@@ -386,6 +388,8 @@ func _process(delta: float) -> void:
 					state_timer = 4.5 if elite else 7.0
 					Global.game.summon("bug", global_position, 3 if elite else 2, 40.0)
 
+	if stream_vec != Vector2.ZERO:
+		move = stream_vec
 	var before := position
 	position += (move + knockback) * delta
 	knockback = knockback.move_toward(Vector2.ZERO, 900.0 * delta)

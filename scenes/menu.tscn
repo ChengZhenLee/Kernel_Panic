@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://bt6y2btpum8rs"]
 
-[ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
+[ext_resource type="Script" uid="uid://qk02ao70e861" path="res://scripts/menu.gd" id="1"]
 
 [node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1")

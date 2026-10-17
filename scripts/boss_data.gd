@@ -30,18 +30,20 @@ const MID := {
 const SECRET := {
 	"golem": {"id": "golem", "name": "ICE CUBE GOLEM", "color": Color(0.55, 0.9, 1.0), "radius": 165.0, "vis_radius": 100.0, "speed": 60.0, "hp": 0.6, "dmg": 0.8,
 		"attacks": [["radial", 3.5, 2.0], ["slam", 5.0, 3.0], ["dash", 9.0, 5.0]]},
-	"intern": {"id": "intern", "name": "THE INTERN", "color": Color(0.4, 0.55, 0.95), "radius": 40.0, "speed": 95.0, "hp": 0.02, "dmg": 0.05, "kite": true,
+	"intern": {"id": "intern", "name": "THE INTERN", "color": Color(0.4, 0.55, 0.95), "radius": 40.0, "speed": 340.0, "hp": 3.0, "dmg": 0.05,   # tanky on purpose (it must survive a strong player) and it runs away from you
 		"attacks": []},
 	"alien": {"id": "alien", "name": "THE VISITOR", "color": Color(0.5, 1.0, 0.6), "radius": 120.0, "speed": 65.0, "hp": 1.6, "dmg": 1.0,
 		"attacks": [["radial", 3.0, 2.0], ["aimed", 2.0, 1.0], ["summon_bug", 8.0, 5.0]]},
 	"kbd": {"id": "kbd", "name": "KEYBOARD WARRIOR", "color": Color(1.0, 0.5, 0.3), "radius": 100.0, "speed": 70.0, "hp": 1.0, "dmg": 1.0,
-		"attacks": [["aimed", 1.8, 1.0], ["fan", 3.0, 2.0]]},
+		"attacks": [["keywall", 5.0, 3.0], ["fan", 3.0, 2.0], ["aimed", 1.8, 1.0]]},
 	"clicker": {"id": "clicker", "name": "THE CLICKER", "color": Color(0.9, 0.9, 0.5), "radius": 80.0, "speed": 110.0, "hp": 0.7, "dmg": 0.8,
-		"attacks": [["dash", 3.5, 2.0], ["aimed", 2.4, 1.0]]},
+		"attacks": [["dash", 3.5, 2.0], ["slam", 4.0, 2.5], ["aimed", 2.4, 1.0]]},
 	"webcam": {"id": "webcam", "name": "THE WATCHER", "color": Color(0.6, 0.9, 1.0), "radius": 90.0, "speed": 55.0, "hp": 0.8, "dmg": 0.8,
-		"attacks": [["radial", 3.5, 2.0], ["aimed", 2.0, 1.0]]},
+		"attacks": [["radial", 3.5, 2.0], ["blink", 7.0, 4.0], ["aimed", 2.0, 1.0]]},
 	"headset": {"id": "headset", "name": "STATIC", "color": Color(0.8, 0.5, 1.0), "radius": 90.0, "speed": 60.0, "hp": 0.8, "dmg": 0.8,
 		"attacks": [["spiral", 6.0, 2.0], ["aimed", 2.2, 1.0]]},
+	"streamhive": {"id": "hive", "name": "STREAM HIVE", "color": Color(0.3, 0.9, 1.0), "radius": 112.0, "speed": 0.0, "hp": 1.6, "dmg": 0.8, "stationary": true,   # the data center's boss: reuses the BOTNET HIVE art (placeholder), never moves, spits enemies
+		"attacks": [["stream_spit", 2.8, 1.5], ["aimed", 3.2, 2.0]]},
 	"window": {"id": "window", "name": "NOT RESPONDING", "color": Color(0.7, 0.8, 1.0), "radius": 150.0, "vis_radius": 96.0, "speed": 55.0, "hp": 0.6, "dmg": 0.8,
 		"attacks": [["aimed", 2.0, 1.0], ["fan", 5.0, 2.5], ["summon_popup", 7.0, 4.0]]},
 }

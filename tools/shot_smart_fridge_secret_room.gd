@@ -1,5 +1,5 @@
 extends SceneTree
-# usage: godot --path . -s tools/shot_a1.gd -- OUTDIR
+# usage: godot --path . -s tools/shot_smart_fridge_secret_room.gd -- OUTDIR
 var out := "."
 func shot(name: String) -> void:
 	await create_timer(0.5).timeout

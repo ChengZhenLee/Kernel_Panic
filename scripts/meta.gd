@@ -783,6 +783,8 @@ func check_achievements(run := {}) -> Array:
 		var met := false
 		if a["type"] == "life":
 			met = float(lifetime.get(a["stat"], 0)) >= float(a["target"])
+		elif a["type"] == "lore":   # an event in a secret room (Meta.lore flag)
+			met = lore.has(a["lore"])
 		else:
 			met = Achievements.run_met(a, run)
 		if met:

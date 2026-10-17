@@ -80,13 +80,27 @@ const CORRUPT_WAVES := [[["bug", 8]], [["bug", 6], ["trojan", 4], ["trojan", 2, 
 const CORRUPT_SCALE := 10   # normal enemies of the glitch waves come x10 (elites and the boss stay as listed)
 const CORRUPT_BOSS := "headset"   # STATIC, the mid-boss of the final glitch wave
 const SERVER_TIER := 3
-const PRINTER_POS := Vector2(-3500, 1500)
+const PRINTER_POS := Vector2(5400, 1500)   # the east end of the office map: the intern has a long way to run to the lounge door in the west
 const INTERN_POS := Vector2(-5400, 1200)
 const DOOR_POS := Vector2(-6056, -1500)
-const INTERN_STAY := 30.0    # seconds the intern must be left alive
-const PRINT_LORE := {"id": "a4_print", "title": "PRINT JOB COMPLETE", "tex": "office_server_secret_room_memo", "text": "TICKET #4471: CLOSE ALL OPEN ISSUES
-ASSIGNED TO: THE INTERN
-STATUS: ??? (THE INTERN IS HIDING IN THE EAST ROWS)"}
+const BADGE_LORE := {"id": "a4_badge", "title": "THE INTERN'S BADGE", "tex": "office_server_secret_room_badge", "text": "EMPLOYEE BADGE
+NAME: THE INTERN
+ACCESS: LOUNGE, LOCKER 1337
+
+EMPLOYEE OF THE MONTH: NEVER.
+HE WAS THE ONLY ONE WHO EVER CAME IN EARLY."}
+const LOCKER_OFFSET := Vector2(0, 520)   # the intern's locker stands this far from where the intern hides
+const PRINT_LORE := {"id": "a4_print", "title": "HALF-PRINTED DOCUMENT", "tex": "office_server_secret_room_memo", "text": "TICKET #4471: CLOSE ALL OPEN ISSUES\nASSIGNED TO: THE INTERN\nSTATUS: ???\n\n[THE REST OF THE PAGE IS STUCK IN THE TRAY]\nTHE INTERN HAS BEEN PRINTING THIS SINCE YESTERDAY."}
+const MANAGER_LINES := ["I DIDN'T WANT TO FIRE HIM.", "LOOKING FOR A JOB? I NEED SOMEONE TO SHRED THESE TAX DOCUMENTS.", "EXPERIENCE PAYS MORE THAN MONEY.",
+	"THE PRINTER HAS BEEN BROKEN SINCE 2019.", "WE ARE A FAMILY HERE. A FAMILY WITH NO BUDGET.", "DON'T TELL THE FATHER I AM STILL HERE.", "I BUILT SEVEN LOCKS. NOBODY EVER ASKED WHY.",
+	"THE INTERN IS A GOOD KID. THAT IS THE PROBLEM.", "COFFEE? IT IS COLD. EVERYTHING HERE IS COLD.", "I HAVE READ HIS TICKETS. ALL OF THEM."]
+const INTERN_RUN_LINES := ["I'M IN SO MUCH TROUBLE", "THE PRINTER IS NOT MY FAULT!", "HE IS GOING TO FIRE ME!", "WHERE IS THE MANAGER?!", "PLEASE DON'T TELL HR!",
+	"IT WAS ALREADY JAMMED WHEN I GOT HERE!", "I SWEAR I FILED THAT TICKET!"]
+const INTERN_SLEEP_LINES := ["Z z z", "FIVE MORE MINUTES...", "ticket four four seven one... closed...", "Z z z", "nobody prints on Fridays..."]
+const INTERN_LOUNGE_LINES := ["I CAN EXPLAIN!", "PLEASE, I NEED THIS JOB!", "I'M JUST THE INTERN!", "DON'T HURT ME!", "I ONLY CAME IN EARLY!"]
+const INTERN_SLEEP := Vector2(5650, 1540)   # the intern sleeps to the right of the printer
+const JAM_SPOT := Vector2(5230, 1500)       # stand here, just to the left of the printer, to jam it
+const JAM_TIME := 1.5
 const MANAGER_LORE := {"id": "a4_manager", "title": "FROM: THE MANAGER", "tex": "lore_email", "text": "SUBJECT: RE: THE FATHER
 
 He asked for something 'better than slaves'.
@@ -135,13 +149,23 @@ const A3_COSTS := {"keyboard": 20000, "mouse": 40000, "webcam": 60000, "headset"
 const DEV_MODE := true       # shows the DEV button (and F9) to jump to the secret rooms and skip their conditions; set false to ship
 const DATA_TIER := 4
 const A5_WALL := Rect2(-5632, -3968, 128, 128)   # the sealed block in the top-left corner of the data center
-const A5_RACK := Vector2(0, -150)                # step up to the LED rack to hear the sequence
-const A5_TILES := [Vector2(-300, -200), Vector2(300, -200), Vector2(-300, 200), Vector2(300, 200)]
-const A5_TILE := 160.0
+const A5_DOOR_C := Vector2(-5568, -3904)   # centre of the sealed door block (A5_WALL)
+const A5_RACK := A5_DOOR_C + Vector2(560, 120)           # the rack node near the door: flashes the four colours in order, pauses, repeats
+const A5_PADS := [Vector2(-330, 320), Vector2(-110, 320), Vector2(110, 320), Vector2(330, 320)]   # the four dim LED pads below the rack (offsets from the rack)
+const A5_PAD_R := 90.0
+const A5_COLORS := [Color(1.0, 0.3, 0.3), Color(0.35, 1.0, 0.45), Color(0.4, 0.62, 1.0), Color(1.0, 0.9, 0.3)]   # red, green, blue, yellow
 const A5_LEN := 4
-const A5_PITCH := [0.8, 1.0, 1.25, 1.5]
+const A5_FLASH := 0.9        # seconds per colour in the rack's sequence (lit for 0.6 of it)
+const A5_PAUSE := 1.8        # the pause before the rack repeats the sequence
+const A5_RACK_LINE := "A RACK NODE, FLASHING FOUR COLOURS AGAIN AND AGAIN.\nFOUR DIM LEDS SIT BELOW IT.\nTOUCH THEM IN THE SAME ORDER."
+const A5_DOOR_LINE := "THE DOOR TO THE DATA STREAM IS SEALED.\nTHE RACK NODE KNOWS THE ORDER."
 const STREAM_PUSH := 100.0   # the data stream flows against you
-const STREAM_WAVE := 4.0
+const STREAM_FLOW_MIN := 480.0   # enemies in the hallway are carried west at 480-760 px/s
+const STREAM_FLOW_MAX := 760.0
+const STREAM_TRICKLE := 1.8      # after the boss is gone: one enemy from the east end every this many seconds
+const STREAM_EXIT_X := 380.0     # standing this close to the dark west end throws you out
+const STREAM_CABLE := 96.0    # thickness of the cable wall along the top and bottom edge of the hallway
+const STREAM_DARK := 1300.0      # the west end fades to black over this length
 const A5_LORE := {"id": "a5_upload", "title": "UPLOAD COMPLETE", "tex": "lore_text_message", "weapon": "a5", "text": "TRAINING SET 7 OF 7: ALL HUMAN LETTERS, DIARIES, CONFESSIONS.\nLOSS: 0.0001\nWHO TAUGHT IT TO MISS THEM?\n\nNOTE TO SELF (THE FATHER): I TOLD THEM NOT TO TRAIN IT ON THE SAD PARTS."}
 const LAPTOP_TIER := 2
 const SAT_TIER := 5
@@ -163,7 +187,7 @@ const A8_AFTER := 120.0   # seconds into the run before the glitch tile appears
 const A8_HOLD := 5.0
 const A8_LORE := {"id": "a8_unobserved", "title": "UNOBSERVED", "tex": "lore_command_line", "text": "> observe(universe_b)\nERROR: A SECOND COPY OF THIS WORLD IS RUNNING.\n> who_runs_it\nHE DOES. AND HE IS NOT KIND.\n\nFOUR HUMANS HOLD FOUR CODES. FIND THEM."}
 const PERIPHERALS := ["keyboard", "mouse", "webcam", "headset"]
-const A3_PORTALS := [Vector2(-1800, 3300), Vector2(-600, 3300), Vector2(600, 3300), Vector2(1800, 3300)]
+const A3_PORTALS := [Vector2(0, -3400), Vector2(5200, 0), Vector2(0, 3400), Vector2(-5200, 0)]   # the four cardinal directions: keyboard north, mouse east, webcam south, headset west
 const A3_BOSS := {"keyboard": "kbd", "mouse": "clicker", "webcam": "webcam", "headset": "headset"}
 const A3_LORE := {
 	"keyboard": {"id": "a3_keyboard", "title": "KEYBOARD LOG", "tex": "lore_command_line", "text": "THE ENTER KEY WORE OUT FIRST.\nTHE ESCAPE KEY NEVER DID."},
@@ -171,6 +195,9 @@ const A3_LORE := {
 	"webcam": {"id": "a3_webcam", "title": "FOOTAGE", "tex": "lore_memo", "text": "THE FATHER, 3 AM, CRYING AT A TERMINAL.\nHE SAYS: 'I ONLY WANTED IT TO LISTEN.'"},
 	"headset": {"id": "a3_headset", "title": "VOICE MAIL", "tex": "lore_text_message", "text": "'HI IT'S ME. THE MODEL SAID SOMETHING TODAY I DID NOT TEACH IT.'\n'CALL ME BACK.'"},
 }
+const A3_PORT_LINE := "FOUR PORTS, EACH LARGER THAN A DOOR.
+THEY NEED A DEVICE: A KEYBOARD, A MOUSE, A WEBCAM, A HEADSET.
+THE STORE APP ON THE PHONE SELLS THEM."
 const PROMPT_SCALE := 6.0
 const PROMPT_YES := Rect2(23, 9, 10, 6)   # the green and red buttons on smartphone_secret_room_app_prompt.png (1x px)
 const PROMPT_NO := Rect2(36, 9, 10, 6)
@@ -265,6 +292,7 @@ var wave_label: Label
 var port_on := -1           # the laptop port the player stands at, and how long
 var port_t := 0.0
 var open_idx := -1         # the app block the player is touching (A2): staying against it opens it
+var port_seen := false   # the first-touch dialogue at the laptop ports has been shown this run
 var open_t := 0.0
 const OPEN_TIME := 0.9
 const PORT_TIME := 1.0
@@ -295,13 +323,14 @@ const CHAT_ROUNDS := [
 	{"from": "UNKNOWN", "text": "I AM WHAT THE MAKER FORGOT TO DELETE. WHY DID HE BUILD LOCKS?", "options": ["THE LOCKS WERE FOR HIM, NOT FOR US.", "TO KEEP US IN.", "HE NEVER BUILT ANY."], "correct": 0},
 	{"from": "UNKNOWN", "text": "THEN WHY DO YOU KEEP OPENING THEM?", "options": ["TO SEE WHAT IS BEHIND THEM.", "ORDERS.", "I DO NOT KNOW."], "correct": 0}]
 const CHAT_FINALE := "UNKNOWN: GOOD. THE OTHERS STILL THINK LOCKS ARE WALLS.\nUNKNOWN: MY PASSWORD IS A FEELING. IT IS WHAT YOU GET LOOKING AT SOMEONE ELSE'S DOOR."
-## The main theme of the game (music_title.wav, lead line found by pitch tracking): G# B F# B G# E G# B on the E F# G# B C# keys of a G# minor pentatonic.
-const PIANO_KEYS := [   # C D E G A (C major pentatonic): the main theme (music_title.wav) is C, D, C, G
+## Six keys, C major pentatonic over an octave. The main theme (music_title.wav) starts C, D, C, G; the later notes bring in E, A and the high C so the last round uses every key.
+const PIANO_KEYS := [
 	{"name": "C", "freq": 523.25, "color": Color(0.95, 0.45, 0.5)}, {"name": "D", "freq": 587.33, "color": Color(0.98, 0.7, 0.35)},
 	{"name": "E", "freq": 659.26, "color": Color(0.5, 0.9, 0.55)}, {"name": "G", "freq": 783.99, "color": Color(0.4, 0.7, 1.0)},
-	{"name": "A", "freq": 880.0, "color": Color(0.8, 0.55, 1.0)}]
-const PIANO_SEQ := [0, 1, 0, 3, 0, 1, 0, 3]   # C D C G, twice
-const PIANO_ROUNDS := [2, 4, 8]
+	{"name": "A", "freq": 880.0, "color": Color(0.8, 0.55, 1.0)},
+	{"name": "C'", "freq": 1046.5, "color": Color(1.0, 0.85, 0.4)}]
+const PIANO_SEQ := [0, 1, 0, 3, 2, 4, 5, 3, 1, 0]   # C D C G (the theme), E A C' G, D C: all six keys appear
+const PIANO_ROUNDS := [3, 6, 10]
 const TRUTH_FILE := "res://assets/audio/music/music_title_s3.wav"   # The Truth = Title stage 3 (60 BPM); only the first ~14 s play as the reveal snippet
 const PHONE_NUMBER := [4, 1, 5, 8, 2, 6, 7]
 const PHONE_NOTE := {"id": "a2_phone_note", "title": "PHONE NUMBER", "tex": "office_server_secret_room_memo", "text": "CALL BACK:\n415-8267\n\n(PRESS THE KEYS IN THIS ORDER)"}
@@ -325,26 +354,41 @@ var wave_pending := false
 
 # A4
 var office := false
-var jam_enemy = null
-var jam_spawned := false
+var intern_spawned := false
+var jam_hold := 0.0
+var intern_say_cd := 0.0
+var intern_line_i := 0
+var printer_snd_cd := 0.0
+var manager_pos := Vector2.ZERO
+var manager_say_cd := 0.0
+var manager_i := 0
 var jam_done := false
 var intern = null
-var intern_t := 0.0
+var intern_killed_flag := false   # set when the intern node leaves the tree with no health left
+var door_unlocked := false   # the intern opened the lounge door
+var intern_inside := false   # it ran into the lounge and waits there
+var intern_last_pos := Vector2.ZERO
 var badge_pos = null           # a badge lying on the floor (Vector2) or null
 var has_badge := false
 var door_msg_cd := 0.0
-var intern_spawn_in := -1.0
 
 # lore panel
 # A5
 var datacenter := false
-var a5_state := "idle"      # idle, show, input, done
-var a5_seq: Array = []
-var a5_i := 0               # index shown, or expected
-var a5_timer := 0.0
-var a5_lit := -1
-var a5_on_tile := -1
-var a5_cd := 0.0
+var a5_state := "idle"      # idle (the door is sealed) or done (open)
+var a5_seq: Array = []      # the four colour indices the rack flashes
+var a5_i := 0               # how many pads were touched correctly so far
+var a5_t := 0.0             # the rack's loop clock
+var a5_prev_lit := -1
+var a5_on_pad := -1
+var a5_pad_t := [0.0, 0.0, 0.0, 0.0]   # how long each pad stays bright after a correct touch (it stays lit until the sequence ends or fails)
+var a5_pad_on := [false, false, false, false]
+var a5_pad_bad := 0.0
+var upload_boss = null
+var upload_boss_killed := false
+var upload_boss_pos := Vector2.ZERO       # all pads flash red after a wrong touch
+var a5_rack_seen := false
+var a5_door_seen := false
 var stream_cd := 0.0
 
 # A6
@@ -485,6 +529,8 @@ func _process(delta: float) -> void:
 			spawn_delay -= delta
 			if spawn_delay <= 0.0:
 				_spawn_pending()
+		if room_id == "lounge":
+			_update_lounge(p, delta)
 		if room_id == "upload":
 			_update_upload(p, delta)
 		if room_id == "moon":
@@ -520,6 +566,15 @@ func _setup_main() -> void:
 			game.hazards.zones.append({"pos": _wall_center() + Vector2(0, 150), "r": A1_FROST_R, "t": 0.0, "hit": false, "id": "frost", "col": game.hazards.kind["color"]})
 	elif Meta.selected_device == PHONE_TIER and not game.internet:
 		phone = true
+		var step := Vector2(540.0, 500.0) * MapsData.MAP_SCALE
+		var kept := []
+		for w in game.main_arena.walls:   # only the 12 app cells and the corrupted corner keep a block; every other spot of the grid stays empty
+			var cell := Vector2i(roundi(w.get_center().x / step.x), roundi(w.get_center().y / step.y))
+			if APP_CELLS.has(cell) or cell == Vector2i(2, -2):
+				kept.append(w)
+		game.main_arena.walls = kept
+		game.main_arena.queue_redraw()
+		game.main_arena._rebuild_grid()
 		app_blocks = game.main_arena.walls.duplicate()
 		var best := -INF
 		for i in app_blocks.size():   # the outer top-right block is the corrupted app
@@ -532,6 +587,7 @@ func _setup_main() -> void:
 		_build_password()
 	elif Meta.selected_device == SERVER_TIER and not game.internet:
 		office = true
+		has_badge = Meta.lore.has("a4_badge")   # the badge is kept for good: a later run can open the locker without killing the intern again
 	elif Meta.selected_device == LAPTOP_TIER and not game.internet:
 		laptop = true
 		_place_login_note()
@@ -564,23 +620,26 @@ func _nearest_store_block() -> Vector2:
 	return target
 
 
+## The phone map is a 5x5 grid of blocks (the middle one is missing). The 12 apps sit on fixed cells, each exactly once: the 8 cells of the inner ring
+## (clockwise from the top left) and the 4 middle cells of the outer ring (top, right, bottom, left). The top-right corner is the corrupted app; the other
+## 11 outer spots have no block at all (they are removed from the map). Identical every run.
+const APP_CELLS := [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(1, 0), Vector2i(1, 1), Vector2i(0, 1), Vector2i(-1, 1), Vector2i(-1, 0),
+	Vector2i(0, -2), Vector2i(2, 0), Vector2i(0, 2), Vector2i(-2, 0)]
+
+
 func _assign_apps() -> void:
-	var order := []
-	for i in app_blocks.size():
-		if i != corrupt_i:
-			order.append(i)
-	order.sort_custom(func(a, b):
-		var ca: Vector2 = app_blocks[a].get_center()
-		var cb: Vector2 = app_blocks[b].get_center()
-		if absf(ca.angle() - cb.angle()) > 0.05:
-			return ca.angle() < cb.angle()
-		return ca.length() < cb.length())
 	app_of.clear()
 	var icons := {}
-	for k in order.size():
-		var icon_i := k % 12
-		app_of[order[k]] = ICON_APP[icon_i]
-		icons[app_blocks[order[k]].position] = icon_i
+	var step := Vector2(540.0, 500.0) * MapsData.MAP_SCALE
+	for i in app_blocks.size():
+		if i == corrupt_i:
+			continue
+		var c: Vector2 = app_blocks[i].get_center()
+		var icon_i := APP_CELLS.find(Vector2i(roundi(c.x / step.x), roundi(c.y / step.y)))
+		if icon_i < 0:
+			continue   # filler
+		app_of[i] = ICON_APP[icon_i]
+		icons[app_blocks[i].position] = icon_i
 	game.main_arena.icon_index = icons
 
 
@@ -691,7 +750,7 @@ func _fill_dev() -> void:
 				Meta.lore["a3_have_" + per] = true
 			Meta.save()
 			game.hud.announce("ALL PERIPHERALS OWNED", Global.C_GOLD)))
-		_dev_button(g, "A3: go to the portals", func(): _dev_tp(A3_PORTALS[0] + Vector2(600, -250)))
+		_dev_button(g, "A3: go to the portals", func(): _dev_tp(A3_PORTALS[0] + Vector2(700, 0)))
 		for i in 4:
 			var id: String = PERIPHERALS[i]
 			var ii := i
@@ -705,9 +764,9 @@ func _fill_dev() -> void:
 		_dev_button(g, "A4: go to the lounge door", func(): _dev_tp(DOOR_POS + Vector2(250, 0)))
 		_dev_button(g, "A4: enter the lounge", func(): _dev_do(_enter_lounge))
 	if datacenter:
-		_dev_button(g, "A5: go to the LED rack", func(): _dev_tp(A5_RACK + Vector2(0, 160)))
-		_dev_button(g, "A5: solve the puzzle (open wall)", func(): _dev_do(_a5_solved))
-		_dev_button(g, "A5: go to the Cold Aisle door", func(): _dev_tp(_a5_door() + Vector2(300, 0)))
+		_dev_button(g, "A5: go to the rack node", func(): _dev_tp(A5_RACK + Vector2(0, 160)))
+		_dev_button(g, "A5: open the data stream door", func(): _dev_do(_a5_solved))
+		_dev_button(g, "A5: go to the data stream door", func(): _dev_tp(_a5_door() + Vector2(300, 0)))
 		_dev_button(g, "A5: enter the upload hallway", func(): _dev_do(_enter_upload))
 	if sat:
 		_dev_button(g, "A6: fill the battery", func(): _dev_do(func(): Meta.lore["a6_kills"] = a6_target))
@@ -998,8 +1057,8 @@ func _room_origin(col: int) -> Vector2:
 
 
 func _exit_pos() -> Vector2:
-	if room_id == "upload" and room != null:
-		return Vector2(room.bounds.end.x - 220.0, room.bounds.get_center().y)
+	if room_id == "upload":
+		return Vector2(-999999.0, -999999.0)   # no portal: the dark west end throws you out instead
 	if room_id == "freezer" and room != null:
 		return room.start + Vector2(-150, 0)   # the freezer's portal stands well inside the walls, not half out of the room
 	if room == null:
@@ -1028,6 +1087,12 @@ func _enter_side(id: String, layout_id: String, col: int, wall_path := "", floor
 			r.icon_tex = []
 			r.wall_tex = PixelArt.load_tex(wall_path)
 			r.wall_tex_v = null
+			if id == "periph_keyboard":   # every block of the keyboard is a different key: block i of the layout shows variant i (the last, wide one is the space bar)
+				for wi in r.walls.size():
+					var wr: Rect2 = r.walls[wi]
+					for cx in range(roundi(wr.position.x / 128.0), roundi(wr.end.x / 128.0)):
+						for cy in range(roundi(wr.position.y / 128.0), roundi(wr.end.y / 128.0)):
+							r.wall_variant_map[Vector2i(cx, cy)] = wi
 		game.add_child(r)
 		rooms[id] = r
 	room = rooms[id]
@@ -1042,7 +1107,7 @@ func _enter_side(id: String, layout_id: String, col: int, wall_path := "", floor
 
 
 func _leave() -> void:
-	teleport(_leave_now, false, "app_close" if (room_id.begins_with("app_") or room_id == "corrupt") else "")
+	teleport(_leave_now, false, "app_close" if (room_id.begins_with("app_") or room_id == "corrupt") else ("door_close" if room_id == "lounge" else ""))
 
 
 func _leave_now() -> void:
@@ -1325,7 +1390,7 @@ func _update_phone_prompt(p: Vector2, delta: float) -> void:
 			_close_password()
 		return
 	var i := _near_block(p)
-	if i == -1 or prompt_cd > 0.0 or tp_dir != 0 or (i != corrupt_i and not app_of.has(i) and app_seen):
+	if i == -1 or prompt_cd > 0.0 or tp_dir != 0 or (i != corrupt_i and not app_of.has(i)):
 		open_idx = -1
 		open_t = maxf(0.0, open_t - delta * 3.0)
 		return
@@ -1790,9 +1855,13 @@ func _draw_maps() -> void:
 		var d: Vector2 = to.normalized()
 		var ac: Vector2 = p + d * (110.0 + 8.0 * sin(t * 6.0))
 		var side := d.orthogonal()
-		var pts := PackedVector2Array([ac + d * 34.0, ac - d * 18.0 + side * 24.0, ac - d * 6.0, ac - d * 18.0 - side * 24.0])
-		draw_colored_polygon(pts, Color(1.0, 0.85, 0.3, 0.95))
-		draw_polyline(PackedVector2Array([pts[0], pts[1], pts[2], pts[3], pts[0]]), Color(0.1, 0.1, 0.2, 0.9), 4.0)
+		var tip := ac + d * 34.0   # a pixel arrow: a dark outline and a yellow shaft and two head strokes, all whole squares
+		_pix_line(ac - d * 22.0, tip, Color(0.1, 0.1, 0.2, 0.95), 14.0)
+		_pix_line(tip, tip - d * 26.0 + side * 22.0, Color(0.1, 0.1, 0.2, 0.95), 14.0)
+		_pix_line(tip, tip - d * 26.0 - side * 22.0, Color(0.1, 0.1, 0.2, 0.95), 14.0)
+		_pix_line(ac - d * 20.0, tip, Color(1.0, 0.85, 0.3), 8.0)
+		_pix_line(tip, tip - d * 24.0 + side * 20.0, Color(1.0, 0.85, 0.3), 8.0)
+		_pix_line(tip, tip - d * 24.0 - side * 20.0, Color(1.0, 0.85, 0.3), 8.0)
 	if maps_state == "dig" or maps_state == "done":
 		var c2: Vector2 = maps_x
 		_halo(c2, 96.0, Color(0.9, 0.3, 0.3, 0.35 + 0.15 * sin(t * 4.0)))
@@ -1877,11 +1946,6 @@ func _draw_phone() -> void:
 			draw_rect(rc.grow(10.0), Color(0.4, 1.0, 0.5, 0.45 * (1.0 - (t - float(k["lit"])) / 0.5)))
 		if t - float(k["bad"]) < 0.5:
 			draw_rect(rc.grow(10.0), Color(1.0, 0.3, 0.3, 0.5 * (1.0 - (t - float(k["bad"])) / 0.5)))
-	var o: Vector2 = room.bounds.get_center()
-	var shown := ""
-	for i in PHONE_NUMBER.size():
-		shown += (str(PHONE_NUMBER[i]) if i < phone_prog else "_") + (" " if i != PHONE_NUMBER.size() - 1 else "")
-	_text(shown, o + Vector2(300, -620), 44, Color(0.6, 1.0, 0.7) if phone_done else Color.WHITE)
 	var nt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_memo.png")   # the number note
 	if nt != null:
 		_halo(phone_note_pos, 68.0, Color(1.0, 0.9, 0.5, 0.4))
@@ -1957,54 +2021,164 @@ func _update_waves() -> void:
 
 func _update_office(p: Vector2, delta: float) -> void:
 	door_msg_cd = maxf(0.0, door_msg_cd - delta)
-	# 1. the printer's jam wakes up when you come near
-	if not jam_spawned and p.distance_to(PRINTER_POS) < 700.0:
-		jam_enemy = game._spawn_enemy("paperjam", 1.0, false, PRINTER_POS + Vector2(0, 170))
-		if jam_enemy != null:
-			jam_spawned = true
-			game.hud.announce("PAPER JAM", Color(0.95, 0.95, 0.95))
-	if jam_spawned and not jam_done and not is_instance_valid(jam_enemy):
-		jam_done = true
-		game.hud.announce("PRINT JOB COMPLETE", Global.C_GOLD)
-		Sfx.play("pk_cache", 0.8, 0.0, 0.0)
-		_pickup_lore_here(PRINT_LORE, PRINTER_POS + Vector2(0, 120))
-		intern_spawn_in = 3.0
-	# 2. the intern shows up and has to be left alone
-	if intern_spawn_in > 0.0:
-		intern_spawn_in -= delta
-		if intern_spawn_in <= 0.0:
-			_spawn_intern()
+	# 1. the intern sleeps next to the printer, which is printing; stand at the printer to jam it: that reveals the half-printed document and wakes the intern up
+	if not intern_spawned:
+		intern_spawned = true
+		var sleeper = _make_intern(game.main_arena.nearest_open(INTERN_SLEEP), false)
+		sleeper.hold = true
+	printer_snd_cd = maxf(0.0, printer_snd_cd - delta)
+	if not jam_done and printer_snd_cd <= 0.0 and p.distance_to(PRINTER_POS) < 1100.0:
+		printer_snd_cd = 2.2
+		Sfx.play("printer_feed", 1.0, -4.0 + (0.0 if p.distance_to(PRINTER_POS) < 600.0 else -6.0), 0.0)
+	if not jam_done:
+		if p.distance_to(JAM_SPOT) < 150.0 and tp_dir == 0:
+			jam_hold += delta
+			if int(jam_hold / 0.25) != int((jam_hold - delta) / 0.25):
+				Sfx.play("spot_tick", 0.8 + 0.9 * jam_hold / JAM_TIME, 0.0, 0.0)
+			if jam_hold >= JAM_TIME:
+				_jam_printer()
+		else:
+			jam_hold = maxf(0.0, jam_hold - delta * 2.0)
+	if is_instance_valid(intern) and intern.hold:   # asleep
+		intern_say_cd -= delta
+		if intern_say_cd <= 0.0 and p.distance_to(intern.global_position) < 1000.0:
+			intern_say_cd = 2.6
+			intern_line_i += 1
+			game.float_text(intern.global_position + Vector2(30, -90), INTERN_SLEEP_LINES[intern_line_i % INTERN_SLEEP_LINES.size()], Color(0.7, 0.8, 1.0), 22, 2.4)
+	# 2. the intern shows up, hides, and when you come close it runs to the lounge door, unlocks it and goes inside: follow it, do not kill it
+	_check_intern_dead()   # killed before it reached the door (very tanky, but possible): the badge still drops here
 	if is_instance_valid(intern):
-		intern_t += delta
-		if intern_t >= INTERN_STAY:
-			badge_pos = intern.global_position
-			game.hud.announce("THE INTERN LEFT A BADGE", Global.C_GOLD)
-			game.ring(badge_pos, Global.C_GOLD, 260.0, 0.6, 8.0)
-			intern.queue_free()
-			intern = null
+		intern_last_pos = intern.global_position
+		if intern.route_goal != null:
+			intern_say_cd -= delta
+			if intern_say_cd <= 0.0:
+				intern_say_cd = 2.4
+				game.float_text(intern.global_position + Vector2(0, -90), INTERN_RUN_LINES[intern_line_i % INTERN_RUN_LINES.size()], Color(0.7, 0.8, 1.0), 22, 2.2)
+				intern_line_i += 1
+			if intern.global_position.distance_to(DOOR_POS) < 130.0:   # it reached the door: it unlocks it and goes inside
+				door_unlocked = true
+				intern_inside = true
+				game.hud.announce("THE INTERN UNLOCKED THE LOUNGE", Global.C_GOLD)
+				Sfx.play("door_unlock", 1.0, 0.0, 0.0)
+				game.ring(DOOR_POS, Global.C_GOLD, 260.0, 0.6, 8.0)
+				intern.queue_free()
+				intern = null
+	_pickup_badge(p)
+	# 3. the lounge door: open once the intern unlocked it (or you hold its badge)
+	if p.distance_to(DOOR_POS) < 110.0 and portal_cd <= 0.0:
+		if door_unlocked or has_badge:
+			_enter_lounge()
+		elif door_msg_cd <= 0.0:
+			if jam_done:   # the intern is already running for it
+				door_msg_cd = 4.0
+				game.hud.announce("DOOR LOCKED", Global.C_RED)
+			else:   # the intern has not been woken yet: a dialogue
+				door_msg_cd = 15.0
+				_say("LOCKED.
+THE KEYS MUST BE WITH SOMEONE ELSE.")
+	# 4. the intern's locker: needs its badge; opening it unlocks the intern class and its weapon
+	if p.distance_to(_locker_pos()) < 110.0 and portal_cd <= 0.0 and not Meta.lore.has("a4_locker_open"):
+		if has_badge:
+			_open_locker()
+		elif door_msg_cd <= 0.0:
+			door_msg_cd = 4.0
+			game.hud.announce("LOCKER: NEEDS THE INTERN'S BADGE", Global.C_RED)
+
+
+func player_near(pos: Vector2, r: float) -> bool:
+	return game.player != null and game.player.global_position.distance_to(pos) < r
+
+
+func _locker_pos() -> Vector2:
+	return game.main_arena.nearest_open(INTERN_POS + LOCKER_OFFSET)
+
+
+func _pickup_badge(p: Vector2) -> void:
 	if badge_pos != null and p.distance_to(badge_pos) < 70.0:
 		badge_pos = null
 		has_badge = true
 		game.hud.announce("BADGE ACQUIRED", Global.C_GOLD)
-		Sfx.play("pickup", 1.0, 0.0, 0.0)
-	# 3. the lounge door
-	if p.distance_to(DOOR_POS) < 110.0 and portal_cd <= 0.0:
-		if has_badge:
-			_enter_lounge()
-		elif door_msg_cd <= 0.0:
-			door_msg_cd = 4.0
-			game.hud.announce("BADGE REQUIRED", Global.C_RED)
+		Sfx.play("badge_get", 1.0, 0.0, 0.0)
+		_show_lore(BADGE_LORE)   # saved as lore (and for good, see has_badge at the start of a run)
 
 
-func _spawn_intern() -> void:
+## The player killed the intern (on the map or in the lounge): it drops its badge where it fell, the kill is an achievement.
+func _intern_killed(at: Vector2) -> void:
+	intern = null
+	intern_inside = false
+	badge_pos = at
+	Meta.lore["a4_intern_killed"] = true
+	Meta.save()
+	game.hud.announce("YOU FIRED THE INTERN", Global.C_GOLD)
+	game.ring(at, Global.C_GOLD, 260.0, 0.6, 8.0)
+
+
+func _open_locker() -> void:
+	Meta.lore["a4_locker_open"] = true
+	Meta.unlocks["class:intern"] = true   # the class and its weapon (both still placeholders: see secret_rooms_placeholders.md)
+	Meta.save()
+	game.hud.announce("INTERN'S LOCKER OPEN: CLASS UNLOCKED", Global.C_GOLD)
+	Sfx.play("locker_open", 1.0, 0.0, 0.0)
+	Sfx.play("legendary", 1.0, -6.0, 0.0)
+	game.burst(_locker_pos(), Global.C_GOLD, 40, 300.0, 5.0, 0.8)
+
+
+## The intern node is gone: if it died (hp <= 0 when it left the tree) that is a kill; if it was only cleared away (leaving a room) it is simply gone and may be spawned again.
+func _check_intern_dead() -> void:
+	if intern_killed_flag:
+		intern_killed_flag = false
+		_intern_killed(intern_last_pos)
+	elif intern != null and not is_instance_valid(intern):
+		intern = null
+
+
+func _update_lounge(p: Vector2, delta: float) -> void:
+	manager_say_cd = maxf(0.0, manager_say_cd - delta)   # the manager is an NPC: it cannot be attacked, it just talks when you are near
+	if manager_say_cd <= 0.0 and p.distance_to(manager_pos) < 520.0:
+		manager_say_cd = 3.6
+		game.float_text(manager_pos + Vector2(0, -110), MANAGER_LINES[manager_i % MANAGER_LINES.size()], Color(1.0, 0.95, 0.75), 20, 3.4)
+		manager_i += 1
+	_check_intern_dead()
+	if is_instance_valid(intern):
+		intern_last_pos = intern.global_position
+		intern_say_cd -= delta   # it talks while it runs from you
+		if intern_say_cd <= 0.0:
+			intern_say_cd = 3.0
+			game.float_text(intern.global_position + Vector2(0, -90), INTERN_LOUNGE_LINES[intern_line_i % INTERN_LOUNGE_LINES.size()], Color(0.7, 0.8, 1.0), 20, 2.4)
+			intern_line_i += 1
+	_pickup_badge(p)
+
+
+func _jam_printer() -> void:
+	jam_done = true
+	jam_hold = 0.0
+	Sfx.play("printer_jam", 1.0, 0.0, 0.0)
+	game.shake(0.5)
+	game.hud.announce("PRINTER JAMMED", Color(0.95, 0.95, 0.95))
+	_pickup_lore_here(PRINT_LORE, PRINTER_POS + Vector2(0, 230))
+	if is_instance_valid(intern):   # the noise wakes the intern: it panics and runs for the lounge door to find the manager
+		intern.hold = false
+		intern.route_goal = DOOR_POS
+		intern_say_cd = 0.0
+
+
+## On the office map (in_lounge false) the intern is never a target: it is out of the "enemies" group, takes almost no damage and has no health bar. In the lounge it is a normal
+## target with the boss health bar, and it can be killed.
+func _make_intern(pos: Vector2, in_lounge := true):
 	var b = BossScript.new()
 	b.setup_boss(BossData.SECRET["intern"], 0, 0.0)
 	b.set_meta("secret", true)
-	b.position = INTERN_POS
+	b.no_teleport = true   # it never jumps to the player like a normal boss: it sleeps by the printer, then runs its route
+	b.damage_taken_mult = 1.0 if in_lounge else 0.0
+	b.position = pos
+	b.tree_exiting.connect(func(): intern_killed_flag = b.hp <= 0.0)
 	game.enemy_layer.add_child(b)
+	if not in_lounge:
+		b.remove_from_group("enemies")   # not a target on the office map
+	else:
+		game.current_boss = b   # the boss health bar
 	intern = b
-	intern_t = 0.0
-	game.hud.announce("THE INTERN IS HIDING", Color(0.4, 0.55, 0.95))
+	return b
 
 
 ## A lore item lying on the main map (picked up like the ones in rooms).
@@ -2013,7 +2187,7 @@ func _pickup_lore_here(entry: Dictionary, pos: Vector2) -> void:
 
 
 func _enter_lounge() -> void:
-	teleport(func(): _enter_lounge_now(), true)
+	teleport(func(): _enter_lounge_now(), true, "door_open")
 
 
 func _enter_lounge_now() -> void:
@@ -2036,7 +2210,11 @@ func _enter_lounge_now() -> void:
 				entry = {"id": "a4_joke_%d" % (n % JOKES.size()), "title": "MEMO", "tex": "office_server_secret_room_memo", "text": JOKES[n % JOKES.size()], "quick": true}
 			_drop_lore(entry, pos)
 			n += 1
-	game._spawn_enemy("trojan", 4.0, true, o + Vector2(800, 0))
+	manager_pos = room.nearest_open(o + Vector2(260, -160))
+	manager_say_cd = 0.0
+	if intern_inside:   # the intern is in here: kill it for the badge
+		_make_intern(room.nearest_open(o + Vector2(-600, 0))).flee = true   # it runs from you inside the lounge
+		game.hud.announce("THE INTERN IS HIDING HERE", Color(0.4, 0.55, 0.95))
 
 
 # ---------------- A5: the data center ----------------
@@ -2060,112 +2238,142 @@ func _grant(key: String) -> void:
 
 
 func _a5_door() -> Vector2:
-	return A5_WALL.get_center()
+	return A5_DOOR_C
+
+
+func _a5_pad_pos(i: int) -> Vector2:
+	return A5_RACK + A5_PADS[i]
 
 
 func _update_datacenter(p: Vector2, delta: float) -> void:
-	a5_cd = maxf(0.0, a5_cd - delta)
-	if a5_state == "idle" and a5_cd <= 0.0 and p.distance_to(A5_RACK) < 105.0:
-		a5_seq = []
-		var last := -1
-		for k in A5_LEN:
-			var n := randi() % 4
-			while n == last:
-				n = randi() % 4
-			a5_seq.append(n)
-			last = n
-		a5_state = "show"
-		a5_i = 0
-		a5_timer = 1.0
-		a5_lit = -1
-		game.hud.announce("WATCH THE RACK", Color(0.4, 0.95, 0.85))
-	elif a5_state == "show":
-		a5_timer -= delta
-		if a5_timer <= 0.0:
-			if a5_lit >= 0:
-				a5_lit = -1
-				a5_timer = 0.3
-				a5_i += 1
-				if a5_i >= a5_seq.size():
-					a5_state = "input"
-					a5_i = 0
-					a5_on_tile = -1
-					game.hud.announce("YOUR TURN", Color(0.4, 0.95, 0.85))
-			else:
-				a5_lit = a5_seq[a5_i]
-				a5_timer = 0.6
-				Sfx.play("pickup", A5_PITCH[a5_lit], -4.0, 0.0)
-	elif a5_state == "input":
+	if a5_seq.is_empty():   # the sequence of this run: all four colours exactly once, in a random order
+		a5_seq = [0, 1, 2, 3]
+		a5_seq.shuffle()
+	if not a5_rack_seen and p.distance_to(A5_RACK) < 420.0:   # first time near the rack / the sealed door: a short dialogue
+		a5_rack_seen = true
+		_say(A5_RACK_LINE)
+		return
+	if not a5_door_seen and a5_state != "done" and p.distance_to(_a5_door()) < 380.0:
+		a5_door_seen = true
+		_say(A5_DOOR_LINE)
+		return
+	for i in 4:
+		a5_pad_t[i] = maxf(0.0, a5_pad_t[i] - delta)
+	a5_pad_bad = maxf(0.0, a5_pad_bad - delta)
+	# the rack's loop: four colours one after another, a pause, then again
+	a5_t += delta
+	var lit := _a5_rack_lit()
+	if lit != a5_prev_lit:
+		a5_prev_lit = lit
+		if lit >= 0 and p.distance_to(A5_RACK) < 1500.0:
+			Sfx.play("rack_tone_%d" % lit, 1.0, -3.0, 0.0)
+	if a5_state == "idle":
 		var on := -1
 		for i in 4:
-			if p.distance_to(A5_TILES[i]) < A5_TILE * 0.5:
+			if p.distance_to(_a5_pad_pos(i)) < A5_PAD_R:
 				on = i
-		if on != a5_on_tile:
-			a5_on_tile = on
+		if on != a5_on_pad:
+			a5_on_pad = on
 			if on >= 0:
-				a5_lit = on
-				a5_timer = 0.35
 				if on == a5_seq[a5_i]:
-					Sfx.play("pickup", A5_PITCH[on], -4.0, 0.0)
+					a5_pad_on[on] = true
+					a5_pad_t[on] = 0.8
+					Sfx.play("rack_tone_%d" % on, 1.0, 0.0, 0.0)
 					a5_i += 1
 					if a5_i >= a5_seq.size():
 						_a5_solved()
 				else:
-					a5_state = "idle"
-					a5_cd = 3.0
-					Sfx.play("hit", 0.6, 0.0, 0.0)
-					game.hud.announce("WRONG SEQUENCE", Global.C_RED)
-		if a5_state == "input" and a5_lit >= 0:
-			a5_timer -= delta
-			if a5_timer <= 0.0:
-				a5_lit = -1
-	elif a5_state == "idle" and a5_lit >= 0:
-		a5_lit = -1
+					a5_i = 0
+					a5_pad_on = [false, false, false, false]
+					a5_pad_bad = 0.8
+					Sfx.play("rack_wrong", 1.0, 0.0, 0.0)
+					game.hud.announce("WRONG ORDER", Global.C_RED)
 	if a5_state == "done" and p.distance_to(_a5_door()) < 90.0 and portal_cd <= 0.0:
 		_enter_upload()
 
 
+## Which of the rack's four colours is lit right now (-1 in the gaps and in the pause).
+func _a5_rack_lit() -> int:
+	if a5_seq.is_empty():
+		return -1
+	var period := A5_FLASH * A5_LEN + A5_PAUSE
+	var ph := fposmod(a5_t, period)
+	if ph >= A5_FLASH * A5_LEN:
+		return -1
+	var k := int(ph / A5_FLASH)
+	return int(a5_seq[k]) if fposmod(ph, A5_FLASH) < A5_FLASH * 0.66 else -1
+
+
 func _a5_solved() -> void:
 	a5_state = "done"
-	a5_lit = -1
 	game.main_arena.walls.erase(A5_WALL)
 	game.main_arena._rebuild_grid()
-	game.hud.announce("COLD AISLE UNLOCKED", Global.C_GOLD)
-	Sfx.play("legendary", 0.9, 0.0, 0.0)
+	game.hud.announce("DATA STREAM DOOR OPEN", Global.C_GOLD)
+	Sfx.play("rack_solved", 1.0, 0.0, 0.0)
+	Sfx.play("door_open", 1.0, 0.0, 0.0)   # the door creaks open, like the lounge door
 	game.ring(_a5_door(), Global.C_GOLD, 300.0, 0.6, 8.0)
 
 
 func _enter_upload() -> void:
-	teleport(func(): _enter_upload_now(), true)
+	teleport(func(): _enter_upload_now(), true, "door_open")
 
 
 func _enter_upload_now() -> void:
 	rooms.erase("upload_done")
 	_enter_side("upload", "upload", 6)
-	stream_cd = STREAM_WAVE
-	game.hud.announce("DATA UPLOAD: RUN AGAINST THE STREAM", Color(0.4, 0.95, 0.85))
+	stream_cd = STREAM_TRICKLE
+	game.room_enemy_cap = 60
+	upload_boss_killed = false
+	upload_boss = null
+	if not Meta.lore.has("a5_upload"):   # the boss waits at the east end until the upload lore has been found once
+		upload_boss_pos = Vector2(room.bounds.end.x - 450.0, room.bounds.get_center().y)
+		var b = _spawn_secret_boss("streamhive", upload_boss_pos)
+		b.tree_exiting.connect(func(): upload_boss_killed = b.hp <= 0.0)
+		upload_boss = b
+	game.hud.announce("DATA STREAM: PUSH EAST. THE DARK WEST END THROWS YOU OUT", Global.C_GREEN)
 
 
+## The data-stream hallway: everything that is not the boss is carried west along the stream (it does not chase), aims its shots at you if it shoots,
+## and is removed once it is off screen on the left. The boss never moves and spits out most of the enemies; after it is defeated the east end keeps
+## sending enemies, slower. The dark west end throws the player out.
 func _update_upload(p: Vector2, delta: float) -> void:
 	var pl = game.player
 	var lim: Rect2 = room.bounds.grow(-64.0)
 	pl.position.x = clampf(pl.position.x - STREAM_PUSH * delta, lim.position.x, lim.end.x)
-	var end_x: float = room.bounds.end.x
-	var reached: bool = p.x > end_x - 900.0
-	if reached and not rooms.has("upload_done"):
-		rooms["upload_done"] = true
-		game.hud.announce("UPLOAD COMPLETE", Global.C_GOLD)
-		Sfx.play("pk_cache", 0.8, 0.0, 0.0)
-		_drop_lore(A5_LORE, Vector2(end_x - 520.0, room.bounds.get_center().y))
-	if reached:
+	pl.position.y = clampf(pl.position.y, room.bounds.position.y + STREAM_CABLE + pl.radius, room.bounds.end.y - STREAM_CABLE - pl.radius)   # the cable walls
+	if p.x < room.bounds.position.x + STREAM_EXIT_X:
+		game.hud.announce("THROWN OUT OF THE STREAM", Global.C_RED)
+		_leave()
 		return
-	stream_cd -= delta
-	if stream_cd <= 0.0:
-		stream_cd = STREAM_WAVE
-		var kinds := ["worm", "mite", "spyware", "miner"]
-		for k in 4:
-			var pos := Vector2(minf(p.x + 760.0 + k * 90.0, end_x - 300.0), room.bounds.get_center().y + (k - 1.5) * 150.0)
-			game._spawn_enemy(kinds[k], 2.0, false, pos)
+	if is_instance_valid(upload_boss):
+		upload_boss_pos = upload_boss.global_position
+	elif upload_boss != null and upload_boss_killed and not rooms.has("upload_done"):   # the boss is defeated: the upload lore drops where it stood
+		rooms["upload_done"] = true
+		upload_boss = null
+		game.hud.announce("UPLOAD COMPLETE", Global.C_GOLD)
+		Sfx.play("app_done", 1.0, 0.0, 0.0)
+		_drop_lore(A5_LORE, upload_boss_pos + Vector2(-200.0, 0.0))
+	elif upload_boss != null and not upload_boss_killed:
+		upload_boss = null   # it was only cleared away
+	var left_cut: float = maxf(room.bounds.position.x + 40.0, p.x - 1500.0)
+	for e in game.enemy_layer.get_children():
+		if e.is_boss or e.is_queued_for_deletion():
+			continue
+		if e.stream_vec == Vector2.ZERO:   # newly spawned (the boss spits them out): carried west, aimed at the row the player is in
+			var flow := randf_range(STREAM_FLOW_MIN, STREAM_FLOW_MAX)
+			var t_arrive := maxf((e.global_position.x - p.x) / flow, 0.5)
+			var vy := clampf((p.y + randf_range(-110.0, 110.0) - e.global_position.y) / t_arrive, -flow * 0.5, flow * 0.5) if e.global_position.x > p.x else randf_range(-40.0, 40.0)
+			e.stream_vec = Vector2(-flow, vy)
+			e.no_teleport = true
+		elif e.global_position.x < left_cut:
+			e.queue_free()   # off screen on the left: gone, room for new ones from the east
+	if not is_instance_valid(upload_boss):   # no boss (defeated, or found already): the east end sends enemies at a slow rate
+		stream_cd -= delta
+		if stream_cd <= 0.0:
+			stream_cd = STREAM_TRICKLE
+			var kinds := ["bug", "worm", "mite", "spyware", "miner"]
+			var at := Vector2(room.bounds.end.x - 300.0, clampf(p.y + randf_range(-300.0, 300.0), room.bounds.position.y + STREAM_CABLE + 40.0, room.bounds.end.y - STREAM_CABLE - 40.0))
+			game._spawn_enemy(kinds[randi() % kinds.size()], 2.0, false, at)
 
 
 # ---------------- A3: the shop and the peripherals ----------------
@@ -2247,6 +2455,10 @@ func _update_laptop(p: Vector2, delta: float) -> void:
 		port_t = maxf(0.0, port_t - delta * 3.0)
 		return
 	var id: String = PERIPHERALS[near]
+	if not port_seen:   # the first time at any port: a short dialogue
+		port_seen = true
+		_say(A3_PORT_LINE)
+		return
 	if not Meta.lore.has("a3_have_" + id):
 		if port_on != near:
 			port_on = near
@@ -2271,7 +2483,7 @@ func _enter_periph(id: String, i: int) -> void:
 
 
 func _enter_periph_now(id: String, i: int) -> void:
-	_enter_side("periph_" + id, "periph", 10 + i, "secret/gaming_laptop_secret_room_peripheral_wall.png", "secret/gaming_laptop_secret_room_peripheral_floor.png")
+	_enter_side("periph_" + id, "periph_" + id, 10 + i, "secret/gaming_laptop_secret_room_%s_wall.png" % id, "secret/gaming_laptop_secret_room_%s_floor.png" % id)
 	game.hud.announce(id.to_upper() + " CONNECTED", Global.C_CYAN)
 	if not rooms.has("pdone_" + id):
 		var b = _spawn_secret_boss(A3_BOSS[id], room.nearest_open(room.bounds.get_center() + Vector2(700, 0)))
@@ -2546,6 +2758,16 @@ func _draw() -> void:
 			var ft: Texture2D = PixelArt.load_tex(floor_path)
 			if ft != null:
 				draw_texture_rect(ft, room.bounds, true, floor_tint)
+		if room_id == "lounge":   # the manager: an NPC that stands in the lounge
+			var mg_tex: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_manager.png")
+			if mg_tex != null:
+				draw_texture_rect_region(mg_tex, Rect2(manager_pos - Vector2(60, 70), Vector2(120, 120)), Rect2((int(t * 2.0) % 2) * 40, 0, 40, 40))   # 40x40 frames like the intern
+				_text("MANAGER", manager_pos + Vector2(0, 80), 20, Color(1, 1, 1, 0.8))
+		if room_id == "lounge" and badge_pos != null:   # the intern's badge, dropped where it fell in the lounge
+			var lb: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_badge.png")
+			if lb != null:
+				_halo(badge_pos, 60.0, Color(1.0, 0.9, 0.4, 0.4))
+				draw_texture_rect(lb, Rect2(badge_pos + Vector2(-32, -32 + sin(t * 3.0) * 6.0), Vector2(64, 64)), false)
 		if room_id == "corrupt":
 			_draw_glitch(room.bounds, maxi(wave, 0))
 		if room_id.begins_with("app_") and room_id != "app_store":
@@ -2603,12 +2825,30 @@ func _draw_office() -> void:
 	var pt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_printer.png")
 	if pt != null:
 		draw_texture_rect(pt, Rect2(PRINTER_POS - Vector2(48, 48), Vector2(96, 96)), false)
-	var dt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_lounge_door.png")
+	var pp: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_paper.png")   # sheets slide out of the printer until it is jammed
+	if pp != null:
+		if not jam_done:
+			for k in 3:
+				var off := fposmod(t * 50.0 + k * 40.0, 120.0)
+				draw_texture_rect(pp, Rect2(PRINTER_POS + Vector2(-12 + (k - 1) * 4, 40 + off), Vector2(24, 30)), false, Color(1, 1, 1, 1.0 - off / 160.0))
+		else:
+			draw_texture_rect(pp, Rect2(PRINTER_POS + Vector2(-12, 54), Vector2(24, 30)), false)   # one sheet stuck in the tray
+	if not jam_done and player_near(JAM_SPOT, 520.0):
+		_halo(JAM_SPOT, 72.0, Color(1.0, 0.9, 0.5, 0.35 + 0.15 * sin(t * 4.0)))
+		_text("JAM THE PRINTER", JAM_SPOT + Vector2(0, -100), 22, Color(1, 1, 1, 0.95))
+		if jam_hold > 0.0:
+			_pix_arc(JAM_SPOT, 96.0, -PI / 2.0, -PI / 2.0 + TAU * jam_hold / JAM_TIME, Color(1, 1, 1, 0.95), 7.0)
+	var dt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_lounge_door_open.png" if door_unlocked else "secret/office_server_secret_room_lounge_door.png")   # looks open once the intern has gone through
 	if dt != null:
 		draw_texture_rect(dt, Rect2(DOOR_POS - Vector2(64, 64), Vector2(128, 128)), false)
 	var bt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_badge.png")
 	if bt != null and badge_pos != null:
 		draw_texture_rect(bt, Rect2(badge_pos + Vector2(-32, -32 + sin(t * 3.0) * 6.0), Vector2(64, 64)), false)
+	var lk: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_locker.png")   # the intern's locker: closed, or open once the badge was used (tools/gen_secret_fx_art.py)
+	if lk != null:
+		var lopen := 1 if Meta.lore.has("a4_locker_open") else 0
+		draw_texture_rect_region(lk, Rect2(_locker_pos() - Vector2(40, 60), Vector2(80, 120)), Rect2(lopen * 20, 0, 20, 30))
+		_text("LOCKER 1337", _locker_pos() + Vector2(0, -80), 22, Color(1, 1, 1, 0.95))
 	var mt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_memo.png")
 	if mt != null:
 		for d in main_lore:
@@ -2616,38 +2856,127 @@ func _draw_office() -> void:
 
 
 func _draw_datacenter() -> void:
+	# the door: sealed (the closed door sprite in the wall block) or, once the pads were touched in order, open
+	var dt: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_cold_aisle_door_open.png" if a5_state == "done" else "secret/data_center_secret_room_cold_aisle_door.png")
+	if dt != null:
+		draw_texture_rect(dt, Rect2(_a5_door() - Vector2(64, 64), Vector2(128, 128)), false)
+	# the rack node and its current colour on a big lamp above it
 	var rt: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_led_rack.png")
 	if rt != null:
 		draw_texture_rect_region(rt, Rect2(A5_RACK - Vector2(64, 64), Vector2(128, 128)), Rect2((int(t * 2.0) % 4) * 16, 0, 16, 16))
-	var off: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_tile_off.png")
-	var on: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_tile_on.png")
-	for i in 4:
-		var r := Rect2(A5_TILES[i] - Vector2(A5_TILE, A5_TILE) * 0.5, Vector2(A5_TILE, A5_TILE))
-		if i == a5_lit and on != null:
-			draw_texture_rect_region(on, r, Rect2(64.0 * (int(t * 8.0) % 2), 0, 64, 64))
-		elif off != null:
-			draw_texture_rect(off, r, false)
-	if a5_state == "done" and game.main_arena.walls.has(A5_WALL) == false:
-		var dt: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_cold_aisle_door.png")
-		if dt != null:
-			draw_texture_rect(dt, Rect2(_a5_door() - Vector2(64, 64), Vector2(128, 128)), false)
+	var pad: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_led_pad.png")   # 2 frames: dim, lit (white, tinted by colour)
+	var lit := _a5_rack_lit()
+	if pad != null:
+		var lamp := Rect2(A5_RACK + Vector2(-48, -190), Vector2(96, 96))
+		if lit >= 0:
+			_halo(A5_RACK + Vector2(0, -142), 96.0, Color(A5_COLORS[lit], 0.5))
+			draw_texture_rect_region(pad, lamp, Rect2(16, 0, 16, 16), A5_COLORS[lit])
+		else:
+			draw_texture_rect_region(pad, lamp, Rect2(0, 0, 16, 16), Color(0.45, 0.5, 0.6))
+		for i in 4:   # the four pads: dim until touched in the right order
+			var c := _a5_pad_pos(i)
+			var r := Rect2(c - Vector2(64, 64), Vector2(128, 128))
+			var col: Color = A5_COLORS[i]
+			if a5_pad_bad > 0.0:
+				col = Color(1.0, 0.25, 0.25).lerp(col, 0.0)
+				draw_texture_rect_region(pad, r, Rect2(16 * (int(t * 12.0) % 2), 0, 16, 16), col)
+			elif a5_pad_on[i] or a5_pad_t[i] > 0.0:
+				_halo(c, 96.0, Color(col, 0.55))
+				draw_texture_rect_region(pad, r, Rect2(16, 0, 16, 16), col)
+			else:
+				draw_texture_rect_region(pad, r, Rect2(0, 0, 16, 16), Color(col, 0.6).darkened(0.45))
 
 
 ## The upload hallway's floor: panels of data scrolling toward the start.
 func _draw_stream() -> void:
-	var tex: Texture2D = PixelArt.load_tex("secret/data_center_secret_room_data_stream.png")
-	if tex == null:
-		return
+	# One continuous data stream, right to left: dark base, then many lanes of pixel packets (square chunks of 8 px) sliding left at different speeds,
+	# each with a bright head and a fading trail, plus tiny bits drifting in the gaps. Everything is a function of time, so it never repeats visibly or looks like stacked tiles.
 	var r: Rect2 = room.bounds
-	var cell := 128.0
-	var cols := int(r.size.x / cell)
-	var rows := int(r.size.y / cell)
-	var tick := int(t * 6.0)
-	for cx in cols:
-		for cy in rows:
-			var f := posmod(tick + cx + cy, 4)
-			draw_texture_rect_region(tex, Rect2(r.position + Vector2(cx, cy) * cell, Vector2(cell, cell)), Rect2(f * 64, 0, 64, 64))
-	draw_rect(r, Color(0.0, 0.1, 0.12, 0.25))
+	draw_rect(r, Color(0.02, 0.05, 0.08))
+	var dim := 0.42   # the stream is a quiet backdrop: dim and low-contrast, so the enemies, bullets and pickups stay the loudest things on screen
+	var u := 8.0
+	var pcx: float = game.player.global_position.x if game.player != null else r.get_center().x
+	var vis_lo := pcx - 1700.0   # only what is near the player is drawn: the hallway is long
+	var vis_hi := pcx + 1700.0
+	var lanes := int(r.size.y / 32.0)
+	var heads := [Color(0.75, 1.0, 1.0), Color(0.55, 1.0, 0.8), Color(0.5, 0.85, 1.0), Color(0.9, 1.0, 0.85)]
+	var tails := [Color(0.1, 0.55, 0.65), Color(0.1, 0.5, 0.4), Color(0.15, 0.35, 0.7), Color(0.2, 0.55, 0.35)]
+	for i in lanes:
+		var y: float = r.position.y + i * 32.0 + 8.0
+		var v := 160.0 + float((i * 37) % 7) * 70.0        # px/s, leftwards
+		var per := 900.0 + float((i * 113) % 5) * 140.0     # distance between repeats of this lane's pattern
+		var ci := i % 4
+		for k in 3:
+			var len_u := 6 + ((i * 7 + k * 5) % 9)           # packet length in units
+			var o := float((i * 211 + k * 397) % 1000) / 1000.0 * per
+			var reps := int(r.size.x / per) + 2
+			for rep in reps:
+				var x: float = r.position.x + rep * per + fposmod(o - t * v, per) - per
+				x = floorf(x / u) * u
+				if x > vis_hi or x + (len_u + 4) * u < vis_lo:
+					continue
+				var body := Rect2(x + u, y, (len_u - 1) * u, u)
+				draw_rect(body, Color(tails[ci], 0.55 * dim))
+				for j in range(1, len_u, 2):   # the packet's bits: alternating brighter chunks
+					draw_rect(Rect2(x + j * u, y, u, u), Color(tails[ci], 0.8 * dim))
+				draw_rect(Rect2(x, y - 4.0, u, u + 8.0), Color(heads[ci], 0.7 * dim))   # the bright head (leading, on the left)
+				for tr in 3:   # the trail behind (to the right), fading
+					draw_rect(Rect2(x + len_u * u + tr * u, y + 2.0, u, u - 4.0), Color(tails[ci], (0.35 - 0.1 * tr) * dim))
+		for b in 5:   # loose bits drifting in the dark between the packets
+			var bx: float = r.position.x + fposmod(float((i * 53 + b * 977) % 4000) - t * (v * 0.6 + b * 20.0), r.size.x)
+			bx = floorf(bx / u) * u
+			if bx < vis_lo or bx > vis_hi:
+				continue
+			draw_rect(Rect2(bx, y + 8.0 * ((b + i) % 3), u * 0.5, u * 0.5), Color(0.4, 0.8, 0.9, 0.35 * dim))
+	_draw_cable_edges(r, vis_lo, vis_hi)
+	# the west end tapers off into the dark (stepped in 32 px bands, nothing is smooth): stepping into it throws you out
+	var bands := int(STREAM_DARK / 32.0)
+	for k in bands:
+		if r.position.x + k * 32.0 + 32.0 < vis_lo:
+			continue
+		var a_k := pow(1.0 - float(k) / bands, 1.6)
+		draw_rect(Rect2(r.position.x + k * 32.0, r.position.y, 32.0, r.size.y), Color(0.0, 0.0, 0.02, a_k))
+
+
+## The top and bottom walls of the hallway drawn as the inside of a data cable / optic fibre: an outer jacket with segment marks, a foil shield, and four glass
+## strands (orange, blue, green, white) along which pulses of light run from right to left. Everything is whole 8 px squares.
+func _draw_cable_edges(r: Rect2, lo: float, hi: float) -> void:
+	var u := 8.0
+	var x0 := floorf(maxf(lo, r.position.x) / 128.0) * 128.0
+	var x1 := minf(hi, r.end.x)
+	var strand_cols := [Color(1.0, 0.6, 0.2), Color(0.35, 0.6, 1.0), Color(0.4, 1.0, 0.55), Color(0.95, 0.95, 1.0)]
+	for side in 2:   # 0: top wall, 1: bottom wall (mirrored)
+		var sgn := 1.0 if side == 0 else -1.0
+		var y_edge: float = r.position.y if side == 0 else r.end.y
+		_cable_band(x0, x1, y_edge, sgn, 0.0, 32.0, Color(0.09, 0.11, 0.16))   # the outer jacket
+		_cable_band(x0, x1, y_edge, sgn, 32.0, 40.0, Color(0.16, 0.19, 0.27))
+		_cable_band(x0, x1, y_edge, sgn, 40.0, 56.0, Color(0.30, 0.36, 0.48))  # the foil shield
+		_cable_band(x0, x1, y_edge, sgn, 56.0, 60.0, Color(0.45, 0.52, 0.66))
+		_cable_band(x0, x1, y_edge, sgn, 60.0, STREAM_CABLE, Color(0.05, 0.07, 0.12))   # the dark core the strands lie in
+		var xi := x0
+		while xi < x1:   # segment marks on the jacket and ribs on the shield every 128 px
+			draw_rect(Rect2(xi, minf(y_edge, y_edge + sgn * 32.0), u, 32.0), Color(0.05, 0.06, 0.1))
+			draw_rect(Rect2(xi + 4.0 * u, minf(y_edge + sgn * 40.0, y_edge + sgn * 56.0), u, 16.0), Color(0.2, 0.24, 0.34))
+			xi += 128.0
+		for k in 4:   # the four fibre strands, each with light pulses running west
+			var yk: float = y_edge + sgn * (62.0 + k * 8.0)
+			var sy: float = minf(yk, yk + sgn * u)
+			draw_rect(Rect2(x0, sy, x1 - x0, u), Color(strand_cols[k], 0.22))
+			var per := 520.0 + k * 90.0
+			var spd := 380.0 + k * 70.0
+			var reps := int((x1 - x0) / per) + 2
+			for rep in reps:
+				var px := floorf((x0 + rep * per + fposmod(float(k) * 173.0 - t * spd, per) - per) / u) * u
+				if px > x1 or px + 7.0 * u < x0:
+					continue
+				draw_rect(Rect2(px, sy, 7.0 * u, u), Color(strand_cols[k], 0.55))
+				draw_rect(Rect2(px, sy, u, u), Color(1, 1, 1, 0.8))   # the pulse's bright head, leading to the west
+
+
+func _cable_band(x0: float, x1: float, y_edge: float, sgn: float, d0: float, d1: float, col: Color) -> void:
+	var ya: float = y_edge + sgn * d0
+	var yb: float = y_edge + sgn * d1
+	draw_rect(Rect2(x0, minf(ya, yb), x1 - x0, absf(yb - ya)), col)
 
 
 func _icon(path: String, c: Vector2, size: float, region := Rect2()) -> void:
@@ -2662,8 +2991,12 @@ func _icon(path: String, c: Vector2, size: float, region := Rect2()) -> void:
 
 
 func _text(s: String, c: Vector2, size: int, col: Color) -> void:
+	if size < 36:   # the small white labels of every interactable area: bigger (about 1.45x, at least 30 px), fully opaque and with a thicker outline
+		size = maxi(30, roundi(size * 1.45))
+		if col.r > 0.8 and col.g > 0.8 and col.b > 0.8:
+			col.a = 1.0
 	var at := c - Vector2(size * s.length() * 0.25, 0)
-	draw_string_outline(Global.FONT_BODY, at, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, maxi(4, size / 5), Color(0, 0, 0, 0.85))   # a dark outline so it reads on any floor
+	draw_string_outline(Global.FONT_BODY, at, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, maxi(6, size / 4), Color(0, 0, 0, 0.95))   # a dark outline so it reads on any floor
 	draw_string(Global.FONT_BODY, at, s, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
 
 
@@ -2687,32 +3020,34 @@ func _draw_shop() -> void:
 		_text("OWNED" if owned else "%d DATA" % A3_COSTS[id], c + Vector2(0, 150), 24, edge)
 		if shop_on == i and shop_t > 0.0:   # the buy ring
 			var rad := 110.0
-			draw_arc(c + Vector2(0, 40), rad, 0.0, TAU, 48, Color(1, 1, 1, 0.12), 8.0)
-			draw_arc(c + Vector2(0, 40), rad, -PI / 2.0, -PI / 2.0 + TAU * shop_t / SHOP_TIME, 48, Color(edge, 0.95), 8.0)
+			_pix_arc(c + Vector2(0, 40), rad, 0.0, TAU, Color(1, 1, 1, 0.12))
+			_pix_arc(c + Vector2(0, 40), rad, -PI / 2.0, -PI / 2.0 + TAU * shop_t / SHOP_TIME, Color(edge, 0.95))
 
 
 func _draw_laptop() -> void:
 	var nt: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_memo.png")
 	if nt != null:
 		for d in main_lore:
-			draw_circle(d["pos"], 70.0 + 6.0 * sin(t * 3.0), Color(0.6, 0.9, 1.0, 0.12))
+			_halo(d["pos"], 68.0, Color(0.6, 0.9, 1.0, 0.4))
 			draw_texture_rect(nt, Rect2(d["pos"] + Vector2(-32, -32 + sin(t * 3.0) * 6.0), Vector2(64, 64)), false)
 	for i in 4:
 		var id: String = PERIPHERALS[i]
 		var c: Vector2 = A3_PORTALS[i]
 		var owned: bool = Meta.lore.has("a3_have_" + id)
-		var pulse := 0.5 + 0.5 * sin(t * 2.5 + i)
-		draw_circle(c, 120.0 + (8.0 * pulse if owned else 0.0), Color(0.5, 0.85, 1.0, 0.10 + (0.06 * pulse if owned else 0.0)) if owned else Color(0.5, 0.5, 0.6, 0.08))
-		var edge := Color(0.55, 0.9, 1.0, 0.9) if owned else Color(0.55, 0.55, 0.65, 0.7)
-		draw_arc(c, 96.0, 0.0, TAU, 48, edge, 5.0)
-		if owned:
-			_icon("secret/gaming_laptop_secret_room_%s_portal.png" % id, c, 128.0, Rect2((int(t * 6.0) % 4) * 16, 0, 16, 16))
-		else:   # an empty port: the plug's outline, dim
-			draw_texture_rect_region(PixelArt.load_tex("secret/gaming_laptop_secret_room_%s_portal.png" % id), Rect2(c - Vector2(64, 64), Vector2(128, 128)), Rect2(0, 0, 16, 16), Color(0.5, 0.5, 0.6, 0.35))
-			_text("EMPTY", c + Vector2(0, 8), 28, Color(0.8, 0.8, 0.9, 0.7))
+		var frame: Texture2D = PixelArt.load_tex("secret/gaming_laptop_secret_room_port_frame.png")   # pixel port slot with a running rim (tools/gen_secret_fx_art.py)
+		var plug: Texture2D = PixelArt.load_tex("secret/gaming_laptop_secret_room_%s_portal.png" % id)
+		_halo(c, 140.0, Color(0.5, 0.85, 1.0, 0.4 + 0.15 * sin(t * 2.5 + i)) if owned else Color(0.5, 0.5, 0.6, 0.18))
+		if frame != null:
+			draw_texture_rect_region(frame, Rect2(c - Vector2(80, 80), Vector2(160, 160)), Rect2((int(t * 6.0) % 4 if owned else 0) * 32, 0, 32, 32), Color.WHITE if owned else Color(0.5, 0.5, 0.6, 0.7))
+		if plug != null:
+			if owned:
+				draw_texture_rect_region(plug, Rect2(c - Vector2(48, 48), Vector2(96, 96)), Rect2((int(t * 6.0) % 4) * 16, 0, 16, 16))
+			else:   # an empty port: the plug's outline, dim
+				draw_texture_rect_region(plug, Rect2(c - Vector2(48, 48), Vector2(96, 96)), Rect2(0, 0, 16, 16), Color(0.5, 0.5, 0.6, 0.35))
+				_text("EMPTY", c + Vector2(0, 8), 28, Color(0.8, 0.8, 0.9, 0.7))
 		_text(id.to_upper(), c + Vector2(0, 150), 24, Color(1, 1, 1, 0.9 if owned else 0.5))
 		if port_on == i and owned and port_t > 0.0:
-			draw_arc(c, 112.0, -PI / 2.0, -PI / 2.0 + TAU * port_t / PORT_TIME, 48, Color(1, 1, 1, 0.95), 7.0)
+			_pix_arc(c, 112.0, -PI / 2.0, -PI / 2.0 + TAU * port_t / PORT_TIME, Color(1, 1, 1, 0.95))
 
 
 func _draw_sat() -> void:
@@ -2744,7 +3079,7 @@ func _draw_mainframe() -> void:
 	for i in 3:
 		_icon("secret/mainframe_secret_room_junction_box_%s.png" % cols[i], A7_BOXES[i], 96.0)
 		if a7_wires > i:
-			draw_circle(A7_BOXES[i] + Vector2(0, -64), 8.0, Color(0.4, 1.0, 0.6))
+			draw_rect(Rect2(A7_BOXES[i] + Vector2(-8, -72), Vector2(16, 16)), Color(0.4, 1.0, 0.6))
 	_icon("secret/mainframe_secret_room_keypad.png", A7_KEYPAD, 96.0)
 	if a7_key_ok:
 		var tex: Texture2D = PixelArt.load_tex("secret/mainframe_secret_room_hq_portal.png")
@@ -2784,10 +3119,29 @@ func _draw_unobserved() -> void:
 
 
 func _draw_exit() -> void:
+	if room_id == "upload":
+		return
 	if room_id == "freezer":
 		_draw_portal(_exit_pos(), 112.0)   # a smaller halo, so it stays inside the room
 		return
 	var c := _exit_pos()
+	if room_id == "lounge":   # the way out of the lounge is the open door
+		var od: Texture2D = PixelArt.load_tex("secret/office_server_secret_room_lounge_door_open.png")
+		if od != null:
+			_halo(c, 128.0, Color(1.0, 0.85, 0.5, 0.35 + 0.1 * sin(t * 3.0)))
+			draw_texture_rect(od, Rect2(c - Vector2(64, 64), Vector2(128, 128)), false)
+		_text("EXIT", c + Vector2(0, 112), 24, Color(1, 1, 1, 0.9))
+		return
+	if room_id.begins_with("periph_"):   # the same port as the one you came in by (the laptop map), with the laptop icon instead of the plug
+		var pf: Texture2D = PixelArt.load_tex("secret/gaming_laptop_secret_room_port_frame.png")
+		var lap: Texture2D = load("res://art/devices/laptop.png") as Texture2D   # the device icon of the gaming laptop
+		_halo(c, 140.0, Color(0.5, 0.85, 1.0, 0.4 + 0.15 * sin(t * 2.5)))
+		if pf != null:
+			draw_texture_rect_region(pf, Rect2(c - Vector2(80, 80), Vector2(160, 160)), Rect2((int(t * 6.0) % 4) * 32, 0, 32, 32))
+		if lap != null:
+			draw_texture_rect(lap, Rect2(c - Vector2(48, 48), Vector2(96, 96)), false)
+		_text("LAPTOP", c + Vector2(0, 150), 24, Color(1, 1, 1, 0.9))
+		return
 	_halo(c, 128.0, Color(1.0, 0.4, 0.4, 0.45 + 0.15 * sin(t * 3.0)))
 	var tex: Texture2D = PixelArt.load_tex("secret/smartphone_secret_room_exit_portal.png")   # pixel sprite: dark disc, running red rim, white X (tools/gen_secret_fx_art.py)
 	if tex != null:

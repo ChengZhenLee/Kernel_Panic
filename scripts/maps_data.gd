@@ -170,6 +170,27 @@ static func secret_room(id: String) -> Dictionary:
 		"corrupt":   # the corrupted app: scattered blocks
 			return _snap({"size": Vector2(2200, 1500), "start": Vector2(-800, 0), "walls": [
 				Rect2(-400, -400, 240, 240), Rect2(160, -400, 240, 240), Rect2(-400, 160, 240, 240), Rect2(160, 160, 240, 240)]})
+		"periph_keyboard":   # a keyboard: three rows of keycap blocks (a gap row between each) with a long space bar at the bottom
+			var keys := []
+			for row in 3:
+				for col in 5:
+					keys.append(Rect2(-520 + col * 260 + row * 40, -480 + row * 250, 140, 140))
+			keys.append(Rect2(-260, 300, 560, 120))
+			return _snap({"size": Vector2(2600, 1600), "start": Vector2(-1000, 0), "walls": keys})
+		"periph_mouse":   # a mouse and its cable: two long wall segments that make an S-shaped cable, a round-ish body block in the middle
+			return _snap({"size": Vector2(2600, 1600), "start": Vector2(-1000, 0), "walls": [
+				Rect2(-700, -300, 800, 90), Rect2(10, -300, 90, 380), Rect2(-420, 70, 520, 90), Rect2(-420, 70, 90, 380),
+				Rect2(380, -230, 300, 460)]})
+		"periph_webcam":   # a lens: eight blocks in a ring around the middle, a gap on each side so you can run through
+			var ring := []
+			for k in 8:
+				var a := TAU * k / 8.0
+				ring.append(Rect2(Vector2.from_angle(a) * 480.0 - Vector2(80, 80), Vector2(160, 160)))
+			return _snap({"size": Vector2(2400, 1700), "start": Vector2(-1000, 0), "walls": ring})
+		"periph_headset":   # a headset: two big ear-cup blocks left and right, a headband of small blocks arching over the top
+			return _snap({"size": Vector2(2600, 1600), "start": Vector2(-1000, 0), "walls": [
+				Rect2(-820, -180, 240, 360), Rect2(580, -180, 240, 360),
+				Rect2(-560, -520, 140, 100), Rect2(-300, -640, 140, 100), Rect2(-70, -680, 140, 100), Rect2(160, -640, 140, 100), Rect2(420, -520, 140, 100)]})
 		"periph":   # a peripheral's room: a few pillars
 			return _snap({"size": Vector2(2400, 1500), "start": Vector2(-900, 0), "walls": [Rect2(-300, -450, 200, 200), Rect2(100, 250, 200, 200)]})
 		"moon":   # the moon base: crater rocks
@@ -178,8 +199,8 @@ static func secret_room(id: String) -> Dictionary:
 			return _snap({"size": Vector2(3600, 1500), "start": Vector2(-1400, 300), "walls": []})
 		"unobserved":   # the unobserved room: empty
 			return _snap({"size": Vector2(2200, 1400), "start": Vector2(-800, 0), "walls": []})
-		"upload":   # the data upload hallway: long and empty
-			return _snap({"size": Vector2(7040, 768), "start": Vector2(-3000, 0), "walls": []})
+		"upload":   # the data upload hallway: long and empty; the west end is dark (it throws you out), the boss waits at the east end
+			return _snap({"size": Vector2(16000, 560), "start": Vector2(-6500, 0), "walls": []})   # a long thin rectangle: about 14000 px from the start to the boss
 	return _snap({"size": Vector2(1900, 1300), "start": Vector2(-600, 0), "walls": []})
 
 
